@@ -1,0 +1,42 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('area_parkir', function (Blueprint $table) {
+            $table->id();
+            $table->string('kode')->unique();
+            $table->string('nama_area');
+            $table->integer('total_kapasitas');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('area_parkir_detail', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('area_parkir_id')->constrained('area_parkir');
+            $table->foreignId('tipe_kendaraan_id')->constrained('kendaraan_tipe');
+            $table->integer('kapasitas');
+            $table->integer('terisi')->default(0);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('area_parkir_detail');
+        Schema::dropIfExists('area_parkir');
+    }
+};

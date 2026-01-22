@@ -11,19 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-            Schema::create('roles', function (Blueprint $table) {
+        Schema::create('kendaraan_tipe', function (Blueprint $table) {
             $table->id();
-            $table->string('role')->unique(); 
+            $table->string('kode');
+            $table->string('tipe_kendaraan');
             $table->timestamps();
             $table->softDeletes();
         });
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('kendaraan', function (Blueprint $table) {
             $table->id();
-            $table->string('username')->unique();
-            $table->string('name');
-            $table->string('password');
-            $table->foreignId('role_id')->constrained('roles');
-            $table->rememberToken();
+            $table->string('plat_nomor')->unique();
+            $table->foreignId('tipe_kendaraan_id')->constrained('kendaraan_tipe');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -34,7 +32,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('kendaraan');
+        Schema::dropIfExists('kendaraan_tipe');
     }
 };
