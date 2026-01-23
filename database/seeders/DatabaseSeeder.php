@@ -3,7 +3,12 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Role;
+use App\Models\TipeKendaraan;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,5 +23,27 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
+        $roles = ['admin', 'petugas', 'owner'];
+        foreach ($roles as $item) {
+            Role::firstOrCreate([
+                'role' => $item
+            ]);
+        }
+
+        $adminRole = Role::where('role', 'admin')->first();
+        User::create([
+            'name'     => 'Administrator',
+            'username' => 'admin',
+            'password' => Hash::make('123'),
+            'role_id'  => $adminRole->id,
+        ]);
+
+        $kendaraanTipe = ['Motor', 'Mobil', 'Bus'];
+        foreach ($kendaraanTipe as $item) {
+            TipeKendaraan::firstOrCreate([
+                'tipe_kendaraan' => $item
+            ]);
+        }
     }
 }

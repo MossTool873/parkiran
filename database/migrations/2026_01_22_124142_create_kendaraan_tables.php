@@ -21,6 +21,7 @@ return new class extends Migration
         Schema::create('kendaraan', function (Blueprint $table) {
             $table->id();
             $table->string('plat_nomor')->unique();
+            $table->string('warna');
             $table->foreignId('tipe_kendaraan_id')->constrained('kendaraan_tipe');
             $table->timestamps();
             $table->softDeletes();

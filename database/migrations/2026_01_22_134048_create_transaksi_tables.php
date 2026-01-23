@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
+            $table->string('kode');
             $table->foreignId('kendaraan_id')->constrained('kendaraan');
             $table->dateTime('waktu_masuk');
             $table->dateTime('waktu_keluar');
