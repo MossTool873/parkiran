@@ -13,6 +13,31 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AreaParkirController;
+use App\Http\Controllers\TipeKendaraanController;
+use App\Http\Controllers\TarifTipeKendaraanController;
+use App\Http\Controllers\UsersController;
+
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('login');
+});
+
+Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/', function () {return view('admin.dashboard');})->name('admin.dashboard');
+    Route::resource('users', UsersController::class);
+    // Route::resource('areaParkir', AreaParkirController::class);
+    // Route::resource('tipeKendaraan', TipeKendaraanController::class);
+    // Route::resource('tarifTipeKendaraan', TarifTipeKendaraanController::class);
+});
+
+Route::prefix('petugas')->middleware(['auth', 'role:petugas,admin'])->group(function () {
+    Route::get('/', function () {
+       view('petugas.dashboard');
+    })->name('petugas.dashboard');
 });

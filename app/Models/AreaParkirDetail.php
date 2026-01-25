@@ -25,6 +25,6 @@ class AreaParkirDetail extends Model
 
     public function tipeKendaraan()
     {
-        return $this->belongsTo(TipeKendaraan::class, 'tipe_kendaraan_id');
+        return $this->belongsTo(KendaraanTipe::class, 'tipe_kendaraan_id');
     }
 }

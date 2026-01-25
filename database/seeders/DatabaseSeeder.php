@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\KendaraanTipe;
 use App\Models\Role;
 use App\Models\TipeKendaraan;
 use App\Models\User;
@@ -41,7 +42,7 @@ class DatabaseSeeder extends Seeder
 
         $kendaraanTipe = ['Motor', 'Mobil', 'Bus'];
         foreach ($kendaraanTipe as $item) {
-            TipeKendaraan::firstOrCreate([
+            KendaraanTipe::firstOrCreate([
                 'tipe_kendaraan' => $item
             ]);
         }

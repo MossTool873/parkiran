@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+
+class UsersController extends Controller
+{
+
+    public function index()
+    {
+        $users = User::with('role')
+            ->whereNull('deleted_at')
+            ->get();
+
+        return view('admin.users.index', compact('users'));
+    }
+
+
+    public function create()
+    {
+        $roles = Role::all();
+        return view('admin.users.create', compact('roles'));
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'username' => 'required',
+            'password' => 'required|min:6',
+            'nama'     => 'required',
+            'role_id'  => 'required|exists:roles,id',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect('/admin/users/create')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Semua field wajib diisi');
+        }
+
+        $uniqueValidator = Validator::make($request->all(), [
+            'username' => 'unique:users,username',
+        ]);
+
+        if ($uniqueValidator->fails()) {
+            return redirect('/admin/users/create')
+                ->withErrors($uniqueValidator)
+                ->withInput()
+                ->with('error', 'Username sudah digunakan');
+        }
+
+        User::create([
+            'username'    => $request->username,
+            'password' => Hash::make($request->password), 
+            'name'     => $request->nama,
+            'role_id'  => $request->role_id,
+        ]);
+
+        return redirect('/admin/users')
+            ->with('success', 'User berhasil ditambahkan');
+    }
+
+    public function edit($id)
+    {
+        $user  = User::findOrFail($id);
+        $roles = Role::all();
+
+        return view('admin.users.edit', compact('user', 'roles'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'username'=> 'required|unique:users,username,' . $user->id,
+            'nama'    => 'required',
+            'role_id' => 'required|exists:roles,id',
+            'password'=> 'nullable|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect('/admin/users/' . $id . '/edit')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = [
+            'username'=> $request->username,
+            'nama'    => $request->nama,
+            'role_id' => $request->role_id,
+            'no_telp' => $request->no_telp,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+
+        return redirect('/admin/users')
+            ->with('success', 'User berhasil diperbarui');
+    }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect('/admin/users')
+            ->with('success', 'User berhasil dihapus');
+    }
+}
+
