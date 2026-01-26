@@ -20,11 +20,6 @@ class SidebarServiceProvider extends ServiceProvider
             $menus = [
                 'admin' => [
                     [
-                        'label' => 'Dashboard',
-                        'route' => '/admin',
-                        'icon'  => '🏠',
-                    ],
-                    [
                         'label' => 'Master Data',
                         'icon'  => '📦',
                         'children' => [
@@ -33,8 +28,16 @@ class SidebarServiceProvider extends ServiceProvider
                                 'route' => '/admin/users',
                             ],
                             [
-                                'label' => 'Role',
-                                'route' => '/admin/roles',
+                                'label' => 'Area Parkir',
+                                'route' => '/admin/areaParkir',
+                            ],
+                            [
+                                'label' => 'Tipe Kendaraan',
+                                'route' => '/admin/tipeKendaraan',
+                            ],
+                            [
+                                'label' => 'Tarif Tipe Kendaraan',
+                                'route' => '/admin/tarifTipeKendaraan',
                             ],
                         ],
                     ],

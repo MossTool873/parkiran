@@ -11,6 +11,6 @@ class KendaraanTipe extends Model
     use SoftDeletes;
     protected $table = 'kendaraan_tipe';
 
-    protected $fillable = ['kode','tipe_kendaraan'];
+    protected $fillable = ['tipe_kendaraan'];
 
 }

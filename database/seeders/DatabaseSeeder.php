@@ -33,10 +33,10 @@ class DatabaseSeeder extends Seeder
         }
 
         $adminRole = Role::where('role', 'admin')->first();
-        User::create([
+        User::firstOrCreate([
             'name'     => 'Administrator',
             'username' => 'admin',
-            'password' => Hash::make('123'),
+            'password' => Hash::make('admin123'),
             'role_id'  => $adminRole->id,
         ]);
 
