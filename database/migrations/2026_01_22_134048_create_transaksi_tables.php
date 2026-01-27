@@ -16,10 +16,10 @@ return new class extends Migration
             $table->string('kode');
             $table->foreignId('kendaraan_id')->constrained('kendaraan');
             $table->dateTime('waktu_masuk');
-            $table->dateTime('waktu_keluar');
+            $table->dateTime('waktu_keluar')->nullable();
             $table->foreignId('tarif_tipe_kendaraan_id')->constrained('tarif_tipe_kendaraan');
-            $table->integer('durasi_jam');
-            $table->integer('biaya_total');
+            $table->integer('durasi_jam')->nullable();;
+            $table->integer('biaya_total')->nullable();;
             $table->enum('status', ['masuk', 'keluar'])->default('masuk');
             $table->foreignId('area_parkir_id')->constrained('area_parkir');
             $table->foreignId('user_id')->constrained('users');

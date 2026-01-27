@@ -16,9 +16,11 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AreaParkirController;
+use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\KendaraanTipeController;
 use App\Http\Controllers\TipeKendaraanController;
 use App\Http\Controllers\TarifTipeKendaraanController;
+use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UsersController;
 
 Route::get('/', function () {
@@ -35,10 +37,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('areaParkir', AreaParkirController::class);
     Route::resource('tipeKendaraan', KendaraanTipeController::class);
     Route::resource('tarifTipeKendaraan', TarifTipeKendaraanController::class);
+    Route::resource('kendaraan', KendaraanController::class);
 });
 
 Route::prefix('petugas')->middleware(['auth', 'role:petugas,admin'])->group(function () {
-    Route::get('/', function () {
-       view('petugas.dashboard');
-    })->name('petugas.dashboard');
+    Route::get('/', function () {return redirect('/petugas/transaksi');});
+    Route::get('/transaksi',[TransaksiController::class, 'index'])->name('transaksi');
+    Route::post('/transaksi', [TransaksiController::class, 'masuk']);
 });
+Route::get('/kendaraan/search', [KendaraanController::class, 'search'])
+->name('kendaraan.search');
+

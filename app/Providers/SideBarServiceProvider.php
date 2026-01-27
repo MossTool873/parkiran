@@ -39,14 +39,18 @@ class SidebarServiceProvider extends ServiceProvider
                                 'label' => 'Tarif Tipe Kendaraan',
                                 'route' => '/admin/tarifTipeKendaraan',
                             ],
+                            [
+                                'label' => 'Kendaraan',
+                                'route' => '/admin/kendaraan',
+                            ],
                         ],
                     ],
                 ],
 
-                'operator' => [
+                'petugas' => [
                     [
-                        'label' => 'Dashboard',
-                        'route' => '/petugas',
+                        'label' => 'Transaksi',
+                        'route' => '/petugas/transaksi',
                         'icon'  => '📋',
                     ],
                 ],

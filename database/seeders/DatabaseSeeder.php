@@ -39,6 +39,13 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('admin123'),
             'role_id'  => $adminRole->id,
         ]);
+        $petugasRole = Role::where('role', 'petugas')->first();
+        User::firstOrCreate([
+            'name'     => 'Petugas',
+            'username' => 'petugas',
+            'password' => Hash::make('admin123'),
+            'role_id'  => $petugasRole->id,
+        ]);
 
         $kendaraanTipe = ['Motor', 'Mobil', 'Bus'];
         foreach ($kendaraanTipe as $item) {

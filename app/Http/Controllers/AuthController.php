@@ -21,7 +21,7 @@ class AuthController extends Controller
                     return redirect('/owner');
                 default:
                     Auth::logout();
-                    return redirect('/login')->withErrors('Role tidak dikenali');
+                    return redirect('/login')->withErrors('silahkan login');
             }
         }
 

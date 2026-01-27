@@ -17,7 +17,7 @@ class RoleMiddleware
         $userRole = Auth::user()->role->role ?? null;
 
         if (!in_array($userRole, $roles)) {
-            abort(403, 'Akses ditolak');
+            return redirect('/logout');
         }
 
         return $next($request);
