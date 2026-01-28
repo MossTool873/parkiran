@@ -7,8 +7,7 @@
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Area Parkir</h1>
 
-        <a href="{{ url('/admin/areaParkir/create') }}"
-           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+        <a href="{{ url('/admin/areaParkir/create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
             + Tambah Area Parkir
         </a>
     </div>
@@ -38,25 +37,32 @@
                         <td class="px-4 py-3">{{ $loop->iteration }}</td>
                         <td class="px-4 py-3">{{ $area->nama_area }}</td>
                         <td class="px-4 py-3">{{ $area->total_kapasitas }}</td>
+
                         <td class="px-4 py-3">
-                            <ul class="list-none ml-4">
-                                @foreach ($area->detailKapasitas as $detail)
-                                    <li>
-                                        {{ $detail->tipeKendaraan->tipe_kendaraan }} :
-                                        {{ $detail->kapasitas }}
-                                    </li>
-                                @endforeach
-                            </ul>
+                            <table class="min text-sm">
+                                <tbody>
+                                    @foreach ($area->detailKapasitas as $detail)
+                                        <tr>
+                                            <td class="px-2 py-1">
+                                                {{ $detail->tipeKendaraan->tipe_kendaraan }}
+                                            </td>
+                                            <td class="px-2 py-1 text-center">
+                                                {{ $detail->kapasitas }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </td>
+
                         <td class="px-4 py-3 flex gap-2">
-                            <a href="{{ url('/admin/areaParkir/'.$area->id.'/edit') }}"
-                               class="text-blue-600 hover:underline">
+                            <a href="{{ url('/admin/areaParkir/' . $area->id . '/edit') }}"
+                                class="text-blue-600 hover:underline">
                                 Edit
                             </a>
 
-                            <form action="{{ url('/admin/areaParkir/'.$area->id) }}"
-                                  method="POST"
-                                  onsubmit="return confirm('Hapus area parkir ini?')">
+                            <form action="{{ url('/admin/areaParkir/' . $area->id) }}" method="POST"
+                                onsubmit="return confirm('Hapus area parkir ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="text-red-600 hover:underline">

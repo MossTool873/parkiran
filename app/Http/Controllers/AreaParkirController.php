@@ -63,33 +63,36 @@ public function edit($id)
     return view('admin.areaParkir.edit', compact('areaParkir', 'tipeKendaraans'));
 }
 
-    // UPDATE
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'nama_area' => 'required',
-            'kapasitas' => 'required|array'
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'nama_area' => 'required',
+        'kapasitas' => 'required|array'
+    ]);
+
+    DB::transaction(function () use ($request, $id) {
+        $total_kapasitas = array_sum($request->kapasitas);
+
+        AreaParkir::where('id', $id)->update([
+            'nama_area' => $request->nama_area,
+            'total_kapasitas' => $total_kapasitas
         ]);
 
-        DB::transaction(function () use ($request, $id) {
-            AreaParkir::where('id', $id)->update([
-                'nama_area' => $request->nama_area
-            ]);
+        foreach ($request->kapasitas as $tipeId => $jumlah) {
+            AreaParkirDetail::updateOrCreate(
+                [
+                    'area_parkir_id' => $id,
+                    'tipe_kendaraan_id' => $tipeId
+                ],
+                [
+                    'kapasitas' => $jumlah
+                ]
+            );
+        }
+    });
 
-            foreach ($request->kapasitas as $tipeId => $jumlah) {
-                AreaParkirDetail::updateOrCreate(
-                    [
-                        'area_parkir_id' => $id,
-                        'tipe_kendaraan_id' => $tipeId
-                    ],
-                    [
-                        'kapasitas' => $jumlah
-                    ]
-                );
-            }
-        });
-        return redirect('/admin/areaParkir');
-    }
+    return redirect('/admin/areaParkir');
+}
 
     public function destroy($id)
     {

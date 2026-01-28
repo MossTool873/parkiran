@@ -23,7 +23,6 @@ class TarifTipeKendaraanController extends Controller
     {
         $tipeKendaraans = KendaraanTipe::all();
 
-        // untuk disable tipe yang sudah punya tarif (opsional di view)
         $tipeTerpakai = TarifTipeKendaraan::pluck('tipe_kendaraan_id')->toArray();
 
         return view(
@@ -73,8 +72,7 @@ class TarifTipeKendaraanController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'tipe_kendaraan_id' => 'required|exists:kendaraan_tipe,id',
-            'tarif_perjam'      => 'required|numeric|min:0'
+            'tarif_perjam' => 'required|numeric|min:0'
         ]);
 
         $tarif = TarifTipeKendaraan::findOrFail($id);
@@ -90,7 +88,7 @@ class TarifTipeKendaraanController extends Controller
     public function destroy($id)
     {
         $tarif = TarifTipeKendaraan::findOrFail($id);
-        $tarif->delete(); 
+        $tarif->delete();
 
         return redirect('/admin/tarifTipeKendaraan')
             ->with('success', 'Tarif berhasil dihapus');

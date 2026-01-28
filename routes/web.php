@@ -43,8 +43,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 Route::prefix('petugas')->middleware(['auth', 'role:petugas,admin'])->group(function () {
     Route::get('/', function () {return redirect('/petugas/transaksi');});
     Route::get('/transaksi',[TransaksiController::class, 'index'])->name('transaksi');
-    Route::post('/transaksi', [TransaksiController::class, 'masuk']);
+    Route::post('/transaksi/masuk', [TransaksiController::class, 'masuk']);
+    Route::post('/transaksi/keluar', [TransaksiController::class, 'keluar']);
+    Route::get('/transaksi-aktif', [TransaksiController::class, 'aktif'])->name('transaksi.aktif');
 });
-Route::get('/kendaraan/search', [KendaraanController::class, 'search'])
-->name('kendaraan.search');
+
+Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
+
 
