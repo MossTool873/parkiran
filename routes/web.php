@@ -45,6 +45,7 @@ Route::prefix('petugas')->middleware(['auth', 'role:petugas,admin'])->group(func
     Route::get('/transaksi',[TransaksiController::class, 'index'])->name('transaksi');
     Route::post('/transaksi/masuk', [TransaksiController::class, 'masuk']);
     Route::post('/transaksi/keluar', [TransaksiController::class, 'keluar']);
+    Route::get('/riwayatTransaksi', [TransaksiController::class, 'riwayat']);
     Route::get('/transaksi-aktif', [TransaksiController::class, 'aktif'])->name('transaksi.aktif');
 });
 

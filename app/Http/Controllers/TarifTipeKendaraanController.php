@@ -65,7 +65,8 @@ class TarifTipeKendaraanController extends Controller
 
         return view(
             'admin.tarifTipeKendaraan.edit',
-            compact('tarif', 'tipeKendaraans')
+            compact('tarif', 'tipeKendaraans') 
+            
         );
     }
 

@@ -46,7 +46,7 @@
                                             <td class="px-2 py-1">
                                                 {{ $detail->tipeKendaraan->tipe_kendaraan }}
                                             </td>
-                                            <td class="px-2 py-1 text-center">
+                                            <td class="px-2 py-1 text-left">
                                                 {{ $detail->kapasitas }}
                                             </td>
                                         </tr>

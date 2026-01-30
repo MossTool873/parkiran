@@ -53,6 +53,11 @@ class SidebarServiceProvider extends ServiceProvider
                         'route' => '/petugas/transaksi',
                         'icon'  => '📋',
                     ],
+                    [
+                        'label' => 'Riwayat Transaksi',
+                        'route' => '/petugas/riwayatTransaksi',
+                        'icon'  => '⌛',
+                    ],
                 ],
 
                 'user' => [

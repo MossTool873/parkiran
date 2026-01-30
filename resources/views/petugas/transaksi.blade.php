@@ -125,7 +125,7 @@ const tipeSelect = document.getElementById('tipe_kendaraan_id');
 
 platInput.addEventListener('keyup', function () {
     const q = this.value;
-    if (q.length < 2) return suggestions.classList.add('hidden');
+    if (q.length < 1) return suggestions.classList.add('hidden');
 
     fetch(`{{ route('kendaraan.search') }}?q=${q}`)
         .then(res => res.json())
@@ -155,7 +155,7 @@ const keluarList = document.getElementById('keluar-list');
 
 platKeluar.addEventListener('keyup', function () {
     const q = this.value;
-    if (q.length < 2) return keluarList.classList.add('hidden');
+    if (q.length < 1) return keluarList.classList.add('hidden');
 
     fetch(`{{ route('transaksi.aktif') }}?q=${q}`)
         .then(res => res.json())
