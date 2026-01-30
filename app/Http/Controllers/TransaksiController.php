@@ -78,8 +78,26 @@ class TransaksiController extends Controller
                     throw new \Exception('Area parkir penuh');
                 }
 
+                // ===============================
+                // GENERATE KODE: TRX-YYYYMMDD-XXXX
+                // ===============================
+                $tanggal = now()->format('Ymd');
+
+                $lastTransaksi = Transaksi::whereDate('waktu_masuk', now()->toDateString())
+                    ->orderBy('id', 'desc')
+                    ->lockForUpdate()
+                    ->first();
+
+                $nomorUrut = 1;
+                if ($lastTransaksi && preg_match('/TRX-\d{8}-(\d+)/', $lastTransaksi->kode, $match)) {
+                    $nomorUrut = intval($match[1]) + 1;
+                }
+
+                $kodeTransaksi = 'TRX-' . $tanggal . '-' . str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
+                // ===============================
+
                 Transaksi::create([
-                    'kode' => 'TRX-' . time(),
+                    'kode' => $kodeTransaksi,
                     'kendaraan_id' => $kendaraan->id,
                     'waktu_masuk' => now(),
                     'tarif_tipe_kendaraan_id' => $tarif->id,
