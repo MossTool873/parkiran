@@ -96,7 +96,7 @@ class TransaksiController extends Controller
                 $kodeTransaksi = 'TRX-' . $tanggal . '-' . str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
                 // ===============================
 
-                Transaksi::create([
+                $transaksi = Transaksi::create([
                     'kode' => $kodeTransaksi,
                     'kendaraan_id' => $kendaraan->id,
                     'waktu_masuk' => now(),
@@ -106,6 +106,14 @@ class TransaksiController extends Controller
                 ]);
 
                 $areaDetail->increment('terisi');
+
+                session()->flash('struk_masuk', [
+                    'kode'   => $transaksi->kode,
+                    'area'   => $areaDetail->areaParkir->nama_area ?? 'Area',
+                    'waktu'  => $transaksi->waktu_masuk->format('H:i'),
+                    'plat'   => $kendaraan->plat_nomor,
+                    'tipe'   => $kendaraan->tipeKendaraan->tipe_kendaraan ?? '-',
+                ]);
             });
         } catch (\Exception $e) {
             return back()
@@ -159,6 +167,8 @@ class TransaksiController extends Controller
                     'biaya_total' => $biayaTotal,
                 ]);
 
+
+
                 $areaDetail = AreaParkirDetail::where('area_parkir_id', $transaksi->area_parkir_id)
                     ->where('tipe_kendaraan_id', $kendaraan->tipe_kendaraan_id)
                     ->lockForUpdate()
@@ -167,6 +177,17 @@ class TransaksiController extends Controller
                 if ($areaDetail && $areaDetail->terisi > 0) {
                     $areaDetail->decrement('terisi');
                 }
+                session()->flash('struk_keluar', [
+                    'kode'       => $transaksi->kode,
+                    'plat'       => $kendaraan->plat_nomor,
+                    'jam_masuk'  => $waktuMasuk->format('H:i'),
+                    'jam_keluar' => $waktuKeluar->format('H:i'),
+                    'durasi'     => $durasiJam . ' jam',
+                    'tarif'      => $tarif->tarif_perjam,
+                    'total'      => $biayaTotal,
+                    'tanggal'    => $waktuKeluar->format('d-m-Y'),
+                    'operator'   => auth()->user()->name ?? '-',
+                ]);
             });
         } catch (\Exception $e) {
             return back()
