@@ -19,66 +19,73 @@
         </div>
     @endif
 
-    {{-- TABLE --}}
-    <div class="bg-white rounded-lg shadow overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-100 text-left">
-                <tr>
-                    <th class="px-4 py-3">No</th>
-                    <th class="px-4 py-3">Nama Area</th>
-                    <th class="px-4 py-3">Total Kapasitas</th>
-                    <th class="px-4 py-3">Detail Kapasitas</th>
-                    <th class="px-4 py-3">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($areaParkirs as $area)
-                    <tr class="border-t">
-                        <td class="px-4 py-3">{{ $loop->iteration }}</td>
-                        <td class="px-4 py-3">{{ $area->nama_area }}</td>
-                        <td class="px-4 py-3">{{ $area->total_kapasitas }}</td>
+<div class="space-y-6">
 
-                        <td class="px-4 py-3">
-                            <table class="min text-sm">
-                                <tbody>
-                                    @foreach ($area->detailKapasitas as $detail)
-                                        <tr>
-                                            <td class="px-2 py-1">
-                                                {{ $detail->tipeKendaraan->tipe_kendaraan }}
-                                            </td>
-                                            <td class="px-2 py-1 text-left">
-                                                {{ $detail->kapasitas }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </td>
+    @forelse ($areaParkirs as $area)
+        <div class="bg-white rounded-lg shadow border">
 
-                        <td class="px-4 py-3 flex gap-2">
-                            <a href="{{ url('/admin/areaParkir/' . $area->id . '/edit') }}"
-                                class="text-blue-600 hover:underline">
-                                Edit
-                            </a>
+            {{-- ================= HEADER CARD ================= --}}
+            <div class="flex justify-between items-center px-6 py-4 border-b">
+                <div class="space-y-1">
+                    <h2 class="text-lg font-semibold">
+                        {{ $area->nama_area }}
+                    </h2>
+                    <p class="text-sm text-gray-600">
+                        Total Kapasitas: <span class="font-medium">{{ $area->total_kapasitas }}</span>
+                    </p>
+                </div>
 
-                            <form action="{{ url('/admin/areaParkir/' . $area->id) }}" method="POST"
-                                onsubmit="return confirm('Hapus area parkir ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="text-red-600 hover:underline">
-                                    Hapus
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-gray-500">
-                            Data area parkir kosong
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                <div class="flex gap-2">
+                    <a href="{{ url('/admin/areaParkir/' . $area->id . '/edit') }}"
+                       class="px-4 py-1.5 text-sm border border-blue-500 text-blue-600 rounded hover:bg-blue-50">
+                        Edit
+                    </a>
+
+                    <form action="{{ url('/admin/areaParkir/' . $area->id) }}"
+                          method="POST"
+                          onsubmit="return confirm('Hapus area parkir ini?')">
+                        @csrf
+                        @method('DELETE')
+                        <button
+                            class="px-4 py-1.5 text-sm border border-red-500 text-red-600 rounded hover:bg-red-50">
+                            Hapus
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- ================= BODY CARD ================= --}}
+            <div class="px-6 py-4">
+                <div class="grid grid-cols-3 font-semibold text-sm text-gray-600 border-b pb-2">
+                    <div>Tipe Kendaraan</div>
+                    <div>Kapasitas</div>
+                    <div>Terisi</div>
+                </div>
+
+                <div class="divide-y">
+                    @foreach ($area->detailKapasitas as $detail)
+                        <div class="grid grid-cols-3 py-2 text-sm">
+                            <div>
+                                {{ $detail->tipeKendaraan->tipe_kendaraan }}
+                            </div>
+                            <div>
+                                {{ $detail->kapasitas }}
+                            </div>
+                            <div>
+                                {{ $detail->terisi ?? 0 }}
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+        </div>
+    @empty
+        <div class="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+            Data area parkir kosong
+        </div>
+    @endforelse
+
+</div>
+
 @endsection

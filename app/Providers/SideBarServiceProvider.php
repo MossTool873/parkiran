@@ -43,6 +43,10 @@ class SidebarServiceProvider extends ServiceProvider
                                 'label' => 'Kendaraan',
                                 'route' => '/admin/kendaraan',
                             ],
+                            [
+                                'label' => 'Membership Tier',
+                                'route' => '/admin/membership-tier',
+                            ],
                         ],
                     ],
                 ],

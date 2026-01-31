@@ -11,6 +11,6 @@ class MembershipTier extends Model
     use SoftDeletes;
 
     protected $table = 'membership_tier';
-    protected $fillable = ['membership_tier'];
+    protected $fillable = ['membership_tier','diskon'];
 
 }

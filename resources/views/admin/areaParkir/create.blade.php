@@ -19,16 +19,17 @@
         <div>
             <h2 class="font-semibold mb-2">Kapasitas per Tipe Kendaraan</h2>
 
-            @foreach ($tipeKendaraans as $tipe)
-                <div class="flex items-center gap-4 mb-2">
-                    <span class="w-48">{{ $tipe->tipe_kendaraan }}</span>
-                    <input type="number"
-                           name="kapasitas[{{ $tipe->id }}]"
-                           class="border rounded px-3 py-1 w-32"
-                           value="{{ old('kapasitas.'.$tipe->id, 0) }}"
-                           min="0">
-                </div>
-            @endforeach
+@foreach ($tipeKendaraans as $tipe)
+    <div class="flex items-center gap-4 mb-2">
+        <span class="w-48">{{ $tipe->tipe_kendaraan }}</span>
+
+        <input type="number"
+               name="kapasitas[{{ $tipe->id }}]"
+               class="border rounded px-3 py-1 w-32"
+               value="{{ old('kapasitas.'.$tipe->id, 0) }}"
+               min="0">
+    </div>
+@endforeach
         </div>
 
         <div class="flex gap-2 pt-4">

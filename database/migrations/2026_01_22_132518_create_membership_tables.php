@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('membership_tier', function (Blueprint $table) {
             $table->id();
-            $table->string('membership_tier')->unique();
+            $table->string('membership_tier');
+            $table->float('diskon');
             $table->timestamps();
             $table->softDeletes();
         });
