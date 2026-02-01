@@ -7,6 +7,7 @@ use App\Models\KendaraanTipe;
 use App\Models\TarifTipeKendaraan;
 use App\Models\Transaksi;
 use App\Models\AreaParkirDetail;
+use App\Models\MetodePembayaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +16,9 @@ class TransaksiController extends Controller
 {
     public function index()
     {
+        $metodePembayarans = MetodePembayaran::all();
         $tipeKendaraans = KendaraanTipe::all();
-        return view('petugas.transaksi', compact('tipeKendaraans'));
+        return view('petugas.transaksi', compact('tipeKendaraans','metodePembayarans'));
     }
 
     public function masuk(Request $request)
@@ -165,6 +167,7 @@ class TransaksiController extends Controller
                     'waktu_keluar' => $waktuKeluar,
                     'durasi_jam' => $durasiJam,
                     'biaya_total' => $biayaTotal,
+                    'metode_pembayaran_id' => $request->metode_pembayaran_id,
                 ]);
 
 
@@ -243,4 +246,33 @@ class TransaksiController extends Controller
 
         return view('petugas.riwayatTransaksi', compact('transaksis'));
     }
+
+    
+public function formKeluar(Request $request)
+{
+    $request->validate([
+        'plat_nomor' => 'required',
+    ]);
+
+    $kendaraan = Kendaraan::where('plat_nomor', $request->plat_nomor)->first();
+    if (!$kendaraan) {
+        return back()->withErrors(['error' => 'Kendaraan tidak ditemukan']);
+    }
+
+    $transaksi = Transaksi::where('kendaraan_id', $kendaraan->id)
+        ->whereNull('waktu_keluar')
+        ->first();
+
+    if (!$transaksi) {
+        return back()->withErrors(['error' => 'Kendaraan tidak sedang parkir']);
+    }
+
+    $metodePembayarans = MetodePembayaran::all();
+
+    return view('petugas.keluar', compact(
+        'kendaraan',
+        'transaksi',
+        'metodePembayarans'
+    ));
+}
 }

@@ -19,10 +19,12 @@ use App\Http\Controllers\AreaParkirController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\KendaraanTipeController;
 use App\Http\Controllers\MembershipTierController;
+use App\Http\Controllers\MetodePembayaranController;
 use App\Http\Controllers\TipeKendaraanController;
 use App\Http\Controllers\TarifTipeKendaraanController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UsersController;
+use App\Models\MetodePembayaran;
 
 Route::get('/', function () {
     return redirect('login');
@@ -39,6 +41,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('tipeKendaraan', KendaraanTipeController::class);
     Route::resource('tarifTipeKendaraan', TarifTipeKendaraanController::class);
     Route::resource('kendaraan', KendaraanController::class);
+    Route::resource('metodePembayaran', MetodePembayaranController::class);
     Route::resource('membership-tier', MembershipTierController::class);
 });
 

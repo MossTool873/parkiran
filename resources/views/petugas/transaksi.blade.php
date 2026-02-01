@@ -170,9 +170,9 @@
         <div class="bg-white p-6 rounded-lg shadow">
             <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Keluar</h4>
 
-            <form method="POST" action="{{ url('/petugas/transaksi/keluar') }}" class="space-y-4">
+ <form method="POST" action="{{ url('/petugas/transaksi/keluar') }}" id="formKeluar" class="space-y-4">
                 @csrf
-
+<input type="hidden" name="metode_pembayaran_id" id="metode_pembayaran_id">
                 <div class="relative">
                     <label class="block text-sm font-medium mb-1">Plat Nomor</label>
                     <input type="text" name="plat_nomor" id="plat_keluar" value="{{ old('plat_nomor') }}"
@@ -182,13 +182,43 @@
                     </ul>
                 </div>
 
-                <button class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
-                    Proses Keluar
-                </button>
+<button type="button"
+    onclick="openPembayaran()"
+    class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+    Proses Keluar
+</button>
+
+
             </form>
         </div>
 
     </div>
+    {{-- ===================== METODE PEMBAYARAN ===================== --}}
+<div id="modalPembayaran"
+     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-80">
+
+        <h3 class="text-lg font-bold mb-4 text-center">
+            Pilih Metode Pembayaran
+        </h3>
+
+        <div class="space-y-2">
+            @foreach ($metodePembayarans as $metode)
+                <button type="button"
+                    onclick="submitKeluar({{ $metode->id }})"
+                    class="w-full border rounded py-2 hover:bg-blue-600 hover:text-white">
+                    {{ $metode->nama_metode }}
+                </button>
+            @endforeach
+        </div>
+
+        <button onclick="closePembayaran()"
+            class="mt-4 w-full bg-gray-300 hover:bg-gray-400 py-2 rounded">
+            Batal
+        </button>
+    </div>
+</div>
+
 
     {{-- ===================== SCRIPT ===================== --}}
     <script>
@@ -250,4 +280,24 @@
                 });
         });
     </script>
+
+    <script>
+    function openPembayaran() {
+        const modal = document.getElementById('modalPembayaran');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closePembayaran() {
+        const modal = document.getElementById('modalPembayaran');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function submitKeluar(metodeId) {
+        document.getElementById('metode_pembayaran_id').value = metodeId;
+        document.getElementById('formKeluar').submit();
+    }
+</script>
+
 @endsection

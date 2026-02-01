@@ -19,6 +19,7 @@ class Transaksi extends Model
         'durasi_jam',
         'biaya_total',
         'status',
+        'metode_pembayaran_id',
         'area_parkir_id',
         'user_id'
     ];
@@ -37,4 +38,10 @@ class Transaksi extends Model
     {
         return $this->belongsTo(AreaParkir::class, 'area_parkir_id');
     }
+
+    public function metodePembayaran()
+{
+    return $this->belongsTo(MetodePembayaran::class);
+}
+
 }

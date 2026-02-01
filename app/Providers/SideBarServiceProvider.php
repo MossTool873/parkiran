@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
@@ -46,6 +47,11 @@ class SidebarServiceProvider extends ServiceProvider
                             [
                                 'label' => 'Membership Tier',
                                 'route' => '/admin/membership-tier',
+
+                            ],
+                            [
+                                'label' => 'Metode Pembayaran',
+                                'route' => '/admin/metodePembayaran',
                             ],
                         ],
                     ],
