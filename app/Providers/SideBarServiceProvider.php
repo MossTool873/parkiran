@@ -55,6 +55,11 @@ class SidebarServiceProvider extends ServiceProvider
                             ],
                         ],
                     ],
+                    [
+                        'label' => 'Membership',
+                        'route' => 'admin/membership',
+                        'icon'  => '⭐',
+                    ],
                 ],
 
                 'petugas' => [

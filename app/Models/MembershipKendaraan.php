@@ -20,8 +20,9 @@ class MembershipKendaraan extends Model
     {
         return $this->belongsTo(Membership::class, 'membership_id');
     }
-        public function kendaraan()
-    {
-        return $this->belongsTo(MembershipTier::class, 'kendaraan_id');
-    }
+public function kendaraan()
+{
+    return $this->belongsTo(Kendaraan::class, 'kendaraan_id');
+}
+
 }

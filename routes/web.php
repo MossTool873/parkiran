@@ -18,6 +18,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AreaParkirController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\KendaraanTipeController;
+use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\MembershipTierController;
 use App\Http\Controllers\MetodePembayaranController;
 use App\Http\Controllers\TipeKendaraanController;
@@ -43,6 +44,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('kendaraan', KendaraanController::class);
     Route::resource('metodePembayaran', MetodePembayaranController::class);
     Route::resource('membership-tier', MembershipTierController::class);
+    Route::resource('membership', MembershipController::class);
 });
 
 Route::prefix('petugas')->middleware(['auth', 'role:petugas,admin'])->group(function () {
@@ -55,5 +57,11 @@ Route::prefix('petugas')->middleware(['auth', 'role:petugas,admin'])->group(func
 });
 
 Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
+Route::get('/kendaraan/search', function (\Illuminate\Http\Request $request) {
+    return \App\Models\Kendaraan::where('plat_nomor', 'like', "%{$request->q}%")
+        ->with('tipeKendaraan')
+        ->limit(10)
+        ->get();
+})->name('kendaraan.search');
 
 
