@@ -20,6 +20,7 @@ class Transaksi extends Model
         'biaya_total',
         'status',
         'metode_pembayaran_id',
+        'membership_id',
         'area_parkir_id',
         'user_id'
     ];
@@ -40,8 +41,11 @@ class Transaksi extends Model
     }
 
     public function metodePembayaran()
-{
-    return $this->belongsTo(MetodePembayaran::class);
-}
-
+    {
+        return $this->belongsTo(MetodePembayaran::class, 'metode_pembayaran_id');
+    }
+    public function membership()
+    {
+        return $this->belongsTo(Membership::class, 'membership_id');
+    }
 }

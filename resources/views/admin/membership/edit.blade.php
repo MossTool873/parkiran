@@ -1,86 +1,226 @@
 @extends('components.app')
 
-@section('title', 'Edit Membership')
-
 @section('content')
-    <h1 class="text-2xl font-bold mb-6">Edit Membership</h1>
+<div class="max-w-6xl mx-auto mt-8">
 
+    {{-- ===================== ERROR ===================== --}}
     @if ($errors->any())
-        <div class="mb-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded">
-            @foreach ($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
+        <div class="mb-4 bg-red-100 text-red-700 p-4 rounded">
+            <ul class="list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow p-6 w-full">
-        <form action="{{ route('membership.update', $membership->id) }}"
-              method="POST"
-              class="space-y-4">
-            @csrf
-            @method('PUT')
+    <form action="{{ route('membership.update', $membership->id) }}" method="POST">
+        @csrf
+        @method('PUT')
 
-            <div>
-                <label class="block text-sm font-medium mb-1">Nama Membership</label>
-                <input
-                    type="text"
-                    name="nama"
-                    value="{{ old('nama', $membership->nama) }}"
-                    class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                >
+        <div class="bg-white p-6 rounded shadow">
+
+            {{-- ===================== DATA MEMBERSHIP ===================== --}}
+            <h2 class="text-lg font-semibold mb-4">Edit Membership</h2>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block mb-1">Nama Membership</label>
+                    <input type="text"
+                           name="nama"
+                           value="{{ old('nama', $membership->nama) }}"
+                           class="w-full border rounded px-3 py-2">
+                </div>
+
+                <div>
+                    <label class="block mb-1">Tier Membership</label>
+                    <select name="membership_tier_id"
+                            class="w-full border rounded px-3 py-2">
+                        @foreach ($tiers as $tier)
+                            <option value="{{ $tier->id }}"
+                                {{ old('membership_tier_id', $membership->membership_tier_id) == $tier->id ? 'selected' : '' }}>
+                                {{ $tier->nama_tier }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block mb-1">Pembaruan Terakhir</label>
+                    <input type="date"
+                           name="pembaruan_terakhir"
+                           value="{{ old('pembaruan_terakhir', $membership->pembaruan_terakhir) }}"
+                           class="w-full border rounded px-3 py-2">
+                </div>
+
+                <div>
+                    <label class="block mb-1">Kadaluarsa</label>
+                    <input type="date"
+                           name="kadaluarsa"
+                           value="{{ old('kadaluarsa', $membership->kadaluarsa) }}"
+                           class="w-full border rounded px-3 py-2">
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium mb-1">Tier Membership</label>
-                <select
-                    name="membership_tier_id"
-                    class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                >
-                    <option value="">-- Pilih Tier --</option>
-                    @foreach ($tiers as $tier)
-                        <option value="{{ $tier->id }}"
-                            {{ old('membership_tier_id', $membership->membership_tier_id) == $tier->id ? 'selected' : '' }}>
-                            {{ $tier->membership_tier }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+            {{-- ===================== KENDARAAN ===================== --}}
+            <h3 class="font-semibold mb-2">Kendaraan</h3>
 
-            <div>
-                <label class="block text-sm font-medium mb-1">Pembaruan Terakhir</label>
-                <input
-                    type="date"
-                    name="pembaruan_terakhir"
-                    value="{{ old('pembaruan_terakhir', $membership->pembaruan_terakhir) }}"
-                    class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                >
-            </div>
+            <table class="w-full text-sm border">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-3 py-2">Plat</th>
+                    <th class="px-3 py-2">Warna</th>
+                    <th class="px-3 py-2">Tipe</th>
+                    <th class="px-3 py-2 text-center">Aksi</th>
+                </tr>
+                </thead>
+                <tbody id="kendaraan-body">
 
-            <div>
-                <label class="block text-sm font-medium mb-1">Kadaluarsa</label>
-                <input
-                    type="date"
-                    name="kadaluarsa"
-                    value="{{ old('kadaluarsa', $membership->kadaluarsa) }}"
-                    class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                >
-            </div>
+                @foreach ($membership->kendaraans as $index => $kendaraan)
+                    <tr>
+                        <td class="relative px-2 py-2">
+                            <input type="text"
+                                   name="kendaraan[{{ $index }}][plat_nomor]"
+                                   value="{{ $kendaraan->plat_nomor }}"
+                                   class="plat-input w-full border rounded px-2 py-1">
+                            <ul class="suggestions hidden absolute bg-white border rounded shadow w-full z-10"></ul>
+                        </td>
 
-            <div class="flex gap-2 pt-4">
-                <button
-                    type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-                >
-                    Update
-                </button>
+                        <td class="px-2 py-2">
+                            <input type="text"
+                                   name="kendaraan[{{ $index }}][warna]"
+                                   value="{{ $kendaraan->warna }}"
+                                   class="warna-input w-full border rounded px-2 py-1">
+                        </td>
 
-                <a
-                    href="{{ route('membership.index') }}"
-                    class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg"
-                >
+                        <td class="px-2 py-2">
+                            <select name="kendaraan[{{ $index }}][tipe_kendaraan_id]"
+                                    class="tipe-input w-full border rounded px-2 py-1">
+                                @foreach ($tipeKendaraans as $tipe)
+                                    <option value="{{ $tipe->id }}"
+                                        {{ $kendaraan->tipe_kendaraan_id == $tipe->id ? 'selected' : '' }}>
+                                        {{ $tipe->tipe_kendaraan }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </td>
+
+                        <td class="px-2 py-2 text-center">
+                            <button type="button" class="hapus-row text-red-600">Hapus</button>
+                        </td>
+                    </tr>
+                @endforeach
+
+                </tbody>
+            </table>
+
+            <button type="button"
+                    id="tambah-row"
+                    class="mt-3 bg-green-600 text-white px-3 py-1 rounded">
+                + Tambah Kendaraan
+            </button>
+
+            {{-- ===================== SUBMIT ===================== --}}
+            <div class="mt-6 flex justify-end gap-2">
+                <a href="{{ route('membership.index') }}"
+                   class="px-4 py-2 bg-gray-300 rounded">
                     Batal
                 </a>
+                <button type="submit"
+                        class="px-4 py-2 bg-green-600 text-white rounded">
+                    Update
+                </button>
             </div>
-        </form>
-    </div>
+
+        </div>
+    </form>
+</div>
+
+{{-- ===================== SCRIPT ===================== --}}
+<script>
+let index = {{ $membership->kendaraans->count() }};
+
+/* ===================== TAMBAH ROW ===================== */
+document.getElementById('tambah-row').onclick = () => {
+    const body = document.getElementById('kendaraan-body');
+    const row  = body.rows[0].cloneNode(true);
+
+    row.querySelectorAll('input, select').forEach(el => {
+        el.value = '';
+        el.readOnly = false;
+        el.style.pointerEvents = 'auto';
+        el.classList.remove('bg-gray-100');
+        el.name = el.name.replace(/\[\d+\]/, `[${index}]`);
+    });
+
+    const list = row.querySelector('.suggestions');
+    list.innerHTML = '';
+    list.classList.add('hidden');
+
+    body.appendChild(row);
+    index++;
+};
+
+/* ===================== HAPUS ROW ===================== */
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('hapus-row')) {
+        const body = document.getElementById('kendaraan-body');
+        if (body.rows.length > 1) {
+            e.target.closest('tr').remove();
+        }
+    }
+});
+
+/* ===================== AUTOCOMPLETE PLAT ===================== */
+document.addEventListener('input', e => {
+    if (!e.target.classList.contains('plat-input')) return;
+
+    const row   = e.target.closest('tr');
+    const warna = row.querySelector('.warna-input');
+    const tipe  = row.querySelector('.tipe-input');
+    const list  = row.querySelector('.suggestions');
+    const q     = e.target.value.trim();
+
+    if (!q) {
+        list.classList.add('hidden');
+        return;
+    }
+
+    fetch(`{{ route('kendaraan.search') }}?q=${q}`)
+        .then(r => r.json())
+        .then(data => {
+            list.innerHTML = '';
+
+            if (!data.length) {
+                warna.readOnly = false;
+                tipe.style.pointerEvents = 'auto';
+                tipe.classList.remove('bg-gray-100');
+                list.classList.add('hidden');
+                return;
+            }
+
+            data.forEach(k => {
+                const li = document.createElement('li');
+                li.textContent = k.plat_nomor;
+                li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
+
+                li.onclick = () => {
+                    e.target.value = k.plat_nomor;
+                    warna.value = k.warna;
+                    tipe.value  = k.tipe_kendaraan_id;
+
+                    warna.readOnly = true;
+                    tipe.style.pointerEvents = 'none';
+                    tipe.classList.add('bg-gray-100');
+
+                    list.classList.add('hidden');
+                };
+
+                list.appendChild(li);
+            });
+
+            list.classList.remove('hidden');
+        });
+});
+</script>
 @endsection

@@ -9,6 +9,7 @@ use App\Models\MembershipKendaraan;
 use App\Models\MembershipTier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class MembershipController extends Controller
 {
@@ -26,19 +27,43 @@ class MembershipController extends Controller
         return view('admin.membership.create', compact('tiers','tipeKendaraans','kendaraanList'));
     }
 
-  public function store(Request $request)
+  
+public function store(Request $request)
 {
     $request->validate([
-        'nama' => 'required',
+        'nama' => 'required|unique:membership,nama',
         'membership_tier_id' => 'required|exists:membership_tier,id',
         'kadaluarsa' => 'required|date',
         'kendaraan.*.plat_nomor' => 'required',
         'kendaraan.*.warna' => 'required',
         'kendaraan.*.tipe_kendaraan_id' => 'required|exists:kendaraan_tipe,id',
-    ]);
+    ],[
+    'nama.unique' => 'Nama membership sudah digunakan.',
+]);
 
     DB::transaction(function () use ($request) {
 
+        /* ===================== VALIDASI KENDARAAN SUDAH PUNYA MEMBERSHIP ===================== */
+        foreach ($request->kendaraan as $i => $item) {
+
+            $sudahAda = DB::table('membership_kendaraan')
+                ->join('membership', 'membership.id', '=', 'membership_kendaraan.membership_id')
+                ->join('kendaraan', 'kendaraan.id', '=', 'membership_kendaraan.kendaraan_id')
+                ->whereNull('membership.deleted_at')
+                ->whereNull('membership_kendaraan.deleted_at')
+                ->where('kendaraan.plat_nomor', $item['plat_nomor'])
+                ->whereDate('membership.kadaluarsa', '>=', now()) // membership masih aktif
+                ->exists();
+
+            if ($sudahAda) {
+                throw ValidationException::withMessages([
+                    "kendaraan.$i.plat_nomor" =>
+                        "Kendaraan {$item['plat_nomor']} sudah terdaftar di membership lain"
+                ]);
+            }
+        }
+
+        /* ===================== CREATE MEMBERSHIP ===================== */
         $membership = Membership::create([
             'nama' => $request->nama,
             'membership_tier_id' => $request->membership_tier_id,
@@ -46,6 +71,7 @@ class MembershipController extends Controller
             'kadaluarsa' => $request->kadaluarsa,
         ]);
 
+        /* ===================== SIMPAN KENDARAAN ===================== */
         foreach ($request->kendaraan as $item) {
 
             $kendaraan = Kendaraan::firstOrCreate(
@@ -63,25 +89,40 @@ class MembershipController extends Controller
         }
     });
 
-    return redirect()->route('membership.index')
+    return redirect()
+        ->route('membership.index')
         ->with('success', 'Membership berhasil ditambahkan');
 }
 
-    public function edit(Membership $membership)
-    {
+    public function edit($id)
+{
+        $membership = Membership::findOrFail($id);
         $tiers = MembershipTier::all();
-        return view('admin.membership.edit', compact('membership', 'tiers'));
-    }
+        $tipeKendaraans = KendaraanTipe::all();
+        $kendaraanList = Kendaraan::all();
 
-    public function update(Request $request, Membership $membership)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:100',
-            'membership_tier_id' => 'required|exists:membership_tier,id',
-            'pembaruan_terakhir' => 'required|date',
-            'kadaluarsa' => 'required|date|after_or_equal:pembaruan_terakhir',
-        ]);
+    return view('admin.membership.edit', compact( 'membership','tiers','kendaraanList','tipeKendaraans'));
+}
 
+ public function update(Request $request, Membership $membership)
+{
+    $request->validate([
+        'nama' => 'required|unique:membership,nama',
+        'membership_tier_id' => 'required|exists:membership_tier,id',
+        'pembaruan_terakhir' => 'required|date',
+        'kadaluarsa' => 'required|date|after_or_equal:pembaruan_terakhir',
+
+        // kendaraan (sama seperti create)
+        'kendaraan.*.plat_nomor' => 'required',
+        'kendaraan.*.warna' => 'required',
+        'kendaraan.*.tipe_kendaraan_id' => 'required|exists:kendaraan_tipe,id',
+    ], [
+        'nama.unique' => 'Nama membership sudah digunakan.',
+    ]);
+
+    DB::transaction(function () use ($request, $membership) {
+
+        // update membership
         $membership->update([
             'nama' => $request->nama,
             'membership_tier_id' => $request->membership_tier_id,
@@ -89,10 +130,29 @@ class MembershipController extends Controller
             'kadaluarsa' => $request->kadaluarsa,
         ]);
 
-        return redirect()
-            ->route('membership.index')
-            ->with('success', 'Membership berhasil diperbarui');
-    }
+        // hapus relasi kendaraan lama
+        $membership->kendaraans()->detach();
+
+        // simpan kendaraan baru
+        foreach ($request->kendaraan as $item) {
+
+            $kendaraan = Kendaraan::firstOrCreate(
+                ['plat_nomor' => $item['plat_nomor']],
+                [
+                    'warna' => $item['warna'],
+                    'tipe_kendaraan_id' => $item['tipe_kendaraan_id'],
+                ]
+            );
+
+            // attach ulang
+            $membership->kendaraans()->attach($kendaraan->id);
+        }
+    });
+
+    return redirect()
+        ->route('membership.index')
+        ->with('success', 'Membership berhasil diperbarui');
+}
 
 
     public function destroy(Membership $membership)

@@ -27,4 +27,14 @@ class Membership extends Model
     {
         return $this->hasMany(MembershipKendaraan::class, 'membership_id');
     }
+
+        public function kendaraans()
+    {
+        return $this->belongsToMany(
+            Kendaraan::class,
+            'membership_kendaraan',
+            'membership_id',
+            'kendaraan_id'
+        );
+    }
 }
