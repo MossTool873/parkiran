@@ -7,6 +7,8 @@ use App\Models\KendaraanTipe;
 use App\Models\TarifTipeKendaraan;
 use App\Models\Transaksi;
 use App\Models\AreaParkirDetail;
+use App\Models\Membership;
+use App\Models\MembershipKendaraan;
 use App\Models\MetodePembayaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ class TransaksiController extends Controller
     {
         $metodePembayarans = MetodePembayaran::all();
         $tipeKendaraans = KendaraanTipe::all();
-        return view('petugas.transaksi', compact('tipeKendaraans','metodePembayarans'));
+        return view('petugas.transaksi', compact('tipeKendaraans', 'metodePembayarans'));
     }
 
     public function masuk(Request $request)
@@ -131,17 +133,20 @@ class TransaksiController extends Controller
     {
         $request->validate([
             'plat_nomor' => 'required',
+            'metode_pembayaran_id' => 'required',
         ]);
 
         try {
             DB::transaction(function () use ($request) {
 
+                // ===================== KENDARAAN =====================
                 $kendaraan = Kendaraan::where('plat_nomor', $request->plat_nomor)->first();
 
                 if (!$kendaraan) {
                     throw new \Exception('Kendaraan tidak ditemukan');
                 }
 
+                // ===================== TRANSAKSI AKTIF =====================
                 $transaksi = Transaksi::where('kendaraan_id', $kendaraan->id)
                     ->whereNull('waktu_keluar')
                     ->lockForUpdate()
@@ -151,27 +156,53 @@ class TransaksiController extends Controller
                     throw new \Exception('Kendaraan tidak sedang parkir');
                 }
 
+                // ===================== TARIF =====================
                 $tarif = TarifTipeKendaraan::find($transaksi->tarif_tipe_kendaraan_id);
 
                 if (!$tarif) {
                     throw new \Exception('Tarif tidak ditemukan');
                 }
 
+                // ===================== WAKTU & BIAYA =====================
                 $waktuMasuk  = Carbon::parse($transaksi->waktu_masuk);
                 $waktuKeluar = now();
 
                 $durasiJam = max(1, $waktuMasuk->diffInHours($waktuKeluar));
-                $biayaTotal = $durasiJam * $tarif->tarif_perjam;
+                $biayaAwal = $durasiJam * $tarif->tarif_perjam;
 
+                // ===================== CEK MEMBER =====================
+                $member         = null;
+                $diskonPersen   = 0;
+                $diskonNominal  = 0;
+
+                if (
+                    $kendaraan->membershipKendaraan &&
+                    $kendaraan->membershipKendaraan->membership &&
+                    $kendaraan->membershipKendaraan->membership->membershipTier
+                ) {
+                    $member = $kendaraan->membershipKendaraan->membership;
+
+                    $diskonPersen  = $member->membershipTier->diskon;
+                    $diskonNominal = ($biayaAwal * $diskonPersen) / 100;
+                }
+
+                // ===================== METODE PEMBAYARAN =====================
+                $metodePembayaran = MetodePembayaran::find($request->metode_pembayaran_id);
+
+                if (!$metodePembayaran) {
+                    throw new \Exception('Metode pembayaran tidak ditemukan');
+                }
+
+                // ===================== UPDATE TRANSAKSI =====================
                 $transaksi->update([
-                    'waktu_keluar' => $waktuKeluar,
-                    'durasi_jam' => $durasiJam,
-                    'biaya_total' => $biayaTotal,
-                    'metode_pembayaran_id' => $request->metode_pembayaran_id,
+                    'waktu_keluar'           => $waktuKeluar,
+                    'durasi_jam'             => $durasiJam,
+                    'biaya'                  => $biayaAwal, // SIMPAN BIAYA AWAL SAJA
+                    'member_id'              => $member ? $member->id : null,
+                    'metode_pembayaran_id'   => $metodePembayaran->id,
                 ]);
 
-
-
+                // ===================== UPDATE AREA PARKIR =====================
                 $areaDetail = AreaParkirDetail::where('area_parkir_id', $transaksi->area_parkir_id)
                     ->where('tipe_kendaraan_id', $kendaraan->tipe_kendaraan_id)
                     ->lockForUpdate()
@@ -180,16 +211,22 @@ class TransaksiController extends Controller
                 if ($areaDetail && $areaDetail->terisi > 0) {
                     $areaDetail->decrement('terisi');
                 }
+
+                // ===================== STRUK KELUAR =====================
                 session()->flash('struk_keluar', [
-                    'kode'       => $transaksi->kode,
-                    'plat'       => $kendaraan->plat_nomor,
-                    'jam_masuk'  => $waktuMasuk->format('H:i'),
-                    'jam_keluar' => $waktuKeluar->format('H:i'),
-                    'durasi'     => $durasiJam . ' jam',
-                    'tarif'      => $tarif->tarif_perjam,
-                    'total'      => $biayaTotal,
-                    'tanggal'    => $waktuKeluar->format('d-m-Y'),
-                    'operator'   => auth()->user()->name ?? '-',
+                    'kode'        => $transaksi->kode,
+                    'plat'        => $kendaraan->plat_nomor,
+                    'jam_masuk'   => $waktuMasuk->format('H:i'),
+                    'jam_keluar'  => $waktuKeluar->format('H:i'),
+                    'durasi'      => $durasiJam . ' jam',
+                    'tarif'       => $tarif->tarif_perjam,
+                    'metode'      => $metodePembayaran->nama_metode,
+                    'biaya_awal'  => $biayaAwal,
+                    'diskon_persen'      => $diskonPersen,
+                    'diskon'      => $diskonNominal,
+                    'total'       => $biayaAwal - $diskonNominal,
+                    'tanggal'     => $waktuKeluar->format('d-m-Y'),
+                    'operator'    => auth()->user()->name ?? '-',
                 ]);
             });
         } catch (\Exception $e) {
@@ -201,6 +238,8 @@ class TransaksiController extends Controller
         return redirect('/petugas/transaksi')
             ->with('success', 'Kendaraan berhasil keluar');
     }
+
+
 
     public function aktif(Request $request)
     {
@@ -247,32 +286,32 @@ class TransaksiController extends Controller
         return view('petugas.riwayatTransaksi', compact('transaksis'));
     }
 
-    
-public function formKeluar(Request $request)
-{
-    $request->validate([
-        'plat_nomor' => 'required',
-    ]);
 
-    $kendaraan = Kendaraan::where('plat_nomor', $request->plat_nomor)->first();
-    if (!$kendaraan) {
-        return back()->withErrors(['error' => 'Kendaraan tidak ditemukan']);
+    public function formKeluar(Request $request)
+    {
+        $request->validate([
+            'plat_nomor' => 'required',
+        ]);
+
+        $kendaraan = Kendaraan::where('plat_nomor', $request->plat_nomor)->first();
+        if (!$kendaraan) {
+            return back()->withErrors(['error' => 'Kendaraan tidak ditemukan']);
+        }
+
+        $transaksi = Transaksi::where('kendaraan_id', $kendaraan->id)
+            ->whereNull('waktu_keluar')
+            ->first();
+
+        if (!$transaksi) {
+            return back()->withErrors(['error' => 'Kendaraan tidak sedang parkir']);
+        }
+
+        $metodePembayarans = MetodePembayaran::all();
+
+        return view('petugas.keluar', compact(
+            'kendaraan',
+            'transaksi',
+            'metodePembayarans'
+        ));
     }
-
-    $transaksi = Transaksi::where('kendaraan_id', $kendaraan->id)
-        ->whereNull('waktu_keluar')
-        ->first();
-
-    if (!$transaksi) {
-        return back()->withErrors(['error' => 'Kendaraan tidak sedang parkir']);
-    }
-
-    $metodePembayarans = MetodePembayaran::all();
-
-    return view('petugas.keluar', compact(
-        'kendaraan',
-        'transaksi',
-        'metodePembayarans'
-    ));
-}
 }

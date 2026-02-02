@@ -30,11 +30,11 @@ return new class extends Migration
             $table->dateTime('waktu_keluar')->nullable();
             $table->foreignId('tarif_tipe_kendaraan_id')->constrained('tarif_tipe_kendaraan');
             $table->integer('durasi_jam')->nullable();
-            $table->integer('biaya_total')->nullable();
+            $table->integer('biaya')->nullable();
             $table->foreignId('metode_pembayaran_id')->nullable()->constrained('metode_pembayaran');
             $table->enum('status', ['masuk', 'keluar'])->default('masuk');
             $table->foreignId('area_parkir_id')->constrained('area_parkir');
-            $table->foreignId('membership_id')->constrained('membership')->nullable();
+            $table->foreignId('membership_id')->constrained('membership');
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
             $table->softDeletes();

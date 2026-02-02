@@ -14,111 +14,165 @@
         </div>
     @endif
 
-    {{-- ===================== STRUK MASUK (OVERLAY) ===================== --}}
-    @if (session('struk_masuk'))
-        @php $s = session('struk_masuk'); @endphp
+{{-- ===================== STRUK MASUK (OVERLAY + PRINT) ===================== --}}
+@if (session('struk_masuk'))
+@php $s = session('struk_masuk'); @endphp
 
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl p-6 w-80 relative">
+<div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded shadow p-6 w-96 relative font-mono text-sm print-area">
 
-                <h3 class="text-center text-lg font-bold mb-4">
-                    Struk Parkir Masuk
-                </h3>
-
-                <div class="border-t border-b py-3 text-sm space-y-1">
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Area</span>
-                        <span class="font-medium">{{ $s['area'] }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Jam Masuk</span>
-                        <span class="font-medium">{{ $s['waktu'] }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Plat</span>
-                        <span class="font-semibold">{{ $s['plat'] }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Tipe</span>
-                        <span class="font-medium">{{ $s['tipe'] }}</span>
-                    </div>
-                </div>
-
-                <div class="mt-4 text-sm text-center">
-                    <div class="text-gray-500">Kode Transaksi</div>
-                    <div class="font-bold text-blue-600 text-lg mb-3">
-                        {{ $s['kode'] }}
-                    </div>
-
-                    {{-- QR CODE --}}
-                    <div class="flex justify-center">
-                        <canvas id="qr-struk"></canvas>
-                    </div>
-                </div>
-
-                <button onclick="this.closest('.fixed').remove()"
-                    class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">
-                    Tutup
-                </button>
-            </div>
+        {{-- HEADER --}}
+        <div class="text-center font-bold mb-4">
+            STRUK PARKIR MASUK
         </div>
 
-
-
-
-        {{-- GENERATE QR --}}
-        <script>
-            new QRious({
-                element: document.getElementById('qr-struk'),
-                value: "{{ $s['kode'] }}",
-                size: 160,
-                level: 'H'
-            });
-        </script>
-    @endif
-    @if (session('struk_keluar'))
-        @php $s = session('struk_keluar'); @endphp
-
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl p-6 w-96 relative font-mono text-sm">
-
-                <div class="text-center font-bold mb-3">
-                    ==================<br>
-                    STRUK KELUAR PARKIR<br>
-                    ==================
-                </div>
-
-                <div class="space-y-1">
-                    <div>Plat: {{ $s['plat'] }}</div>
-                    <div>Jam Masuk : {{ $s['jam_masuk'] }}</div>
-                    <div>Jam Keluar: {{ $s['jam_keluar'] }}</div>
-                    <div>Durasi : {{ $s['durasi'] }}</div>
-                </div>
-
-                <div class="my-3">
-                    <div>Tarif / Jam : Rp {{ number_format($s['tarif'], 0, ',', '.') }}</div>
-                    <div class="font-bold">
-                        TOTAL BAYAR: Rp {{ number_format($s['total'], 0, ',', '.') }}
-                    </div>
-                </div>
-
-                <div class="border-t pt-2 text-xs">
-                    <div>Kode : {{ $s['kode'] }}</div>
-                    <div>Tanggal : {{ $s['tanggal'] }}</div>
-                    <div>Operator : {{ $s['operator'] }}</div>
-                </div>
-
-                <div class="text-center mt-3">
-                    Terima Kasih!
-                </div>
-
-                <button onclick="this.closest('.fixed').remove()"
-                    class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
-                    Tutup
-                </button>
-            </div>
+        {{-- INFO --}}
+        <div class="space-y-1">
+            <div>Area      : {{ $s['area'] }}</div>
+            <div>Jam Masuk : {{ $s['waktu'] }}</div>
+            <div>Plat      : {{ $s['plat'] }}</div>
+            <div>Tipe      : {{ $s['tipe'] }}</div>
         </div>
-    @endif
+
+        <hr class="my-3">
+
+        {{-- KODE --}}
+        <div class="text-center">
+            <div>Kode Transaksi</div>
+            <div class="font-bold">{{ $s['kode'] }}</div>
+
+            <canvas id="qr-struk" class="mx-auto mt-2"></canvas>
+        </div>
+
+        {{-- BUTTON --}}
+        <div class="mt-5 flex gap-2 no-print">
+            <button onclick="window.print()"
+                class="flex-1 border px-3 py-1 rounded">
+                Print
+            </button>
+
+            <button onclick="this.closest('.fixed').remove()"
+                class="flex-1 border px-3 py-1 rounded">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+new QRious({
+    element: document.getElementById('qr-struk'),
+    value: "{{ $s['kode'] }}",
+    size: 120
+});
+</script>
+@endif
+
+
+
+{{-- ===================== STRUK KELUAR (OVERLAY + PRINT) ===================== --}}
+@if (session('struk_keluar'))
+@php $s = session('struk_keluar'); @endphp
+
+<div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded shadow p-6 w-96 relative font-mono text-sm print-area">
+
+        <div class="text-center font-bold mb-3">
+            STRUK PARKIR KELUAR
+        </div>
+
+        <div class="space-y-1">
+            <div>Plat      : {{ $s['plat'] }}</div>
+            <div>Masuk     : {{ $s['jam_masuk'] }}</div>
+            <div>Keluar    : {{ $s['jam_keluar'] }}</div>
+            <div>Durasi    : {{ $s['durasi'] }}</div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="space-y-1">
+            <div>Tarif Awal : Rp {{ number_format($s['tarif'],0,',','.') }}</div>
+
+            <div>
+                Diskon ({{ $s['diskon_persen'] }}%) :
+                - Rp {{ number_format($s['diskon'],0,',','.') }}
+            </div>
+
+            <div class="font-bold">
+                TOTAL : Rp {{ number_format($s['total'],0,',','.') }}
+            </div>
+
+            <div>Metode : {{ $s['metode'] }}</div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="text-xs">
+            <div>Kode     : {{ $s['kode'] }}</div>
+            <div>Tanggal  : {{ $s['tanggal'] }}</div>
+            <div>Operator : {{ $s['operator'] }}</div>
+        </div>
+
+        <div class="text-center mt-2">
+            Terima Kasih
+        </div>
+
+        <div class="mt-4 flex gap-2 no-print">
+            <button onclick="window.print()"
+                class="flex-1 border px-3 py-1 rounded">
+                Print
+            </button>
+
+            <button onclick="this.closest('.fixed').remove()"
+                class="flex-1 border px-3 py-1 rounded">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
+
+{{-- ===================== SCRIPT PRINT ===================== --}}
+<script>
+function basePrint(content) {
+    const win = window.open('', '', 'width=400,height=600');
+    win.document.write(`
+        <html>
+        <head>
+            <title>Print Struk</title>
+            <style>
+                body {
+                    font-family: monospace;
+                    font-size: 12px;
+                    margin: 0;
+                    padding: 10px;
+                }
+                .font-bold { font-weight: bold; }
+                .text-center { text-align: center; }
+                .space-y-1 > div { margin-bottom: 4px; }
+            </style>
+        </head>
+        <body>
+            ${content}
+        </body>
+        </html>
+    `);
+    win.document.close();
+    win.focus();
+    win.print();
+    win.close();
+}
+
+function printStrukMasuk() {
+    basePrint(document.getElementById('struk-masuk-print').innerHTML);
+}
+
+function printStrukKeluar() {
+    basePrint(document.getElementById('struk-keluar-print').innerHTML);
+}
+</script>
+
 
 
     {{-- ===================== FORM MASUK & KELUAR ===================== --}}
@@ -170,9 +224,9 @@
         <div class="bg-white p-6 rounded-lg shadow">
             <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Keluar</h4>
 
- <form method="POST" action="{{ url('/petugas/transaksi/keluar') }}" id="formKeluar" class="space-y-4">
+            <form method="POST" action="{{ url('/petugas/transaksi/keluar') }}" id="formKeluar" class="space-y-4">
                 @csrf
-<input type="hidden" name="metode_pembayaran_id" id="metode_pembayaran_id">
+                <input type="hidden" name="metode_pembayaran_id" id="metode_pembayaran_id">
                 <div class="relative">
                     <label class="block text-sm font-medium mb-1">Plat Nomor</label>
                     <input type="text" name="plat_nomor" id="plat_keluar" value="{{ old('plat_nomor') }}"
@@ -182,11 +236,10 @@
                     </ul>
                 </div>
 
-<button type="button"
-    onclick="openPembayaran()"
-    class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
-    Proses Keluar
-</button>
+                <button type="button" onclick="openPembayaran()"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                    Proses Keluar
+                </button>
 
 
             </form>
@@ -194,30 +247,27 @@
 
     </div>
     {{-- ===================== METODE PEMBAYARAN ===================== --}}
-<div id="modalPembayaran"
-     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl p-6 w-80">
+    <div id="modalPembayaran" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-80">
 
-        <h3 class="text-lg font-bold mb-4 text-center">
-            Pilih Metode Pembayaran
-        </h3>
+            <h3 class="text-lg font-bold mb-4 text-center">
+                Pilih Metode Pembayaran
+            </h3>
 
-        <div class="space-y-2">
-            @foreach ($metodePembayarans as $metode)
-                <button type="button"
-                    onclick="submitKeluar({{ $metode->id }})"
-                    class="w-full border rounded py-2 hover:bg-blue-600 hover:text-white">
-                    {{ $metode->nama_metode }}
-                </button>
-            @endforeach
+            <div class="space-y-2">
+                @foreach ($metodePembayarans as $metode)
+                    <button type="button" onclick="submitKeluar({{ $metode->id }})"
+                        class="w-full border rounded py-2 hover:bg-blue-600 hover:text-white">
+                        {{ $metode->nama_metode }}
+                    </button>
+                @endforeach
+            </div>
+
+            <button onclick="closePembayaran()" class="mt-4 w-full bg-gray-300 hover:bg-gray-400 py-2 rounded">
+                Batal
+            </button>
         </div>
-
-        <button onclick="closePembayaran()"
-            class="mt-4 w-full bg-gray-300 hover:bg-gray-400 py-2 rounded">
-            Batal
-        </button>
     </div>
-</div>
 
 
     {{-- ===================== SCRIPT ===================== --}}
@@ -282,22 +332,21 @@
     </script>
 
     <script>
-    function openPembayaran() {
-        const modal = document.getElementById('modalPembayaran');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+        function openPembayaran() {
+            const modal = document.getElementById('modalPembayaran');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
 
-    function closePembayaran() {
-        const modal = document.getElementById('modalPembayaran');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
+        function closePembayaran() {
+            const modal = document.getElementById('modalPembayaran');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
 
-    function submitKeluar(metodeId) {
-        document.getElementById('metode_pembayaran_id').value = metodeId;
-        document.getElementById('formKeluar').submit();
-    }
-</script>
-
+        function submitKeluar(metodeId) {
+            document.getElementById('metode_pembayaran_id').value = metodeId;
+            document.getElementById('formKeluar').submit();
+        }
+    </script>
 @endsection

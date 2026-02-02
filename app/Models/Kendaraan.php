@@ -22,12 +22,22 @@ class Kendaraan extends Model
     }
 
     public function memberships()
+    {
+        return $this->belongsToMany(
+            Membership::class,
+            'membership_kendaraan',
+            'kendaraan_id',
+            'membership_id'
+        );
+    }
+public function membershipKendaraan()
 {
-    return $this->belongsToMany(
-        Membership::class,
-        'membership_kendaraan',
-        'kendaraan_id',
-        'membership_id'
-    );
+    return $this->hasOne(MembershipKendaraan::class)
+        ->whereHas('membership', function ($q) {
+            $q->whereNull('kadaluarsa')
+              ->orWhere('kadaluarsa', '>=', now());
+        });
 }
+
+
 }

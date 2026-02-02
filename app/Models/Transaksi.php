@@ -17,7 +17,7 @@ class Transaksi extends Model
         'waktu_keluar',
         'tarif_tipe_kendaraan_id',
         'durasi_jam',
-        'biaya_total',
+        'biaya',
         'status',
         'metode_pembayaran_id',
         'membership_id',
