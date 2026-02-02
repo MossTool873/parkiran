@@ -167,8 +167,10 @@ class TransaksiController extends Controller
                 $waktuMasuk  = Carbon::parse($transaksi->waktu_masuk);
                 $waktuKeluar = now();
 
-                $durasiJam = max(1, $waktuMasuk->diffInHours($waktuKeluar));
-                $biayaAwal = $durasiJam * $tarif->tarif_perjam;
+                $durasiJamTarif = max(1, $waktuMasuk->diffInHours($waktuKeluar));
+                $durasiJam =  $waktuMasuk->diffInHours($waktuKeluar);
+                $durasiMenit = $waktuMasuk->diffInMinutes($waktuKeluar);
+                $biayaAwal = $durasiJamTarif * $tarif->tarif_perjam;
 
                 // ===================== CEK MEMBER =====================
                 $member         = null;
@@ -196,8 +198,9 @@ class TransaksiController extends Controller
                 // ===================== UPDATE TRANSAKSI =====================
                 $transaksi->update([
                     'waktu_keluar'           => $waktuKeluar,
-                    'durasi_jam'             => $durasiJam,
-                    'biaya'                  => $biayaAwal, // SIMPAN BIAYA AWAL SAJA
+                    'durasi_menit'           => $durasiMenit,
+                    'biaya'                  => $biayaAwal, 
+                    'biaya_total'            => $biayaAwal - $diskonNominal, 
                     'member_id'              => $member ? $member->id : null,
                     'metode_pembayaran_id'   => $metodePembayaran->id,
                 ]);
@@ -214,19 +217,19 @@ class TransaksiController extends Controller
 
                 // ===================== STRUK KELUAR =====================
                 session()->flash('struk_keluar', [
-                    'kode'        => $transaksi->kode,
-                    'plat'        => $kendaraan->plat_nomor,
-                    'jam_masuk'   => $waktuMasuk->format('H:i'),
-                    'jam_keluar'  => $waktuKeluar->format('H:i'),
-                    'durasi'      => $durasiJam . ' jam',
-                    'tarif'       => $tarif->tarif_perjam,
-                    'metode'      => $metodePembayaran->nama_metode,
-                    'biaya_awal'  => $biayaAwal,
-                    'diskon_persen'      => $diskonPersen,
-                    'diskon'      => $diskonNominal,
-                    'total'       => $biayaAwal - $diskonNominal,
-                    'tanggal'     => $waktuKeluar->format('d-m-Y'),
-                    'operator'    => auth()->user()->name ?? '-',
+                    'kode'          => $transaksi->kode,
+                    'plat'          => $kendaraan->plat_nomor,
+                    'jam_masuk'     => $waktuMasuk->format('H:i'),
+                    'jam_keluar'    => $waktuKeluar->format('H:i'),
+                    'durasi'        => $durasiJam . ' jam '.+$durasiMenit.'menit',
+                    'tarif'         => $tarif->tarif_perjam,
+                    'metode'        => $metodePembayaran->nama_metode,
+                    'biaya_awal'    => $biayaAwal,
+                    'diskon_persen' => $diskonPersen,
+                    'diskon'        => $diskonNominal,
+                    'total'         => $biayaAwal - $diskonNominal,
+                    'tanggal'       => $waktuKeluar->format('d-m-Y'),
+                    'operator'      => auth()->user()->name ?? '-',
                 ]);
             });
         } catch (\Exception $e) {
