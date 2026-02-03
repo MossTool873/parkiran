@@ -200,8 +200,9 @@ class TransaksiController extends Controller
                     'waktu_keluar'           => $waktuKeluar,
                     'durasi_menit'           => $durasiMenit,
                     'biaya'                  => $biayaAwal, 
+                    'status'                 => 'keluar',
                     'biaya_total'            => $biayaAwal - $diskonNominal, 
-                    'member_id'              => $member ? $member->id : null,
+                    'membership_id'              => $member ? $member->id : null,
                     'metode_pembayaran_id'   => $metodePembayaran->id,
                 ]);
 

@@ -23,9 +23,6 @@ return new class extends Migration
 
             $table->foreignId('kendaraan_id')->constrained('kendaraan');
 
-            // MEMBER (nullable)
-            $table->foreignId('member_id')->nullable()->constrained('membership');
-
             $table->dateTime('waktu_masuk');
             $table->dateTime('waktu_keluar')->nullable();
             $table->foreignId('tarif_tipe_kendaraan_id')->constrained('tarif_tipe_kendaraan');
