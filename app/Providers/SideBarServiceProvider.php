@@ -47,7 +47,6 @@ class SidebarServiceProvider extends ServiceProvider
                             [
                                 'label' => 'Membership Tier',
                                 'route' => '/admin/membership-tier',
-
                             ],
                             [
                                 'label' => 'Metode Pembayaran',
@@ -55,12 +54,29 @@ class SidebarServiceProvider extends ServiceProvider
                             ],
                         ],
                     ],
+
                     [
                         'label' => 'Membership',
-                        'route' => 'admin/membership',
                         'icon'  => '⭐',
+                        'route' => '/admin/membership',
+                    ],
+
+                    [
+                        'label' => 'Laporan',
+                        'icon'  => '📃',
+                        'children' => [
+                            [
+                                'label' => 'Transaksi Harian',
+                                'route' => '/laporan/laporan-harian',
+                            ],
+                            [
+                                'label' => 'Transaksi Periode',
+                                'route' => '/laporan/laporan-periode',
+                            ],
+                        ],
                     ],
                 ],
+
 
                 'petugas' => [
                     [

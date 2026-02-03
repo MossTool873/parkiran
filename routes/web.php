@@ -18,6 +18,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AreaParkirController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\KendaraanTipeController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\MembershipTierController;
 use App\Http\Controllers\MetodePembayaranController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\TipeKendaraanController;
 use App\Http\Controllers\TarifTipeKendaraanController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UsersController;
+use App\Models\Kendaraan;
 use App\Models\MetodePembayaran;
 
 Route::get('/', function () {
@@ -47,7 +49,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('membership', MembershipController::class);
 });
 
-Route::prefix('petugas')->middleware(['auth', 'role:petugas,admin'])->group(function () {
+Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function () {
     Route::get('/', function () {return redirect('/petugas/transaksi');});
     Route::get('/transaksi',[TransaksiController::class, 'index'])->name('transaksi');
     Route::post('/transaksi/masuk', [TransaksiController::class, 'masuk']);
@@ -56,12 +58,17 @@ Route::prefix('petugas')->middleware(['auth', 'role:petugas,admin'])->group(func
     Route::get('/transaksi-aktif', [TransaksiController::class, 'aktif'])->name('transaksi.aktif');
 });
 
+Route::prefix('laporan')->middleware(['auth', 'role:owner,admin'])->group(function () {
+    Route::get('/laporan-harian', [LaporanController::class, 'laporanHariIni']);
+    Route::get('/laporan-periode', [LaporanController::class, 'laporanPeriode']);
+});
+
 Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
 Route::get('/kendaraan/search', function (\Illuminate\Http\Request $request) {
-    return \App\Models\Kendaraan::where('plat_nomor', 'like', "%{$request->q}%")
-        ->with('tipeKendaraan')
-        ->limit(10)
-        ->get();
+    return Kendaraan::where('plat_nomor', 'like', "%{$request->q}%")
+    ->with('tipeKendaraan')
+    ->limit(10)
+    ->get();
 })->name('kendaraan.search');
 
 
