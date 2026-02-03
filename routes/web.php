@@ -59,8 +59,9 @@ Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function (
 });
 
 Route::prefix('laporan')->middleware(['auth', 'role:owner,admin'])->group(function () {
-    Route::get('/laporan-harian', [LaporanController::class, 'laporanHariIni']);
-    Route::get('/laporan-periode', [LaporanController::class, 'laporanPeriode']);
+    Route::get('/harian', [LaporanController::class, 'laporanHariIni']);
+Route::get('/periode', [LaporanController::class, 'laporanPeriode']);
+Route::post('/periode', [LaporanController::class, 'laporanPeriode']);
 });
 
 Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');

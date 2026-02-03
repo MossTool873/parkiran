@@ -67,11 +67,11 @@ class SidebarServiceProvider extends ServiceProvider
                         'children' => [
                             [
                                 'label' => 'Transaksi Harian',
-                                'route' => '/laporan/laporan-harian',
+                                'route' => '/laporan/harian',
                             ],
                             [
                                 'label' => 'Transaksi Periode',
-                                'route' => '/laporan/laporan-periode',
+                                'route' => '/laporan/periode',
                             ],
                         ],
                     ],

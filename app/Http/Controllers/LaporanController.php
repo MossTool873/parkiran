@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaksi;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LaporanController extends Controller
@@ -42,7 +43,73 @@ class LaporanController extends Controller
             ->orderBy('metode_pembayaran.nama_metode')
             ->get();
 
-        return view('laporan.transaksi-harian', compact(
+        return view('laporan.laporan-harian', compact(
+            'totalTransaksi',
+            'totalPendapatan',
+            'breakdownTipeKendaraan',
+            'breakdownMetodePembayaran'
+        ));
+    }
+
+public function laporanPeriode(Request $request)
+{
+    // belum submit → tampilkan halaman kosong
+    if (!$request->filled(['tanggal_awal', 'tanggal_akhir'])) {
+        return view('laporan.laporan-periode', [
+            'tanggalAwal' => null,
+            'tanggalAkhir' => null,
+            'totalTransaksi' => 0,
+            'totalPendapatan' => 0,
+            'breakdownTipeKendaraan' => collect(),
+            'breakdownMetodePembayaran' => collect(),
+        ]);
+    }
+
+    // baru validasi kalau sudah submit
+    $request->validate([
+        'tanggal_awal'  => 'required|date',
+        'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+    ]);
+
+    // lanjut proses normal
+
+        $tanggalAwal  = Carbon::parse($request->tanggal_awal)->startOfDay();
+        $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+
+        $transaksiPeriode = Transaksi::whereBetween('waktu_keluar', [$tanggalAwal, $tanggalAkhir])
+            ->where('status', 'keluar');
+
+        $totalTransaksi  = (clone $transaksiPeriode)->count();
+        $totalPendapatan = (clone $transaksiPeriode)->sum('biaya_total');
+
+        $breakdownTipeKendaraan = Transaksi::select(
+                'kendaraan_tipe.tipe_kendaraan',
+                DB::raw('COUNT(transaksi.id) as total'),
+                DB::raw('SUM(transaksi.biaya_total) as total_pendapatan')
+            )
+            ->join('kendaraan', 'transaksi.kendaraan_id', '=', 'kendaraan.id')
+            ->join('kendaraan_tipe', 'kendaraan.tipe_kendaraan_id', '=', 'kendaraan_tipe.id')
+            ->whereBetween('transaksi.waktu_keluar', [$tanggalAwal, $tanggalAkhir])
+            ->where('transaksi.status', 'keluar')
+            ->groupBy('kendaraan_tipe.tipe_kendaraan')
+            ->orderBy('kendaraan_tipe.tipe_kendaraan')
+            ->get();
+
+        $breakdownMetodePembayaran = Transaksi::select(
+                'metode_pembayaran.nama_metode',
+                DB::raw('COUNT(transaksi.id) as total'),
+                DB::raw('SUM(transaksi.biaya_total) as total_pendapatan')
+            )
+            ->join('metode_pembayaran', 'transaksi.metode_pembayaran_id', '=', 'metode_pembayaran.id')
+            ->whereBetween('transaksi.waktu_keluar', [$tanggalAwal, $tanggalAkhir])
+            ->where('transaksi.status', 'keluar')
+            ->groupBy('metode_pembayaran.nama_metode')
+            ->orderBy('metode_pembayaran.nama_metode')
+            ->get();
+
+        return view('laporan.laporan-periode', compact(
+            'tanggalAwal',
+            'tanggalAkhir',
             'totalTransaksi',
             'totalPendapatan',
             'breakdownTipeKendaraan',
