@@ -10,6 +10,7 @@
         action="{{ url('/admin/tipeKendaraan/'.$tipeKendaraan->id) }}"
         method="POST"
         class="space-y-6"
+        onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')"
     >
         @csrf
         @method('PUT')

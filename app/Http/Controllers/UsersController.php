@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
-
     public function index()
     {
         $users = User::with('role')
@@ -19,7 +18,6 @@ class UsersController extends Controller
 
         return view('admin.users.index', compact('users'));
     }
-
 
     public function create()
     {
@@ -30,33 +28,23 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'username' => 'required',
-            'password' => 'required|min:6',
-            'nama'     => 'required',
-            'role_id'  => 'required|exists:roles,id',
+            'username'              => 'required|unique:users,username',
+            'nama'                  => 'required',
+            'role_id'               => 'required|exists:roles,id',
+            'password'              => 'required|min:6|confirmed',
+            'password_confirmation' => 'required',
         ]);
 
         if ($validator->fails()) {
             return redirect('/admin/users/create')
                 ->withErrors($validator)
                 ->withInput()
-                ->with('error', 'Semua field wajib diisi');
-        }
-
-        $uniqueValidator = Validator::make($request->all(), [
-            'username' => 'unique:users,username',
-        ]);
-
-        if ($uniqueValidator->fails()) {
-            return redirect('/admin/users/create')
-                ->withErrors($uniqueValidator)
-                ->withInput()
-                ->with('error', 'Username sudah digunakan');
+                ->with('error', 'Data tidak valid');
         }
 
         User::create([
-            'username'    => $request->username,
-            'password' => Hash::make($request->password), 
+            'username' => $request->username,
+            'password' => Hash::make($request->password),
             'name'     => $request->nama,
             'role_id'  => $request->role_id,
         ]);
@@ -78,10 +66,11 @@ class UsersController extends Controller
         $user = User::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'username'=> 'required|unique:users,username,' . $user->id,
-            'nama'    => 'required',
-            'role_id' => 'required|exists:roles,id',
-            'password'=> 'nullable|min:6',
+            'username'              => 'required|unique:users,username,' . $user->id,
+            'nama'                  => 'required',
+            'role_id'               => 'required|exists:roles,id',
+            'password'              => 'nullable|min:6|confirmed',
+            'password_confirmation' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -91,10 +80,10 @@ class UsersController extends Controller
         }
 
         $data = [
-            'username'=> $request->username,
-            'nama'    => $request->nama,
-            'role_id' => $request->role_id,
-            'no_telp' => $request->no_telp,
+            'username' => $request->username,
+            'name'     => $request->nama,
+            'role_id'  => $request->role_id,
+            'no_telp'  => $request->no_telp,
         ];
 
         if ($request->filled('password')) {
@@ -116,4 +105,3 @@ class UsersController extends Controller
             ->with('success', 'User berhasil dihapus');
     }
 }
-

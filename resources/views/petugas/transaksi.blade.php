@@ -182,7 +182,7 @@ function printStrukKeluar() {
         <div class="bg-white p-6 rounded-lg shadow">
             <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Masuk</h4>
 
-            <form method="POST" action="{{ url('/petugas/transaksi/masuk') }}" class="space-y-4">
+            <form method="POST" action="{{ url('/petugas/transaksi/masuk') }}" class="space-y-4" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')">
                 @csrf
 
                 <div class="relative">
@@ -224,7 +224,7 @@ function printStrukKeluar() {
         <div class="bg-white p-6 rounded-lg shadow">
             <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Keluar</h4>
 
-            <form method="POST" action="{{ url('/petugas/transaksi/keluar') }}" id="formKeluar" class="space-y-4">
+            <form method="POST" action="{{ url('/petugas/transaksi/keluar') }}" id="formKeluar" class="space-y-4" onsubmit="return confirm('Anda Yakin?')">
                 @csrf
                 <input type="hidden" name="metode_pembayaran_id" id="metode_pembayaran_id">
                 <div class="relative">

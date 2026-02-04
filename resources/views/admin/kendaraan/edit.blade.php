@@ -8,7 +8,8 @@
     <div class="bg-white rounded-lg shadow p-6 w-full">
         <form action="{{ url('/admin/kendaraan/'.$kendaraan->id) }}"
               method="POST"
-              class="space-y-4">
+              class="space-y-4"
+              onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')">
             @csrf
             @method('PUT')
 

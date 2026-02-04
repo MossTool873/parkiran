@@ -17,6 +17,7 @@
         <form action="{{ url('/admin/users') }}" method="POST" class="space-y-4">
             @csrf
 
+            {{-- Username --}}
             <div>
                 <label class="block text-sm font-medium mb-1">Username</label>
                 <input
@@ -27,6 +28,7 @@
                 >
             </div>
 
+            {{-- Nama --}}
             <div>
                 <label class="block text-sm font-medium mb-1">Nama</label>
                 <input
@@ -37,6 +39,7 @@
                 >
             </div>
 
+            {{-- Password --}}
             <div>
                 <label class="block text-sm font-medium mb-1">Password</label>
                 <input
@@ -46,6 +49,17 @@
                 >
             </div>
 
+            {{-- Confirm Password --}}
+            <div>
+                <label class="block text-sm font-medium mb-1">Konfirmasi Password</label>
+                <input
+                    type="password"
+                    name="password_confirmation"
+                    class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                >
+            </div>
+
+            {{-- Role --}}
             <div>
                 <label class="block text-sm font-medium mb-1">Role</label>
                 <select
@@ -62,6 +76,7 @@
                 </select>
             </div>
 
+            {{-- Button --}}
             <div class="flex gap-2 pt-4">
                 <button
                     type="submit"

@@ -14,7 +14,7 @@
         </div>
     @endif
 
-    <form action="{{ route('membership.update', $membership->id) }}" method="POST">
+    <form action="{{ route('membership.update', $membership->id) }}" method="POST" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')">
         @csrf
         @method('PUT')
 

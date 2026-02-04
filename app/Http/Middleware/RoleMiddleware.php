@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, $roles)
     {
         if (!Auth::check()) {
             return redirect('/login');
@@ -16,10 +16,13 @@ class RoleMiddleware
 
         $userRole = Auth::user()->role->role ?? null;
 
+        $roles = explode(',', $roles);
+
         if (!in_array($userRole, $roles)) {
-            return redirect('/logout');
+            abort(403, 'Akses Ditolak');
         }
 
         return $next($request);
     }
 }
+
