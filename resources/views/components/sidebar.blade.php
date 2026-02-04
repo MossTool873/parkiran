@@ -1,7 +1,7 @@
 <aside class="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
     {{-- HEADER --}}
-    <div class="p-4 text-lg font-semibold border-b border-gray-700">
-        My App
+    <div class="p-4 text-lg font-semibold  border-gray-700">
+        Parkiran
     </div>
 
     {{-- MENU --}}
@@ -57,20 +57,6 @@
         @endforeach
     </nav>
 
-    {{-- LOGOUT --}}
-    <div class="border-t border-gray-700 p-2">
-        <form action="{{ url('/logout') }}" method="POST">
-            @csrf
-            <button
-                type="submit"
-                class="w-full flex items-center gap-2 px-4 py-2 rounded
-                       text-red-400 hover:bg-gray-800 hover:text-red-300 transition"
-            >
-                <span>🚪</span>
-                <span>Logout</span>
-            </button>
-        </form>
-    </div>
 </aside>
 
 <script src="//unpkg.com/alpinejs" defer></script>

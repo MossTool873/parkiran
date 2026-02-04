@@ -36,6 +36,8 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+Route::get('/ganti-password', [AuthController::class, 'gantiPaswordForm']);
+Route::post('/ganti-password', [AuthController::class, 'updatePassword']);
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', function () {
