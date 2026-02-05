@@ -45,6 +45,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $role = auth()->user()->role->role;
+            logAktivitas('Login');
 
             switch ($role) {
                 case 'admin':
@@ -67,6 +68,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        logAktivitas('Logout');
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
