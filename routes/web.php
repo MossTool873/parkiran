@@ -60,16 +60,19 @@ Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function (
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
     Route::post('/transaksi/masuk', [TransaksiController::class, 'masuk']);
     Route::post('/transaksi/keluar', [TransaksiController::class, 'keluar']);
-    Route::get('/riwayatTransaksi', [TransaksiController::class, 'riwayat']);
     Route::get('/transaksi-aktif', [TransaksiController::class, 'transaksiAktif'])->name('transaksi.transaksiAktif');
-});
+    });
+    
+    Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(function () {
+        Route::get('/harian', [LaporanController::class, 'laporanHariIni']);
+        Route::get('/periode', [LaporanController::class, 'laporanPeriode']);
+        Route::post('/periode', [LaporanController::class, 'laporanPeriode']);
+        });
+        
+        Route::get('laporan/occupancy', [LaporanController::class, 'occupancy']);
+        Route::get('laporan/riwayatTransaksi', [LaporanController::class, 'riwayatTransaksi']);
+        Route::get('/transaksi/{id}', [TransaksiController::class, 'showTransaksi'])->name('transaksi.show');
 
-Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(function () {
-    Route::get('/harian', [LaporanController::class, 'laporanHariIni']);
-    Route::get('/periode', [LaporanController::class, 'laporanPeriode']);
-    Route::post('/periode', [LaporanController::class, 'laporanPeriode']);
-    Route::get('/occupancy', [LaporanController::class, 'occupancy']);
-});
 
 Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
 Route::get('/kendaraan/search', function (\Illuminate\Http\Request $request) {

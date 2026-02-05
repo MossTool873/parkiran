@@ -65,6 +65,8 @@ class SidebarServiceProvider extends ServiceProvider
                         'label' => 'Laporan',
                         'icon'  => '📃',
                         'children' => [
+                                                    ['label' => 'Riwayat Transaksi',
+                        'route' => '/laporan/riwayatTransaksi',],
                             [
                                 'label' => 'Transaksi Harian',
                                 'route' => '/laporan/harian',
@@ -90,9 +92,13 @@ class SidebarServiceProvider extends ServiceProvider
                     ],
                     [
                         'label' => 'Riwayat Transaksi',
-                        'route' => '/petugas/riwayatTransaksi',
+                        'route' => '/laporan/riwayatTransaksi',
                         'icon'  => '⌛',
                     ],
+                                                [
+                                'label' => 'Occupancy Area Parkir',
+                                'route' => '/laporan/occupancy',
+                            ],
                 ],
 
                 'user' => [

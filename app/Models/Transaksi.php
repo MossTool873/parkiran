@@ -26,6 +26,11 @@ class Transaksi extends Model
         'user_id'
     ];
 
+     public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function kendaraan()
     {
         return $this->belongsTo(Kendaraan::class, 'kendaraan_id');

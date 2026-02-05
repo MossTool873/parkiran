@@ -126,10 +126,39 @@ public function occupancy(Request $request)
         $query->where('nama_area', 'like', '%' . $request->search . '%');
     }
 
-    $areaParkirs = $query->paginate(10);
+    $areaParkirs = $query->paginate(6);
 
     return view('laporan.occupancy', compact('areaParkirs'));
 }
+
+    public function riwayatTransaksi(Request $request)
+    {
+        $query = Transaksi::with([
+            'kendaraan.tipeKendaraan',
+            'areaParkir'
+        ]);
+
+        if ($request->filled('plat_nomor')) {
+            $query->whereHas('kendaraan', function ($q) use ($request) {
+                $q->where('plat_nomor', 'like', '%' . $request->plat_nomor . '%');
+            });
+        }
+
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('waktu_masuk', '>=', $request->tanggal_mulai);
+        }
+
+        if ($request->filled('tanggal_selesai')) {
+            $query->whereDate('waktu_masuk', '<=', $request->tanggal_selesai);
+        }
+
+        $transaksis = $query
+            ->orderBy('waktu_masuk', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('laporan.riwayatTransaksi', compact('transaksis'));
+    }
 
 }
 
