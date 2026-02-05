@@ -30,9 +30,7 @@ use App\Http\Controllers\UsersController;
 use App\Models\Kendaraan;
 use App\Models\MetodePembayaran;
 
-Route::get('/', function () {
-    return redirect('login');
-});
+Route::get('/', function () {return redirect('login');});
 
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -41,9 +39,7 @@ Route::get('/ganti-password', [AuthController::class, 'gantiPaswordForm']);
 Route::post('/ganti-password', [AuthController::class, 'updatePassword']);
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/', function () {
-        return redirect('/admin/users');
-    });
+    Route::get('/', function () {return redirect('/admin/users');});
     Route::resource('users', UsersController::class);
     Route::resource('areaParkir', AreaParkirController::class);
     Route::resource('tipeKendaraan', KendaraanTipeController::class);
@@ -56,13 +52,15 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 });
 
 Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function () {
-    Route::get('/', function () {
-        return redirect('/petugas/transaksi');
-    });
+    Route::get('/', function () {return redirect('/petugas/transaksi');});
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
     Route::post('/transaksi/masuk', [TransaksiController::class, 'masuk']);
     Route::post('/transaksi/keluar', [TransaksiController::class, 'keluar']);
     Route::get('/transaksi-aktif', [TransaksiController::class, 'transaksiAktif'])->name('transaksi.transaksiAktif');
+});
+
+Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
+    Route::get('/', function () {return redirect('/laporan/harian');});
 });
 
 Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(function () {

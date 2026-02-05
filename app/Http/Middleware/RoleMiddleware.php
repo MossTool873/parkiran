@@ -8,17 +8,18 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, $roles)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        $userRole = Auth::user()->role->role ?? null;
+        $userRole = Auth::user()->role?->role;
 
-        $roles = explode(',', $roles);
+        // normalisasi role (trim + lowercase)
+        $roles = array_map(fn ($r) => strtolower(trim($r)), $roles);
 
-        if (!in_array($userRole, $roles)) {
+        if (!in_array(strtolower($userRole), $roles, true)) {
             abort(403, 'Akses Ditolak');
         }
 

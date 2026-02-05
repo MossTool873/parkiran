@@ -112,12 +112,21 @@ class SidebarServiceProvider extends ServiceProvider
                             ],
                 ],
 
-                'user' => [
-                    [
-                        'label' => 'Dashboard',
-                        'route' => '/owner',
-                        'icon'  => '👤',
-                    ],
+                'owner' => [
+                                                    ['label' => 'Riwayat Transaksi',
+                        'route' => '/laporan/riwayatTransaksi',],
+                            [
+                                'label' => 'Transaksi Harian',
+                                'route' => '/laporan/harian',
+                            ],
+                            [
+                                'label' => 'Transaksi Periode',
+                                'route' => '/laporan/periode',
+                            ],
+                            [
+                                'label' => 'Occupancy Area Parkir',
+                                'route' => '/laporan/occupancy',
+                            ],
                 ],
             ];
 
