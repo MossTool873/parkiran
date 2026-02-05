@@ -61,7 +61,7 @@ Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function (
     Route::post('/transaksi/masuk', [TransaksiController::class, 'masuk']);
     Route::post('/transaksi/keluar', [TransaksiController::class, 'keluar']);
     Route::get('/riwayatTransaksi', [TransaksiController::class, 'riwayat']);
-    Route::get('/transaksi-aktif', [TransaksiController::class, 'aktif'])->name('transaksi.aktif');
+    Route::get('/transaksi-aktif', [TransaksiController::class, 'transaksiAktif'])->name('transaksi.transaksiAktif');
 });
 
 Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(function () {

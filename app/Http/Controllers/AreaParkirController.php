@@ -15,7 +15,7 @@ public function index()
 {
     $areaParkirs = AreaParkir::with(['detailKapasitas.tipeKendaraan'])
         ->orderBy('id', 'desc')
-        ->paginate(10); 
+        ->paginate(6); 
 
     return view('admin.areaParkir.index', compact('areaParkirs'));
 }

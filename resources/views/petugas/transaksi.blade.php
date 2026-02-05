@@ -81,12 +81,13 @@ new QRious({
             STRUK PARKIR KELUAR
         </div>
 
-        <div class="space-y-1">
-            <div>Plat      : {{ $s['plat'] }}</div>
-            <div>Masuk     : {{ $s['jam_masuk'] }}</div>
-            <div>Keluar    : {{ $s['jam_keluar'] }}</div>
-            <div>Durasi    : {{ $s['durasi'] }}</div>
-        </div>
+<div class="space-y-1">
+    <div>Plat      : {{ $s['plat'] }}</div>
+    <div>Masuk     : {{ $s['jam_masuk'] }}</div>
+    <div>Keluar    : {{ $s['jam_keluar'] }}</div>
+    <div>Durasi    : {{ $s['durasi'] }}</div>
+    <div>Member    : {{ $s['member'] }}</div> {{-- ini baru --}}
+</div>
 
         <hr class="my-3">
 
@@ -179,174 +180,176 @@ function printStrukKeluar() {
     <div class="max-w-6xl mx-auto mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {{-- ===================== MASUK ===================== --}}
-        <div class="bg-white p-6 rounded-lg shadow">
-            <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Masuk</h4>
+<div class="bg-white p-6 rounded-lg shadow">
+    <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Masuk</h4>
 
-            <form method="POST" action="{{ url('/petugas/transaksi/masuk') }}" class="space-y-4" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')">
-                @csrf
+    <form method="POST" action="{{ url('/petugas/transaksi/masuk') }}" class="space-y-4" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')">
+        @csrf
 
-                <div class="relative">
-                    <label class="block text-sm font-medium mb-1">Plat Nomor</label>
-                    <input type="text" name="plat_nomor" id="plat_nomor" value="{{ old('plat_nomor') }}"
-                        class="w-full border rounded px-3 py-2" autocomplete="off" required>
-                    <ul id="suggestions"
-                        class="absolute left-0 right-0 mt-1 bg-white border rounded shadow max-h-48 overflow-y-auto hidden z-50">
-                    </ul>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Warna</label>
-                    <input type="text" name="warna" id="warna" value="{{ old('warna') }}"
-                        class="w-full border rounded px-3 py-2" required>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Tipe Kendaraan</label>
-                    <select name="tipe_kendaraan_id" id="tipe_kendaraan_id" class="w-full border rounded px-3 py-2"
-                        required>
-                        <option value="">-- Pilih --</option>
-                        @foreach ($tipeKendaraans as $tipe)
-                            <option value="{{ $tipe->id }}"
-                                {{ old('tipe_kendaraan_id') == $tipe->id ? 'selected' : '' }}>
-                                {{ $tipe->tipe_kendaraan }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">
-                    Simpan Masuk
-                </button>
-            </form>
+        <div class="relative">
+            <label class="block text-sm font-medium mb-1">Plat Nomor</label>
+            <input type="text" name="plat_nomor" id="plat_nomor" value="{{ old('plat_nomor') }}"
+                class="w-full border rounded px-3 py-2" autocomplete="off" required>
+            <ul id="suggestions"
+                class="absolute left-0 right-0 mt-1 bg-white border rounded shadow max-h-48 overflow-y-auto hidden z-50">
+            </ul>
         </div>
 
-        {{-- ===================== KELUAR ===================== --}}
-        <div class="bg-white p-6 rounded-lg shadow">
-            <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Keluar</h4>
-
-            <form method="POST" action="{{ url('/petugas/transaksi/keluar') }}" id="formKeluar" class="space-y-4" onsubmit="return confirm('Anda Yakin?')">
-                @csrf
-                <input type="hidden" name="metode_pembayaran_id" id="metode_pembayaran_id">
-                <div class="relative">
-                    <label class="block text-sm font-medium mb-1">Plat Nomor</label>
-                    <input type="text" name="plat_nomor" id="plat_keluar" value="{{ old('plat_nomor') }}"
-                        class="w-full border rounded px-3 py-2" autocomplete="off" required>
-                    <ul id="keluar-list"
-                        class="absolute left-0 right-0 mt-1 bg-white border rounded shadow max-h-48 overflow-y-auto hidden z-50">
-                    </ul>
-                </div>
-
-                <button type="button" onclick="openPembayaran()"
-                    class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
-                    Proses Keluar
-                </button>
-
-
-            </form>
+        <div>
+            <label class="block text-sm font-medium mb-1">Warna</label>
+            <input type="text" name="warna" id="warna" value="{{ old('warna') }}"
+                class="w-full border rounded px-3 py-2" required>
         </div>
 
-    </div>
-    {{-- ===================== METODE PEMBAYARAN ===================== --}}
-    <div id="modalPembayaran" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-80">
-
-            <h3 class="text-lg font-bold mb-4 text-center">
-                Pilih Metode Pembayaran
-            </h3>
-
-            <div class="space-y-2">
-                @foreach ($metodePembayarans as $metode)
-                    <button type="button" onclick="submitKeluar({{ $metode->id }})"
-                        class="w-full border rounded py-2 hover:bg-blue-600 hover:text-white">
-                        {{ $metode->nama_metode }}
-                    </button>
+        <div>
+            <label class="block text-sm font-medium mb-1">Tipe Kendaraan</label>
+            <select name="tipe_kendaraan_id" id="tipe_kendaraan_id" class="w-full border rounded px-3 py-2"
+                required>
+                <option value="">-- Pilih --</option>
+                @foreach ($tipeKendaraans as $tipe)
+                    <option value="{{ $tipe->id }}"
+                        {{ old('tipe_kendaraan_id') == $tipe->id ? 'selected' : '' }}>
+                        {{ $tipe->tipe_kendaraan }}
+                    </option>
                 @endforeach
-            </div>
-
-            <button onclick="closePembayaran()" class="mt-4 w-full bg-gray-300 hover:bg-gray-400 py-2 rounded">
-                Batal
-            </button>
+            </select>
         </div>
-    </div>
 
+        <div>
+            <label class="block text-sm font-medium mb-1">Area Parkir</label>
+            <select name="area_parkir_id" id="area_parkir_id" class="w-full border rounded px-3 py-2" required>
+                <option value="">-- Pilih --</option>
+                @foreach ($areaParkirs as $area)
+                    <option value="{{ $area->id }}"
+                        {{ old('area_parkir_id') == $area->id ? 'selected' : '' }}>
+                        {{ $area->nama_area }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
-    {{-- ===================== SCRIPT ===================== --}}
-    <script>
-        const platInput = document.getElementById('plat_nomor');
-        const suggestions = document.getElementById('suggestions');
-        const warnaInput = document.getElementById('warna');
-        const tipeSelect = document.getElementById('tipe_kendaraan_id');
+        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">
+            Simpan Masuk
+        </button>
+    </form>
+</div>
+<script>
+    // =================== AUTOCOMPLETE KENDARAAN MASUK ===================
+    const platInput = document.getElementById('plat_nomor');
+    const suggestions = document.getElementById('suggestions');
+    const warnaInput = document.getElementById('warna');
+    const tipeSelect = document.getElementById('tipe_kendaraan_id');
 
-        platInput.addEventListener('keyup', function() {
-            const q = this.value;
-            if (q.length < 1) return suggestions.classList.add('hidden');
+    platInput.addEventListener('keyup', function() {
+        const q = this.value.trim();
+        if (!q) return suggestions.classList.add('hidden');
 
-            fetch(`{{ route('kendaraan.search') }}?q=${q}`)
-                .then(res => res.json())
-                .then(data => {
-                    suggestions.innerHTML = '';
-                    if (!data.length) return suggestions.classList.add('hidden');
+        fetch(`{{ route('kendaraan.search') }}?q=${q}`)
+            .then(res => res.json())
+            .then(data => {
+                suggestions.innerHTML = '';
+                if (!data.length) return suggestions.classList.add('hidden');
 
-                    data.forEach(item => {
-                        const li = document.createElement('li');
-                        li.textContent = item.plat_nomor;
-                        li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
-                        li.onclick = () => {
-                            platInput.value = item.plat_nomor;
-                            warnaInput.value = item.warna;
-                            tipeSelect.value = item.tipe_kendaraan_id;
-                            suggestions.classList.add('hidden');
-                        };
-                        suggestions.appendChild(li);
-                    });
-                    suggestions.classList.remove('hidden');
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item.plat_nomor;
+                    li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
+                    li.onclick = () => {
+                        platInput.value = item.plat_nomor;
+                        warnaInput.value = item.warna;
+                        tipeSelect.value = item.tipe_kendaraan_id;
+                        suggestions.classList.add('hidden');
+                    };
+                    suggestions.appendChild(li);
                 });
+
+                suggestions.classList.remove('hidden');
+            });
+    });
+
+
+</script>
+
+{{-- ===================== KELUAR ===================== --}}
+<div class="bg-white p-6 rounded-lg shadow">
+    <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Keluar</h4>
+
+    <form method="POST" action="{{ url('/petugas/transaksi/keluar') }}" id="formKeluar" class="space-y-4" onsubmit="return confirm('Anda Yakin?')">
+        @csrf
+        <input type="hidden" name="metode_pembayaran_id" id="metode_pembayaran_id">
+
+        <div class="relative">
+            <label class="block text-sm font-medium mb-1">Plat Nomor atau Kode Transaksi</label>
+            <input type="text" name="plat_nomor" id="plat_keluar" value="{{ old('plat_nomor') }}"
+                class="w-full border rounded px-3 py-2" autocomplete="off" placeholder="Masukkan Plat Nomor atau Kode Transaksi" required>
+            
+            <!-- List autocomplete -->
+            <ul id="keluar-list"
+                class="absolute left-0 right-0 mt-1 bg-white border rounded shadow max-h-48 overflow-y-auto hidden z-50">
+            </ul>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1">Metode Pembayaran</label>
+            <select id="metodeSelect" class="w-full border rounded px-3 py-2" required>
+                <option value="">-- Pilih --</option>
+                @foreach ($metodePembayarans as $metode)
+                    <option value="{{ $metode->id }}">{{ $metode->nama_metode }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <button type="button" onclick="submitKeluar()"
+            class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+            Proses Keluar
+        </button>
+    </form>
+</div>
+
+<script>
+function submitKeluar() {
+    const metode = document.getElementById('metodeSelect').value;
+    if(!metode) {
+        alert('Pilih metode pembayaran terlebih dahulu');
+        return;
+    }
+    document.getElementById('metode_pembayaran_id').value = metode;
+    document.getElementById('formKeluar').submit();
+}
+
+// =================== AUTOCOMPLETE TRANSAKSI KELUAR ===================
+const platKeluar = document.getElementById('plat_keluar');
+const keluarList = document.getElementById('keluar-list');
+
+platKeluar.addEventListener('keyup', function() {
+    const q = this.value.trim();
+    if (!q) return keluarList.classList.add('hidden');
+
+    fetch(`{{ route('transaksi.transaksiAktif') }}?q=${q}`)
+        .then(res => res.json())
+        .then(data => {
+            keluarList.innerHTML = '';
+            if (!data.length) return keluarList.classList.add('hidden');
+
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item.plat_nomor + (item.kode ? ' / ' + item.kode : '');
+                li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
+                li.onclick = () => {
+                    platKeluar.value = item.plat_nomor; // isi input plat
+                    keluarList.classList.add('hidden');
+                };
+                keluarList.appendChild(li);
+            });
+            keluarList.classList.remove('hidden');
         });
+});
 
-        const platKeluar = document.getElementById('plat_keluar');
-        const keluarList = document.getElementById('keluar-list');
+document.addEventListener('click', function(e) {
+    if (!platKeluar.contains(e.target) && !keluarList.contains(e.target)) {
+        keluarList.classList.add('hidden');
+    }
+});
+</script>
 
-        platKeluar.addEventListener('keyup', function() {
-            const q = this.value;
-            if (q.length < 1) return keluarList.classList.add('hidden');
-
-            fetch(`{{ route('transaksi.aktif') }}?q=${q}`)
-                .then(res => res.json())
-                .then(data => {
-                    keluarList.innerHTML = '';
-                    if (!data.length) return keluarList.classList.add('hidden');
-
-                    data.forEach(item => {
-                        const li = document.createElement('li');
-                        li.textContent = item.plat_nomor + ' • ' + item.waktu_masuk;
-                        li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
-                        li.onclick = () => {
-                            platKeluar.value = item.plat_nomor;
-                            keluarList.classList.add('hidden');
-                        };
-                        keluarList.appendChild(li);
-                    });
-                    keluarList.classList.remove('hidden');
-                });
-        });
-    </script>
-
-    <script>
-        function openPembayaran() {
-            const modal = document.getElementById('modalPembayaran');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closePembayaran() {
-            const modal = document.getElementById('modalPembayaran');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function submitKeluar(metodeId) {
-            document.getElementById('metode_pembayaran_id').value = metodeId;
-            document.getElementById('formKeluar').submit();
-        }
-    </script>
 @endsection

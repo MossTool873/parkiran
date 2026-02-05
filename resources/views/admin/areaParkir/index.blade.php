@@ -110,9 +110,10 @@
 
     </div>
 
-    {{-- PAGINATION (MAX 5 ANGKA) --}}
-    <div class="mt-8 flex justify-center">
-        {{ $areaParkirs->onEachSide(2)->links() }}
-    </div>
+<div class="mt-8 text-center">
+    {{ $areaParkirs->onEachSide(2)->links() }}
+</div>
+
+
 
 @endsection
