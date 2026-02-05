@@ -32,7 +32,7 @@ return new class extends Migration
             $table->foreignId('metode_pembayaran_id')->nullable()->constrained('metode_pembayaran');
             $table->enum('status', ['masuk', 'keluar'])->default('masuk');
             $table->foreignId('area_parkir_id')->constrained('area_parkir');
-            $table->foreignId('membership_id')->constrained('membership');
+            $table->foreignId('membership_id')->nullable()->constrained('membership');
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
             $table->softDeletes();

@@ -107,6 +107,11 @@ public function masuk(Request $request)
 
             $kodeTransaksi = 'TRX-' . $tanggal . '-' . str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
             // ===============================
+if($kendaraan->membershipKendaraan){
+    $kendaraan->membershipKendaraan->update([
+        'area_parkir_id' => $areaDetail->area_parkir_id
+    ]);
+}
 
             $transaksi = Transaksi::create([
                 'kode' => $kodeTransaksi,
@@ -193,6 +198,9 @@ public function keluar(Request $request)
                 $kendaraan->membershipKendaraan->membership &&
                 $kendaraan->membershipKendaraan->membership->membershipTier
             ) {
+                $kendaraan->membershipKendaraan->update([
+        'area_parkir_id' => null
+    ]);
                 $member = $kendaraan->membershipKendaraan->membership;
                 $diskonPersen = $member->membershipTier->diskon;
                 $diskonNominal = ($biayaAwal * $diskonPersen) / 100;
@@ -273,9 +281,6 @@ session()->flash('struk_keluar', [
                 ];
             });
     }
-
-    
-
 
     public function formKeluar(Request $request)
     {

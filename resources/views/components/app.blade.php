@@ -99,6 +99,23 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .print-area, .print-area * {
+        visibility: visible;
+    }
+
+
+
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
 
 </body>
 </html>

@@ -14,8 +14,12 @@ class MembershipKendaraan extends Model
     protected $fillable = [
         'membership_id',
         'kendaraan_id',
+        'area_parkir_id'
         ];
+    public function areaParkir(){
+        return $this->belongsTo(AreaParkir::class, 'area_parkir_id');
 
+    }
         public function membership()
     {
         return $this->belongsTo(Membership::class, 'membership_id');

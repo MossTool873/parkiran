@@ -44,10 +44,7 @@ class SidebarServiceProvider extends ServiceProvider
                                 'label' => 'Kendaraan',
                                 'route' => '/admin/kendaraan',
                             ],
-                            [
-                                'label' => 'Membership Tier',
-                                'route' => '/admin/membership-tier',
-                            ],
+
                             [
                                 'label' => 'Metode Pembayaran',
                                 'route' => '/admin/metodePembayaran',
@@ -58,7 +55,21 @@ class SidebarServiceProvider extends ServiceProvider
                     [
                         'label' => 'Membership',
                         'icon'  => '⭐',
-                        'route' => '/admin/membership',
+                        'children' => [
+                            [
+                                'label' => 'Membership Tier',
+                                'route' => '/admin/membership-tier',
+                            ],
+                            [
+                                'label' => 'Daftar Membership',
+                                'route' => '/admin/membership',
+                            ],
+                            [
+                                'label' => 'Tracking Kendaraan',
+                                'route' => '/admin/membership-kendaraan',
+                            ],
+                            
+                        ],
                     ],
 
                     [
