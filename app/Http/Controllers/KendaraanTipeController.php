@@ -39,10 +39,16 @@ class KendaraanTipeController extends Controller
         return redirect('/admin/tipeKendaraan');
     }
 
-    public function destroy($id)
-    {
-        $tipeKendaraan = KendaraanTipe::findOrFail($id);
-        $tipeKendaraan->delete();
-        return redirect('/admin/tipeKendaraan');
+public function destroy($id)
+{
+    $tipe = KendaraanTipe::findOrFail($id);
+
+    if ($tipe->tarifTipeKendaraans()->exists()) {
+        return back()->with('error', 'Tipe kendaraan masih digunakan!!');
     }
+
+    $tipe->delete();
+
+    return back()->with('success', 'Tipe kendaraan berhasil dihapus');
+}
 }

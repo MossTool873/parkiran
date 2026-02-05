@@ -3,6 +3,7 @@
 @section('title', 'Tipe Kendaraan')
 
 @section('content')
+
     {{-- HEADER --}}
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Data Tipe Kendaraan</h1>
@@ -19,6 +20,13 @@
             {{ session('success') }}
         </div>
     @endif
+
+        @if(session('error'))
+        <div class="mb-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
+    
 
     {{-- TABLE --}}
     <div class="bg-white rounded-lg shadow overflow-x-auto">

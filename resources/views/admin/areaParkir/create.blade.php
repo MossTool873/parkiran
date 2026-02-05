@@ -3,6 +3,16 @@
 @section('title', 'Tambah Area Parkir')
 
 @section('content')
+@if ($errors->any())
+    <div class="mb-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded">
+        <ul class="list-disc list-inside">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <h1 class="text-2xl font-bold mb-6">Tambah Area Parkir</h1>
 
 <div class="bg-white rounded-lg shadow p-6 w-full">

@@ -29,7 +29,7 @@
                     <tr class="border-t">
                         <td class="px-4 py-3">{{ $loop->iteration }}</td>
                         <td class="px-4 py-3">
-                            {{ $tarif->tipeKendaraan->tipe_kendaraan }}
+                            {{ $tarif->tipeKendaraan->tipe_kendaraan ?? "-" }}
                         </td>
                         <td class="px-4 py-3">
                             Rp {{ number_format($tarif->tarif_perjam, 0, ',', '.') }}

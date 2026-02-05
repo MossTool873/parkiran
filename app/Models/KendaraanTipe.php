@@ -13,4 +13,8 @@ class KendaraanTipe extends Model
 
     protected $fillable = ['tipe_kendaraan'];
 
+        public function tarifTipeKendaraans()
+    {
+        return $this->hasMany(TarifTipeKendaraan::class, 'tipe_kendaraan_id');
+    }
 }

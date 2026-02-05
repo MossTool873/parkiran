@@ -64,7 +64,7 @@ Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function (
     Route::get('/transaksi-aktif', [TransaksiController::class, 'aktif'])->name('transaksi.aktif');
 });
 
-Route::prefix('laporan')->middleware(['auth', 'role:owner,admin'])->group(function () {
+Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(function () {
     Route::get('/harian', [LaporanController::class, 'laporanHariIni']);
     Route::get('/periode', [LaporanController::class, 'laporanPeriode']);
     Route::post('/periode', [LaporanController::class, 'laporanPeriode']);

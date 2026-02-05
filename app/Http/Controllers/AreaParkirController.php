@@ -11,14 +11,15 @@ use Illuminate\Support\Facades\Validator;
 
 class AreaParkirController extends Controller
 {
-    public function index()
-    {
-        $areaParkirs = AreaParkir::with('detailKapasitas.tipeKendaraan')
-        ->whereNull('deleted_at')
-        ->get();
-        
-        return view('admin.areaParkir.index', compact('areaParkirs'));
-    }
+public function index()
+{
+    $areaParkirs = AreaParkir::with(['detailKapasitas.tipeKendaraan'])
+        ->orderBy('id', 'desc')
+        ->paginate(10); 
+
+    return view('admin.areaParkir.index', compact('areaParkirs'));
+}
+
 
     public function create()
     {
@@ -26,34 +27,44 @@ class AreaParkirController extends Controller
         return view('admin.areaParkir.create', compact('tipeKendaraans'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama_area' => 'required',
-            'kapasitas' => 'required|array'
+public function store(Request $request)
+{
+    $request->validate([
+        'nama_area' => 'required|string|max:255',
+        'kapasitas' => 'required|array',
+        'kapasitas.*' => 'nullable|integer|min:0'
+    ]);
+
+    $total_kapasitas = array_sum($request->kapasitas);
+
+    if ($total_kapasitas <= 0) {
+        return back()
+            ->withErrors(['eror' => 'Total kapasitas harus lebih dari 0'])
+            ->withInput();
+    }
+
+    DB::transaction(function () use ($request, $total_kapasitas) {
+
+        $area = AreaParkir::create([
+            'nama_area'       => $request->nama_area,
+            'total_kapasitas' => $total_kapasitas
         ]);
 
-        DB::transaction(function () use ($request) {
-            $total_kapasitas = array_sum($request->kapasitas);
-
-            $area = AreaParkir::create([
-                'nama_area' => $request->nama_area,
-                'total_kapasitas' => $total_kapasitas
-            ]);
-
-            foreach ($request->kapasitas as $tipeId => $jumlah) {
-                if ($jumlah > 0) {
-                    AreaParkirDetail::create([
-                        'area_parkir_id' => $area->id,
-                        'tipe_kendaraan_id' => $tipeId,
-                        'kapasitas' => $jumlah
-                    ]);
-                }
+        foreach ($request->kapasitas as $tipeId => $jumlah) {
+            if ($jumlah > 0) {
+                AreaParkirDetail::create([
+                    'area_parkir_id'     => $area->id,
+                    'tipe_kendaraan_id' => $tipeId,
+                    'kapasitas'         => $jumlah
+                ]);
             }
-        });
+        }
+    });
 
-        return redirect('/admin/areaParkir');
-    }
+    return redirect('/admin/areaParkir')
+        ->with('success', 'Area parkir berhasil ditambahkan');
+}
+
 
 public function edit($id)
 {
