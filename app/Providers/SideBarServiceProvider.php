@@ -73,6 +73,10 @@ class SidebarServiceProvider extends ServiceProvider
                                 'label' => 'Transaksi Periode',
                                 'route' => '/laporan/periode',
                             ],
+                            [
+                                'label' => 'Occupancy Area Parkir',
+                                'route' => '/laporan/occupancy',
+                            ],
                         ],
                     ],
                 ],

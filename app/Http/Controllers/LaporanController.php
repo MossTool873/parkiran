@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AreaParkir;
 use App\Models\Transaksi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -117,5 +118,18 @@ public function laporanPeriode(Request $request)
         ));
     }
 
-    
+public function occupancy(Request $request)
+{
+    $query = AreaParkir::with('detailKapasitas.tipeKendaraan');
+
+    if ($request->has('search') && $request->search != '') {
+        $query->where('nama_area', 'like', '%' . $request->search . '%');
+    }
+
+    $areaParkirs = $query->paginate(10);
+
+    return view('laporan.occupancy', compact('areaParkirs'));
 }
+
+}
+

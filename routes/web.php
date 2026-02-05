@@ -68,12 +68,11 @@ Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(functi
     Route::get('/harian', [LaporanController::class, 'laporanHariIni']);
     Route::get('/periode', [LaporanController::class, 'laporanPeriode']);
     Route::post('/periode', [LaporanController::class, 'laporanPeriode']);
+    Route::get('/occupancy', [LaporanController::class, 'occupancy']);
 });
 
 Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
 Route::get('/kendaraan/search', function (\Illuminate\Http\Request $request) {
-    return Kendaraan::where('plat_nomor', 'like', "%{$request->q}%")
-        ->with('tipeKendaraan')
-        ->limit(10)
-        ->get();
+    return Kendaraan::where('plat_nomor', 'like', "%{$request->q}%")->with('tipeKendaraan')->limit(10)->get();
 })->name('kendaraan.search');
+
