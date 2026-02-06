@@ -49,6 +49,7 @@ class SidebarServiceProvider extends ServiceProvider
                                 'label' => 'Metode Pembayaran',
                                 'route' => '/admin/metodePembayaran',
                             ],
+                            
                         ],
                     ],
 
@@ -64,11 +65,6 @@ class SidebarServiceProvider extends ServiceProvider
                                 'label' => 'Daftar Membership',
                                 'route' => '/admin/membership',
                             ],
-                            [
-                                'label' => 'Tracking Kendaraan',
-                                'route' => '/admin/membership-kendaraan',
-                            ],
-                            
                         ],
                     ],
 
@@ -91,7 +87,12 @@ class SidebarServiceProvider extends ServiceProvider
                                 'route' => '/laporan/occupancy',
                             ],
                         ],
+                            
                     ],
+                    [
+                                'label' => 'Tracking Kendaraan',
+                                'route' => '/tracking-kendaraan',
+                            ],
                 ],
 
 
@@ -109,6 +110,10 @@ class SidebarServiceProvider extends ServiceProvider
                                                 [
                                 'label' => 'Occupancy Area Parkir',
                                 'route' => '/laporan/occupancy',
+                            ],
+                                                [
+                                'label' => 'Tracking Kendaraan',
+                                'route' => '/tracking-kendaraan',
                             ],
                 ],
 

@@ -77,30 +77,52 @@ new QRious({
 <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div class="bg-white rounded shadow p-6 w-96 relative font-mono text-sm print-area">
 
+{{--  TOMBOL BATAL --}}
+<form method="POST"
+      action="{{ route('transaksi.batalStruk') }}"
+      class="absolute top-3 right-3 no-print">
+    @csrf
+    <button
+        type="submit"
+        class="w-10 h-10 flex items-center justify-center
+               rounded-full
+               text-2xl font-bold
+               text-gray-500
+               hover:text-white hover:bg-red-600
+               transition">
+        &times;
+    </button>
+</form>
+
+
+        {{-- HEADER --}}
         <div class="text-center font-bold mb-3">
             STRUK PARKIR KELUAR
         </div>
 
-<div class="space-y-1">
-    <div>Plat      : {{ $s['plat'] }}</div>
-    <div>Masuk     : {{ $s['jam_masuk'] }}</div>
-    <div>Keluar    : {{ $s['jam_keluar'] }}</div>
-    <div>Durasi    : {{ $s['durasi'] }}</div>
-    <div>Member    : {{ $s['member'] }}</div> {{-- ini baru --}}
-</div>
+        {{-- INFO KENDARAAN --}}
+        <div class="space-y-1">
+            <div>Plat      : {{ $s['plat'] }}</div>
+            <div>Masuk     : {{ $s['jam_masuk'] }}</div>
+            <div>Keluar    : {{ $s['jam_keluar'] }}</div>
+            <div>Durasi    : {{ $s['durasi'] }}</div>
+            <div>Member    : {{ $s['member'] }}</div>
+        </div>
 
         <hr class="my-3">
 
+        {{-- BIAYA --}}
         <div class="space-y-1">
-            <div>Tarif Awal : Rp {{ number_format($s['tarif'],0,',','.') }}</div>
+            <div>Tarif/Jam  : Rp {{ number_format($s['tarif_perjam'], 0, ',', '.') }}</div>
+            <div>Biaya Awal : Rp {{ number_format($s['biaya_awal'], 0, ',', '.') }}</div>
 
             <div>
                 Diskon ({{ $s['diskon_persen'] }}%) :
-                - Rp {{ number_format($s['diskon'],0,',','.') }}
+                - Rp {{ number_format($s['diskon'], 0, ',', '.') }}
             </div>
 
             <div class="font-bold">
-                TOTAL : Rp {{ number_format($s['total'],0,',','.') }}
+                TOTAL : Rp {{ number_format($s['total'], 0, ',', '.') }}
             </div>
 
             <div>Metode : {{ $s['metode'] }}</div>
@@ -108,6 +130,7 @@ new QRious({
 
         <hr class="my-3">
 
+        {{-- META --}}
         <div class="text-xs">
             <div>Kode     : {{ $s['kode'] }}</div>
             <div>Tanggal  : {{ $s['tanggal'] }}</div>
@@ -118,17 +141,22 @@ new QRious({
             Terima Kasih
         </div>
 
+        {{-- BUTTON --}}
         <div class="mt-4 flex gap-2 no-print">
             <button onclick="window.print()"
                 class="flex-1 border px-3 py-1 rounded">
                 Print
             </button>
 
-            <button onclick="this.closest('.fixed').remove()"
-                class="flex-1 border px-3 py-1 rounded">
-                Tutup
-            </button>
+            <form method="POST" action="{{ route('transaksi.konfirmasi') }}" class="flex-1">
+                @csrf
+                <button
+                    class="w-full border px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white">
+                    Konfirmasi Pembayaran
+                </button>
+            </form>
         </div>
+
     </div>
 </div>
 @endif

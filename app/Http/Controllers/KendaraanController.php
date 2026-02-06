@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AreaParkir;
 use App\Models\Kendaraan;
 use App\Models\KendaraanTipe;
 use Illuminate\Http\Request;
@@ -91,4 +92,26 @@ class KendaraanController extends Controller
 
         return response()->json($data);
     }
+
+    
+
+public function tracking(Request $request)
+{
+    $search = $request->search;
+
+    $areaParkirs = AreaParkir::with([
+        'kendaraan' => function ($q) {
+            $q->with('tipeKendaraan')
+              ->orderBy('created_at', 'desc');
+        }
+    ])
+    ->when($search, function ($q) use ($search) {
+        $q->where('nama_area', 'like', '%' . $search . '%');
+    })
+    ->orderBy('nama_area')
+    ->get();
+
+    return view('laporan.trackingKendaraan', compact('areaParkirs', 'search'));
+}
+
 }

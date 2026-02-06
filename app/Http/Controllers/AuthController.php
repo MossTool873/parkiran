@@ -91,9 +91,7 @@ public function updatePassword(Request $request)
 
     $user = Auth::user();
 
-    if (!$user) {
-        abort(403);
-    }
+    if (!$user) {abort(403);}
 
     if (!Hash::check($request->password_lama, $user->password)) {
         return back()->withErrors([
@@ -109,8 +107,7 @@ public function updatePassword(Request $request)
 
     Auth::logout();
 
-    return redirect('/login')
-        ->with('success', 'Password berhasil diubah, silakan login kembali');
+    return redirect('/login')->with('success', 'Password berhasil diubah, silakan login kembali');
 }
 
 

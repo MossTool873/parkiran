@@ -51,4 +51,5 @@ public function destroy($id)
 
     return back()->with('success', 'Tipe kendaraan berhasil dihapus');
 }
+
 }

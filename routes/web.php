@@ -48,7 +48,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('metodePembayaran', MetodePembayaranController::class);
     Route::resource('membership-tier', MembershipTierController::class);
     Route::resource('membership', MembershipController::class);
-    Route::get('/membership-kendaraan', [KendaraanMembershipController::class, 'index']);
 });
 
 Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function () {
@@ -57,6 +56,15 @@ Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function (
     Route::post('/transaksi/masuk', [TransaksiController::class, 'masuk']);
     Route::post('/transaksi/keluar', [TransaksiController::class, 'keluar']);
     Route::get('/transaksi-aktif', [TransaksiController::class, 'transaksiAktif'])->name('transaksi.transaksiAktif');
+    Route::post('/transaksi/konfirmasi', 
+    [TransaksiController::class, 'konfirmasiPembayaran']
+)->name('transaksi.konfirmasi');
+Route::post('/transaksi/batal-struk', function () {
+    session()->forget('struk_keluar');
+    return back();
+})->name('transaksi.batalStruk');
+
+
 });
 
 Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
@@ -72,7 +80,8 @@ Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(functi
 Route::get('laporan/occupancy', [LaporanController::class, 'occupancy']);
 Route::get('laporan/riwayatTransaksi', [LaporanController::class, 'riwayatTransaksi']);
 Route::get('/transaksi/{id}', [TransaksiController::class, 'showTransaksi'])->name('transaksi.show');
-
+Route::get('/tracking-kendaraan', [KendaraanController::class, 'tracking'])
+    ->name('kendaraan.tracking');
 
 Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
 Route::get('/kendaraan/search', function (\Illuminate\Http\Request $request) {

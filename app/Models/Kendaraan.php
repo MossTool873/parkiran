@@ -14,7 +14,12 @@ class Kendaraan extends Model
         'plat_nomor',
         'warna',
         'tipe_kendaraan_id',
+        'area_parkir_id'
     ];
+    public function areaParkir()
+    {
+        return $this->belongsTo(AreaParkir::class, 'area_parkir_id');
+    }
 
     public function tipeKendaraan()
     {
@@ -30,14 +35,12 @@ class Kendaraan extends Model
             'membership_id'
         );
     }
-public function membershipKendaraan()
-{
-    return $this->hasOne(MembershipKendaraan::class)
-        ->whereHas('membership', function ($q) {
-            $q->whereNull('kadaluarsa')
-              ->orWhere('kadaluarsa', '>=', now());
-        });
-}
-
-
+    public function membershipKendaraan()
+    {
+        return $this->hasOne(MembershipKendaraan::class)
+            ->whereHas('membership', function ($q) {
+                $q->whereNull('kadaluarsa')
+                    ->orWhere('kadaluarsa', '>=', now());
+            });
+    }
 }

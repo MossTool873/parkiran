@@ -3,11 +3,9 @@
 @section('title', 'Occupancy Area Parkir')
 
 @section('content')
-    {{-- HEADER --}}
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Occupancy Area Parkir</h1>
 
-        {{-- SEARCH BAR --}}
         <form method="GET" action="{{ url('laporan/occupancy') }}" class="flex items-center space-x-2 w-64 md:w-80">
             <input type="text" name="search" value="{{ request('search') }}"
                    placeholder="Cari area..."
@@ -21,7 +19,6 @@
         </form>
     </div>
 
-    {{-- GRID CARD --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @forelse ($areaParkirs as $area)
             @php

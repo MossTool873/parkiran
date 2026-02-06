@@ -31,7 +31,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('membership_id')->constrained('membership');
             $table->foreignId('kendaraan_id')->constrained('kendaraan');
-            $table->foreignId('area_parkir_id')->nullable()->constrained('area_parkir');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -20,4 +20,9 @@ class AreaParkir extends Model
     public function detailKapasitas() {
         return $this->hasMany(AreaParkirDetail::class,'area_parkir_id');
     }
+    public function kendaraan()
+{
+    return $this->hasMany(Kendaraan::class, 'area_parkir_id');
+}
+
 }
