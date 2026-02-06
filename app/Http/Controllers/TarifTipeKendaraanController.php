@@ -82,8 +82,7 @@ class TarifTipeKendaraanController extends Controller
             'tarif_perjam' => $request->tarif_perjam
         ]);
 
-        return redirect('/admin/tarifTipeKendaraan')
-            ->with('success', 'Tarif berhasil diperbarui');
+        return redirect('/admin/tarifTipeKendaraan')->with('success', 'Tarif berhasil diperbarui');
     }
 
     public function destroy($id)
@@ -91,7 +90,6 @@ class TarifTipeKendaraanController extends Controller
         $tarif = TarifTipeKendaraan::findOrFail($id);
         $tarif->delete();
 
-        return redirect('/admin/tarifTipeKendaraan')
-            ->with('success', 'Tarif berhasil dihapus');
+        return redirect('/admin/tarifTipeKendaraan')->with('success', 'Tarif berhasil dihapus');
     }
 }

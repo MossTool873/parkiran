@@ -92,8 +92,7 @@ class UsersController extends Controller
 
         $user->update($data);
 
-        return redirect('/admin/users')
-            ->with('success', 'User berhasil diperbarui');
+        return redirect('/admin/users')->with('success', 'User berhasil diperbarui');
     }
 
     public function destroy($id)
@@ -101,7 +100,6 @@ class UsersController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
-        return redirect('/admin/users')
-            ->with('success', 'User berhasil dihapus');
+        return redirect('/admin/users')->with('success', 'User berhasil dihapus');
     }
 }

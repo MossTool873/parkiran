@@ -31,7 +31,6 @@ class KendaraanTipeController extends Controller
         return view('admin.tipeKendaraan.edit', compact('tipeKendaraan'));
     }
 
-    // UPDATE
     public function update(Request $request, $id)
     {
         $request->validate(['tipe_kendaraan' => 'required',]);

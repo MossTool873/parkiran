@@ -13,13 +13,10 @@ class AreaParkirController extends Controller
 {
 public function index()
 {
-    $areaParkirs = AreaParkir::with(['detailKapasitas.tipeKendaraan'])
-        ->orderBy('id', 'desc')
-        ->paginate(6); 
+    $areaParkirs = AreaParkir::with(['detailKapasitas.tipeKendaraan'])->orderBy('id', 'desc')->paginate(6); 
 
     return view('admin.areaParkir.index', compact('areaParkirs'));
 }
-
 
     public function create()
     {
@@ -38,9 +35,7 @@ public function store(Request $request)
     $total_kapasitas = array_sum($request->kapasitas);
 
     if ($total_kapasitas <= 0) {
-        return back()
-            ->withErrors(['eror' => 'Total kapasitas harus lebih dari 0'])
-            ->withInput();
+        return back()->withErrors(['eror' => 'Total kapasitas harus lebih dari 0'])->withInput();
     }
 
     DB::transaction(function () use ($request, $total_kapasitas) {
@@ -61,16 +56,13 @@ public function store(Request $request)
         }
     });
 
-    return redirect('/admin/areaParkir')
-        ->with('success', 'Area parkir berhasil ditambahkan');
+    return redirect('/admin/areaParkir')->with('success', 'Area parkir berhasil ditambahkan');
 }
-
 
 public function edit($id)
 {
     $areaParkir = AreaParkir::with('detailKapasitas')->findOrFail($id);
     $tipeKendaraans = KendaraanTipe::all();
-
     return view('admin.areaParkir.edit', compact('areaParkir', 'tipeKendaraans'));
 }
 
@@ -108,9 +100,7 @@ public function update(Request $request, $id)
     public function destroy($id)
     {
         $areaParkir = AreaParkir::findOrFail($id);
-
         $areaParkir->delete();
-
         return redirect('/admin/areaParkir');
     }
 }

@@ -65,8 +65,7 @@ class MetodePembayaranController extends Controller
                     'required',
                     'string',
                     'max:100',
-                    Rule::unique('metode_pembayaran', 'nama_metode')
-                        ->ignore($id)
+                    Rule::unique('metode_pembayaran', 'nama_metode')->ignore($id)
                 ]
             ]
         );
@@ -77,8 +76,7 @@ class MetodePembayaranController extends Controller
             'nama_metode' => $request->nama_metode
         ]);
 
-        return redirect('/admin/metodePembayaran')
-            ->with('success', 'Metode pembayaran berhasil diperbarui');
+        return redirect('/admin/metodePembayaran')->with('success', 'Metode pembayaran berhasil diperbarui');
     }
 
     public function destroy($id)
@@ -86,7 +84,6 @@ class MetodePembayaranController extends Controller
         $metode = MetodePembayaran::findOrFail($id);
         $metode->delete();
 
-        return redirect('/admin/metodePembayaran')
-            ->with('success', 'Metode pembayaran berhasil dihapus');
+        return redirect('/admin/metodePembayaran')->with('success', 'Metode pembayaran berhasil dihapus');
     }
 }

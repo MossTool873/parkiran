@@ -27,7 +27,6 @@ class AuthController extends Controller
                     return redirect('/login')->withErrors('silahkan login');
             }
         }
-
         return view('auth.login');
     }
 
@@ -80,7 +79,6 @@ class AuthController extends Controller
     {
         return view('auth.gantiPassword');
     }
-
     
 public function updatePassword(Request $request)
 {
@@ -99,14 +97,11 @@ public function updatePassword(Request $request)
         ]);
     }
 
-    DB::table('users')
-        ->where('id', $user->id)
-        ->update([
-            'password' => bcrypt($request->password),
-        ]);
+    DB::table('users')->where('id', $user->id)->update([
+        'password' => bcrypt($request->password),
+    ]);
 
     Auth::logout();
-
     return redirect('/login')->with('success', 'Password berhasil diubah, silakan login kembali');
 }
 

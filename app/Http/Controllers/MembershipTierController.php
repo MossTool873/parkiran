@@ -65,8 +65,6 @@ class MembershipTierController extends Controller
         $tier = MembershipTier::findOrFail($id);
         $tier->delete();
 
-        return redirect()
-            ->route('membership-tier.index')
-            ->with('success', 'Membership tier berhasil dihapus');
+        return redirect()->route('membership-tier.index')->with('success', 'Membership tier berhasil dihapus');
     }
 }
