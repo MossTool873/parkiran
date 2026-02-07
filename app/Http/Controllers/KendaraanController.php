@@ -11,7 +11,7 @@ class KendaraanController extends Controller
 {
     public function index()
     {
-        $kendaraans = Kendaraan::with('tipeKendaraan')->get();
+        $kendaraans = Kendaraan::with('tipeKendaraan')->orderBy('id', 'desc')->paginate(10); 
         return view('admin.kendaraan.index', compact('kendaraans'));
     }
 
@@ -24,7 +24,7 @@ class KendaraanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'plat_nomor' => 'required',
+            'plat_nomor' => 'required|unique:kendaraan,plat_nomor,',
             'warna' => 'required',
             'tipe_kendaraan_id' => 'required',
         ]);
@@ -93,16 +93,24 @@ class KendaraanController extends Controller
 public function tracking(Request $request)
 {
     $search = $request->search;
+
     $areaParkirs = AreaParkir::with([
         'kendaraan' => function ($q) {
-            $q->with('tipeKendaraan')->orderBy('created_at', 'desc');
+            $q->with([
+                'tipeKendaraan',
+                'memberships'
+            ])
+            ->orderBy('created_at', 'desc');
         }
     ])
     ->when($search, function ($q) use ($search) {
         $q->where('nama_area', 'like', '%' . $search . '%');
-    })->orderBy('nama_area')->get();
+    })
+    ->orderBy('nama_area')
+    ->get();
 
     return view('laporan.trackingKendaraan', compact('areaParkirs', 'search'));
 }
+
 
 }

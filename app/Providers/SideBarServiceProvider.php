@@ -90,9 +90,14 @@ class SidebarServiceProvider extends ServiceProvider
                             
                     ],
                     [
-                                'label' => 'Tracking Kendaraan',
-                                'route' => '/tracking-kendaraan',
-                            ],
+                        'label' => 'Tracking Kendaraan',
+                        'route' => '/tracking-kendaraan',
+                    ],
+[
+                        'label' => 'Backup-Restore Database',
+                        'route' => '/admin/database/index',
+                    ],
+                    
                 ],
 
 

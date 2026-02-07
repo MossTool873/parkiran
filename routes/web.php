@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
+use App\Http\Controllers\BackupDatabaseController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AreaParkirController;
 use App\Http\Controllers\KendaraanController;
@@ -48,6 +48,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('metodePembayaran', MetodePembayaranController::class);
     Route::resource('membership-tier', MembershipTierController::class);
     Route::resource('membership', MembershipController::class);
+    Route::get('/database/index',[BackupDatabaseController::class,'index']);
+    Route::post('/database/backup', [BackupDatabaseController::class, 'download'])->name('database.backup');
+    Route::post('/database/restore', [BackupDatabaseController::class, 'restore'])->name('database.restore');
 });
 
 Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function () {
@@ -82,6 +85,9 @@ Route::get('laporan/riwayatTransaksi', [LaporanController::class, 'riwayatTransa
 Route::get('/transaksi/{id}', [TransaksiController::class, 'showTransaksi'])->name('transaksi.show');
 Route::get('/tracking-kendaraan', [KendaraanController::class, 'tracking'])
     ->name('kendaraan.tracking');
+
+
+
 
 Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
 Route::get('/kendaraan/search', function (\Illuminate\Http\Request $request) {

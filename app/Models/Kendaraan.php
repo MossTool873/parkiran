@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -41,6 +40,14 @@ class Kendaraan extends Model
             ->whereHas('membership', function ($q) {
                 $q->whereNull('kadaluarsa')
                     ->orWhere('kadaluarsa', '>=', now());
+            });
+    }
+        public function membershipAktif()
+    {
+        return $this->hasOne(MembershipKendaraan::class, 'kendaraan_id')
+            ->whereHas('membership', function ($q) {
+                $q->whereNull('kadaluarsa')
+                  ->orWhere('kadaluarsa', '>=', now());
             });
     }
 }

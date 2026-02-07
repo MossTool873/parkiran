@@ -32,7 +32,9 @@
             <tbody>
                 @forelse ($kendaraans as $kendaraan)
                     <tr class="border-t">
-                        <td class="px-4 py-3">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-3">
+                            {{ ($kendaraans->currentPage() - 1) * $kendaraans->perPage() + $loop->iteration }}
+                        </td>
                         <td class="px-4 py-3">{{ $kendaraan->plat_nomor }}</td>
                         <td class="px-4 py-3">{{ $kendaraan->warna }}</td>
                         <td class="px-4 py-3">
@@ -64,5 +66,10 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    {{-- PAGINATION --}}
+    <div class="mt-4">
+        {{ $kendaraans->links() }}
     </div>
 @endsection
