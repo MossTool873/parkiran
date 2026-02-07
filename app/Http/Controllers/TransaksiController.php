@@ -260,10 +260,10 @@ class TransaksiController extends Controller
                 $areaDetail->decrement('terisi');
             }
 
-            if ($s['membership_id']) {
-                MembershipKendaraan::where('kendaraan_id', $transaksi->kendaraan_id)
+            
+                Kendaraan::where('id', $transaksi->kendaraan_id)
                     ->update(['area_parkir_id' => null]);
-            }
+            
         });
 
         session()->forget('struk_keluar');
