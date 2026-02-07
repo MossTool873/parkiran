@@ -65,6 +65,10 @@ class SidebarServiceProvider extends ServiceProvider
                                 'label' => 'Daftar Membership',
                                 'route' => '/admin/membership',
                             ],
+                             [
+                                'label' => 'Daftar Membership',
+                                'route' => '/admin/membership-kendaraan',
+                            ],
                         ],
                     ],
 

@@ -17,6 +17,7 @@ use App\Http\Controllers\BackupDatabaseController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AreaParkirController;
 use App\Http\Controllers\KendaraanController;
+use App\Http\Controllers\KendaraanMemberController;
 use App\Http\Controllers\KendaraanMembershipController;
 use App\Http\Controllers\KendaraanTipeController;
 use App\Http\Controllers\LaporanController;
@@ -51,6 +52,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/database/index',[BackupDatabaseController::class,'index']);
     Route::post('/database/backup', [BackupDatabaseController::class, 'download'])->name('database.backup');
     Route::post('/database/restore', [BackupDatabaseController::class, 'restore'])->name('database.restore');
+Route::get('/membership-kendaraan', [KendaraanMemberController::class, 'index']);
 });
 
 
