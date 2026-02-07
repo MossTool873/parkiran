@@ -22,125 +22,148 @@ class SidebarServiceProvider extends ServiceProvider
                 'admin' => [
                     [
                         'label' => 'Master Data',
-                        'icon'  => '📦',
+                        'icon'  => 'bi bi-stack', // ikon folder/stack
                         'children' => [
                             [
                                 'label' => 'User',
                                 'route' => '/admin/users',
-                            ],
-                            [
-                                'label' => 'Area Parkir',
-                                'route' => '/admin/areaParkir',
+                                'icon'  => 'bi bi-person'
                             ],
                             [
                                 'label' => 'Tipe Kendaraan',
                                 'route' => '/admin/tipeKendaraan',
+                                'icon'  => 'bi bi-truck'
                             ],
                             [
-                                'label' => 'Tarif Tipe Kendaraan',
+                                'label' => 'Area Parkir',
+                                'route' => '/admin/areaParkir',
+                                'icon'  => 'bi bi-geo-alt'
+                            ],
+                            [
+                                'label' => 'Tarif Dasar',
                                 'route' => '/admin/tarifTipeKendaraan',
+                                'icon'  => 'bi bi-currency-dollar'
                             ],
                             [
                                 'label' => 'Kendaraan',
                                 'route' => '/admin/kendaraan',
+                                'icon'  => 'bi bi-car-front'
                             ],
-
                             [
                                 'label' => 'Metode Pembayaran',
                                 'route' => '/admin/metodePembayaran',
+                                'icon'  => 'bi bi-credit-card'
                             ],
-                            
                         ],
                     ],
-
                     [
                         'label' => 'Membership',
-                        'icon'  => '⭐',
+                        'icon'  => 'bi bi-stars',
                         'children' => [
                             [
                                 'label' => 'Membership Tier',
                                 'route' => '/admin/membership-tier',
+                                'icon'  => 'bi bi-award'
                             ],
                             [
                                 'label' => 'Daftar Membership',
                                 'route' => '/admin/membership',
+                                'icon'  => 'bi bi-list'
                             ],
-                             [
-                                'label' => 'Daftar Membership',
+                            [
+                                'label' => 'Kendaraan Membership',
                                 'route' => '/admin/membership-kendaraan',
+                                'icon'  => 'bi bi-car-front'
                             ],
                         ],
                     ],
-
                     [
                         'label' => 'Laporan',
-                        'icon'  => '📃',
+                        'icon'  => 'bi bi-file-earmark-text',
                         'children' => [
-                                                    ['label' => 'Riwayat Transaksi',
-                        'route' => '/laporan/riwayatTransaksi',],
+                            [
+                                'label' => 'Riwayat Transaksi',
+                                'route' => '/laporan/riwayatTransaksi',
+                                'icon'  => 'bi bi-clock-history'
+                            ],
                             [
                                 'label' => 'Transaksi Harian',
                                 'route' => '/laporan/harian',
+                                'icon'  => 'bi bi-calendar-day'
                             ],
                             [
                                 'label' => 'Transaksi Periode',
                                 'route' => '/laporan/periode',
+                                'icon'  => 'bi bi-calendar'
                             ],
                             [
                                 'label' => 'Occupancy Area Parkir',
                                 'route' => '/laporan/occupancy',
+                                'icon'  => 'bi bi-bar-chart'
                             ],
                         ],
-                            
                     ],
                     [
                         'label' => 'Tracking Kendaraan',
                         'route' => '/tracking-kendaraan',
+                        'icon'  => 'bi bi-geo-alt'
                     ],
-[
+                    [
                         'label' => 'Backup-Restore Database',
                         'route' => '/admin/database/index',
+                        'icon'  => 'bi bi-database'
                     ],
-                    
+                    [
+                        'label' => 'Log Aktivitas',
+                        'route' => '/admin/log-aktivitas',
+                        'icon'  => 'bi bi-clock-history'
+                    ],
                 ],
-
 
                 'petugas' => [
                     [
                         'label' => 'Transaksi',
                         'route' => '/petugas/transaksi',
-                        'icon'  => '📋',
+                        'icon'  => 'bi bi-receipt'
                     ],
                     [
                         'label' => 'Riwayat Transaksi',
                         'route' => '/laporan/riwayatTransaksi',
-                        'icon'  => '⌛',
+                        'icon'  => 'bi bi-clock-history'
                     ],
-                                                [
-                                'label' => 'Occupancy Area Parkir',
-                                'route' => '/laporan/occupancy',
-                            ],
-                                                [
-                                'label' => 'Tracking Kendaraan',
-                                'route' => '/tracking-kendaraan',
-                            ],
+                    [
+                        'label' => 'Occupancy Area Parkir',
+                        'route' => '/laporan/occupancy',
+                        'icon'  => 'bi bi-bar-chart'
+                    ],
+                    [
+                        'label' => 'Tracking Kendaraan',
+                        'route' => '/tracking-kendaraan',
+                        'icon'  => 'bi bi-geo-alt'
+                    ],
                 ],
 
                 'owner' => [
-                                                    ['label' => 'Riwayat Transaksi',
-                        'route' => '/laporan/riwayatTransaksi',],
-                            [
-                                'label' => 'Transaksi Harian',
-                                'route' => '/laporan/harian',
-                            ],
-                            [
-                                'label' => 'Transaksi Periode',
-                                'route' => '/laporan/periode',
-                            ],
-                            [
-                                'label' => 'Occupancy Area Parkir',
-                                'route' => '/laporan/occupancy',
-                            ],
+                    [
+                        'label' => 'Riwayat Transaksi',
+                        'route' => '/laporan/riwayatTransaksi',
+                        'icon'  => 'bi bi-clock-history'
+                    ],
+                    [
+                        'label' => 'Transaksi Harian',
+                        'route' => '/laporan/harian',
+                        'icon'  => 'bi bi-calendar-day'
+                    ],
+                    [
+                        'label' => 'Transaksi Periode',
+                        'route' => '/laporan/periode',
+                        'icon'  => 'bi bi-calendar'
+                    ],
+                    [
+                        'label' => 'Occupancy Area Parkir',
+                        'route' => '/laporan/occupancy',
+                        'icon'  => 'bi bi-bar-chart'
+                    ],
                 ],
             ];
 

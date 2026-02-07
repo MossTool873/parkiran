@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'My App')</title>
 
     <!-- ANTI FLASH -->
     <style>
-        [x-cloak] { display: none !important; }
-        body.loading { visibility: hidden; }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body.loading {
+            visibility: hidden;
+        }
     </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,40 +35,43 @@
 
 <body class="loading bg-gray-100">
 
-<div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden">
 
-    {{-- SIDEBAR --}}
-    <x-sidebar />
+        {{-- SIDEBAR --}}
+        <x-sidebar />
 
-    {{-- MAIN --}}
-    <div class="flex-1 flex flex-col">
+        {{-- MAIN --}}
+        <div class="flex-1 flex flex-col">
 
-{{-- HEADER --}}
+            {{-- HEADER --}}
 <header class="bg-blue-600 shadow px-4 py-4 flex justify-end items-center">
-    <div class="flex items-center space-x-3">
+    <div class="flex items-center space-x-3 relative">
         {{-- NAMA USER --}}
         <span class="text-white font-semibold">
             {{ Auth::user()->name ?? 'User' }}
         </span>
 
         {{-- ICON PROFIL --}}
-        <div class="relative">
-            <button id="profileBtn" class="focus:outline-none text-white text-2xl">
+        <div class="relative" x-data="{ open: false }">
+            <button @click="open = !open" class="focus:outline-none text-white text-2xl flex items-center gap-1">
                 <i class="bi bi-person-circle"></i>
+                <i class="bi bi-caret-down-fill text-sm"></i>
             </button>
 
             {{-- MENU PROFILE --}}
-            <div id="profileMenu"
-                 class="hidden absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50">
+            <div x-show="open" @click.outside="open = false"
+                class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50"
+                x-cloak
+            >
                 <a href="{{ url('/ganti-password') }}"
-                   class="block px-4 py-2 text-sm hover:bg-gray-100">
+                    class="block px-4 py-2 text-sm hover:bg-gray-100">
                     Ganti Password
                 </a>
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100">
+                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100">
                         Logout
                     </button>
                 </form>
@@ -72,50 +81,51 @@
 </header>
 
 
+            {{-- CONTENT --}}
+            <main class="flex-1 overflow-y-auto p-6">
+                @yield('content')
+            </main>
 
-        {{-- CONTENT --}}
-        <main class="flex-1 overflow-y-auto p-6">
-            @yield('content')
-        </main>
-
+        </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const btn  = document.getElementById('profileBtn');
-    const menu = document.getElementById('profileMenu');
-    if (!btn || !menu) return;
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('profileBtn');
+            const menu = document.getElementById('profileMenu');
+            if (!btn || !menu) return;
 
-    btn.addEventListener('click', e => {
-        e.stopPropagation();
-        menu.classList.toggle('hidden');
-    });
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            });
 
-    document.addEventListener('click', e => {
-        if (!menu.contains(e.target)) {
-            menu.classList.add('hidden');
+            document.addEventListener('click', e => {
+                if (!menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .print-area,
+            .print-area * {
+                visibility: visible;
+            }
+
+
+
+            .no-print {
+                display: none !important;
+            }
         }
-    });
-});
-</script>
-<style>
-@media print {
-    body * {
-        visibility: hidden;
-    }
-
-    .print-area, .print-area * {
-        visibility: visible;
-    }
-
-
-
-    .no-print {
-        display: none !important;
-    }
-}
-</style>
+    </style>
 
 </body>
+
 </html>

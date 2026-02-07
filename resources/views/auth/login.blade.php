@@ -5,15 +5,18 @@
     <title>Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {{-- Tailwind via CDN (aman untuk auth page) --}}
+    {{-- Tailwind CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
 
-    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <h1 class="text-2xl font-semibold text-center text-gray-800 mb-6">
-            Login
-        </h1>
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 sm:p-10">
+        <!-- Judul ParkiranApp -->
+<h1 class="text-center mb-8 flex justify-center items-baseline gap-2">
+    <span class="text-4xl font-bold text-gray-700">Parkiran</span>
+    <span class="text-2xl font-medium lowercase text-gray-700">app</span>
+</h1>
+
 
         {{-- Error global --}}
         @if ($errors->any())
@@ -24,11 +27,11 @@
             </div>
         @endif
 
-        <form action="{{ url('/login') }}" method="POST" class="space-y-4">
+        <form action="{{ url('/login') }}" method="POST" class="space-y-6">
             @csrf
 
             <div>
-                <label for="username" class="block text-sm font-medium text-gray-700">
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
                     Username
                 </label>
                 <input
@@ -37,40 +40,29 @@
                     id="username"
                     value="{{ old('username') }}"
                     autofocus
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
             </div>
 
             <div>
-                <label for="password" class="block text-sm font-medium text-gray-700">
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
                     Password
                 </label>
                 <input
                     type="password"
                     name="password"
                     id="password"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
             </div>
 
-            <div class="flex items-center justify-between text-sm">
-                <label class="flex items-center gap-2 text-gray-600">
-                    <input
-                        type="checkbox"
-                        name="remember"
-                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        {{ old('remember') ? 'checked' : '' }}
-                    >
-                    Remember me
-                </label>
-            </div>
-
+            {{-- Tombol Login --}}
             <button
                 type="submit"
                 class="w-full bg-blue-600 hover:bg-blue-700 text-white
-                       font-medium py-2.5 rounded-lg transition duration-200"
+                       font-semibold py-2.5 rounded-lg transition duration-200 text-lg"
             >
                 Login
             </button>

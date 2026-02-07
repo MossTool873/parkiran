@@ -14,6 +14,7 @@ class LogAktivitas extends Model
     protected $fillable = [
         'user_id',
         'aksi',
+        'created_at'
     ];
 
     public function user()

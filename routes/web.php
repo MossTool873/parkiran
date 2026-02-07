@@ -21,6 +21,7 @@ use App\Http\Controllers\KendaraanMemberController;
 use App\Http\Controllers\KendaraanMembershipController;
 use App\Http\Controllers\KendaraanTipeController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\LogAktivitasController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\MembershipTierController;
 use App\Http\Controllers\MetodePembayaranController;
@@ -40,6 +41,7 @@ Route::get('/ganti-password', [AuthController::class, 'gantiPaswordForm']);
 Route::post('/ganti-password', [AuthController::class, 'updatePassword']);
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+
     Route::get('/', function () {return redirect('/admin/users');});
     Route::resource('users', UsersController::class);
     Route::resource('areaParkir', AreaParkirController::class);
@@ -52,7 +54,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/database/index',[BackupDatabaseController::class,'index']);
     Route::post('/database/backup', [BackupDatabaseController::class, 'download'])->name('database.backup');
     Route::post('/database/restore', [BackupDatabaseController::class, 'restore'])->name('database.restore');
-Route::get('/membership-kendaraan', [KendaraanMemberController::class, 'index']);
+    Route::get('/membership-kendaraan', [KendaraanMemberController::class, 'index']);
+    Route::get('/log-aktivitas', [LogAktivitasController::class, 'index']);
 });
 
 
@@ -71,8 +74,6 @@ Route::prefix('petugas')->middleware(['auth','role:petugas'])->group(function ()
     })->name('keluar.batal');
 });
 
-
-
 Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/', function () {return redirect('/laporan/harian');});
 });
@@ -83,16 +84,10 @@ Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(functi
     Route::post('/periode', [LaporanController::class, 'laporanPeriode']);
 });
 
-Route::get('laporan/occupancy', [LaporanController::class, 'occupancy']);
-Route::get('laporan/riwayatTransaksi', [LaporanController::class, 'riwayatTransaksi']);
-Route::get('/transaksi/{id}', [TransaksiController::class, 'showTransaksi'])->name('transaksi.show');
-Route::get('/tracking-kendaraan', [KendaraanController::class, 'tracking'])
-    ->name('kendaraan.tracking');
-
-
-
-
-Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
-Route::get('/kendaraan/search', function (\Illuminate\Http\Request $request) {
-    return Kendaraan::where('plat_nomor', 'like', "%{$request->q}%")->with('tipeKendaraan')->limit(10)->get();
-})->name('kendaraan.search');
+Route::middleware(['auth'])->group(function () {
+    Route::get('laporan/occupancy', [LaporanController::class, 'occupancy']);
+    Route::get('laporan/riwayatTransaksi', [LaporanController::class, 'riwayatTransaksi']);
+    Route::get('/transaksi/{id}', [TransaksiController::class, 'showTransaksi'])->name('transaksi.show');
+    Route::get('/tracking-kendaraan', [KendaraanController::class, 'tracking'])->name('kendaraan.tracking');
+    Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
+});

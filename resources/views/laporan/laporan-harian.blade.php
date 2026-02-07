@@ -24,23 +24,21 @@
 
     <div class="space-y-6">
 
-        {{-- ================= SUMMARY CARD ================= --}}
-        <div class="bg-white rounded-lg border">
-            <div class="px-6 py-4 border-b">
-                <h2 class="text-lg font-semibold">Ringkasan</h2>
+        {{-- ================= TOTALS SEJARAH ================= --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {{-- Total Transaksi --}}
+            <div class="bg-white rounded-lg border shadow-sm">
+                <div class="px-6 py-4">
+                    <h2 class="text-lg font-semibold mb-2">Total Transaksi</h2>
+                    <p class="text-2xl font-bold">{{ $totalTransaksi }}</p>
+                </div>
             </div>
 
-            <div class="px-6 py-4 grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-sm">Total Transaksi</p>
-                    <p class="text-xl font-bold">
-                        {{ $totalTransaksi }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-sm">Total Pendapatan</p>
-                    <p class="text-xl font-bold">
+            {{-- Total Pendapatan --}}
+            <div class="bg-white rounded-lg border shadow-sm">
+                <div class="px-6 py-4">
+                    <h2 class="text-lg font-semibold mb-2">Total Pendapatan</h2>
+                    <p class="text-2xl font-bold">
                         Rp {{ number_format($totalPendapatan, 0, ',', '.') }}
                     </p>
                 </div>
@@ -48,7 +46,7 @@
         </div>
 
         {{-- ================= BREAKDOWN TIPE KENDARAAN ================= --}}
-        <div class="bg-white rounded-lg border">
+        <div class="bg-white rounded-lg border shadow-sm">
             <div class="px-6 py-4 border-b">
                 <h2 class="text-lg font-semibold">Breakdown Tipe Kendaraan</h2>
             </div>
@@ -77,7 +75,7 @@
         </div>
 
         {{-- ================= BREAKDOWN METODE PEMBAYARAN ================= --}}
-        <div class="bg-white rounded-lg border">
+        <div class="bg-white rounded-lg border shadow-sm">
             <div class="px-6 py-4 border-b">
                 <h2 class="text-lg font-semibold">Breakdown Metode Pembayaran</h2>
             </div>
