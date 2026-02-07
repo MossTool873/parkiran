@@ -53,22 +53,23 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/database/restore', [BackupDatabaseController::class, 'restore'])->name('database.restore');
 });
 
-Route::prefix('petugas')->middleware(['auth', 'role:petugas'])->group(function () {
-    Route::get('/', function () {return redirect('/petugas/transaksi');});
-    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
-    Route::post('/transaksi/masuk', [TransaksiController::class, 'masuk']);
-    Route::post('/transaksi/keluar', [TransaksiController::class, 'keluar']);
-    Route::get('/transaksi-aktif', [TransaksiController::class, 'transaksiAktif'])->name('transaksi.transaksiAktif');
-    Route::post('/transaksi/konfirmasi', 
-    [TransaksiController::class, 'konfirmasiPembayaran']
-)->name('transaksi.konfirmasi');
-Route::post('/transaksi/batal-struk', function () {
-    session()->forget('struk_keluar');
-    return back();
-})->name('transaksi.batalStruk');
 
+Route::prefix('petugas')->middleware(['auth','role:petugas'])->group(function () {
 
+    Route::get('/', fn()=>redirect('/petugas/transaksi'));
+    Route::get('/transaksi', [TransaksiController::class,'index'])->name('transaksi');
+    Route::post('/transaksi/masuk', [TransaksiController::class,'masuk'])->name('transaksi.masuk');
+    Route::post('/transaksi/keluar', [TransaksiController::class,'keluar'])->name('keluar.hitung');
+    Route::post('/transaksi/keluar/bayar', [TransaksiController::class,'bayar'])->name('keluar.bayar');
+    Route::get('/transaksi-aktif',[TransaksiController::class,'transaksiAktif'])->name('transaksi.transaksiAktif');
+    Route::post('/transaksi/keluar/batal', function(){
+        session()->forget('draft_keluar');
+        session()->forget('struk_keluar');
+        return back();
+    })->name('keluar.batal');
 });
+
+
 
 Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/', function () {return redirect('/laporan/harian');});

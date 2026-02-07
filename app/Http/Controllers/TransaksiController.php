@@ -138,12 +138,10 @@ class TransaksiController extends Controller
             ->with('success', 'Kendaraan berhasil masuk');
     }
 
-
-    public function keluar(Request $request)
+ public function keluar(Request $request)
     {
         $request->validate([
             'plat_nomor' => 'required',
-            'metode_pembayaran_id' => 'required',
         ]);
 
         try {
@@ -152,94 +150,88 @@ class TransaksiController extends Controller
             $transaksi = Transaksi::whereNull('waktu_keluar')
                 ->where(function ($q) use ($input) {
                     $q->where('kode', $input)
-                        ->orWhereHas('kendaraan', function ($q2) use ($input) {
-                            $q2->where('plat_nomor', $input);
-                        });
+                        ->orWhereHas('kendaraan', fn($q2) => $q2->where('plat_nomor', $input));
                 })
                 ->first();
 
-            if (!$transaksi) {
-                throw new \Exception('Transaksi aktif tidak ditemukan');
-            }
+            if (!$transaksi) throw new \Exception('Transaksi aktif tidak ditemukan');
 
             $kendaraan = $transaksi->kendaraan;
 
             $tarif = TarifTipeKendaraan::find($transaksi->tarif_tipe_kendaraan_id);
-            if (!$tarif) {
-                throw new \Exception('Tarif tidak ditemukan');
-            }
+            if (!$tarif) throw new \Exception('Tarif tidak ditemukan');
 
-            $waktuMasuk  = Carbon::parse($transaksi->waktu_masuk);
+            $waktuMasuk = Carbon::parse($transaksi->waktu_masuk);
             $waktuKeluar = now();
 
             $durasiMenit = $waktuMasuk->diffInMinutes($waktuKeluar);
-            $durasiJamTarif = max(1, ceil($durasiMenit / 60));
+            $durasiJam = max(1, ceil($durasiMenit / 60));
+            $biayaAwal = $durasiJam * $tarif->tarif_perjam;
 
-            $biayaAwal = $durasiJamTarif * $tarif->tarif_perjam;
+            $member = $kendaraan->membershipKendaraan?->membership;
+            $diskonPersen = $member?->membershipTier?->diskon ?? 0;
+            $diskonNominal = ($biayaAwal * $diskonPersen) / 100;
 
-            $member = null;
-            $diskonPersen = 0;
-            $diskonNominal = 0;
-
-            if (
-                $kendaraan->membershipKendaraan &&
-                $kendaraan->membershipKendaraan->membership &&
-                $kendaraan->membershipKendaraan->membership->membershipTier
-            ) {
-                $member = $kendaraan->membershipKendaraan->membership;
-                $diskonPersen = $member->membershipTier->diskon;
-                $diskonNominal = ($biayaAwal * $diskonPersen) / 100;
-            }
-
-            $metode = MetodePembayaran::find($request->metode_pembayaran_id);
-            if (!$metode) {
-                throw new \Exception('Metode pembayaran tidak ditemukan');
-            }
-
-            session()->put('struk_keluar', [
+            session()->put('draft_keluar', [
                 'transaksi_id' => $transaksi->id,
                 'area_parkir_id' => $transaksi->area_parkir_id,
                 'tipe_kendaraan_id' => $kendaraan->tipe_kendaraan_id,
-
+                'kendaraan_id' => $kendaraan->id,
                 'kode' => $transaksi->kode,
                 'plat' => $kendaraan->plat_nomor,
                 'jam_masuk' => $waktuMasuk->format('H:i'),
                 'jam_keluar' => $waktuKeluar->format('H:i'),
                 'durasi_menit' => $durasiMenit,
                 'durasi' => floor($durasiMenit / 60) . ' jam ' . ($durasiMenit % 60) . ' menit',
-
                 'tarif_perjam' => $tarif->tarif_perjam,
                 'biaya_awal' => $biayaAwal,
                 'diskon_persen' => $diskonPersen,
                 'diskon' => $diskonNominal,
                 'total' => $biayaAwal - $diskonNominal,
-
-                'membership_id' => $member ? $member->id : null,
-                'member' => $member ? $member->nama : '-',
-
-                'metode_id' => $metode->id,
-                'metode' => $metode->nama_metode,
-
+                'membership_id' => $member?->id,
+                'member' => $member?->nama ?? '-',
                 'tanggal' => $waktuKeluar->format('d-m-Y'),
                 'operator' => auth()->user()->name ?? '-',
             ]);
+
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()])->withInput();
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
 
         return back();
     }
-    public function konfirmasiPembayaran()
+
+    /**
+     * Autocomplete plat/kode
+     */
+    public function transaksiAktif(Request $request)
     {
-        $s = session('struk_keluar');
+        $q = $request->query('q');
+        $transaksis = Transaksi::whereNull('waktu_keluar')
+            ->whereHas('kendaraan', fn($q2) => $q2->where('plat_nomor','like',"%$q%"))
+            ->orWhere('kode','like',"%$q%")
+            ->limit(10)
+            ->get(['kode','kendaraan_id']);
 
-        if (!$s) {
-            return back()->withErrors('Data pembayaran tidak ditemukan');
-        }
+        return response()->json($transaksis->map(fn($t) => [
+            'kode' => $t->kode,
+            'plat_nomor' => $t->kendaraan->plat_nomor ?? ''
+        ]));
+    }
 
-        DB::transaction(function () use ($s) {
+    /**
+     * Bayar → simpan transaksi keluar → simpan overlay struk
+     */
+    public function bayar(Request $request)
+    {
+        $request->validate(['metode_pembayaran_id'=>'required']);
 
+        $s = session('draft_keluar');
+        if (!$s) return back()->withErrors('Data pembayaran tidak ditemukan');
+
+        DB::transaction(function() use ($request, $s) {
             $transaksi = Transaksi::lockForUpdate()->findOrFail($s['transaksi_id']);
+            $metode = MetodePembayaran::findOrFail($request->metode_pembayaran_id);
 
             $transaksi->update([
                 'waktu_keluar' => now(),
@@ -247,46 +239,32 @@ class TransaksiController extends Controller
                 'biaya' => $s['biaya_awal'],
                 'biaya_total' => $s['total'],
                 'membership_id' => $s['membership_id'],
-                'metode_pembayaran_id' => $s['metode_id'],
+                'metode_pembayaran_id' => $metode->id,
                 'status' => 'keluar',
             ]);
 
-            $areaDetail = AreaParkirDetail::where('area_parkir_id', $s['area_parkir_id'])
-                ->where('tipe_kendaraan_id', $s['tipe_kendaraan_id'])
+            $areaDetail = AreaParkirDetail::where('area_parkir_id',$s['area_parkir_id'])
+                ->where('tipe_kendaraan_id',$s['tipe_kendaraan_id'])
                 ->lockForUpdate()
                 ->first();
 
-            if ($areaDetail && $areaDetail->terisi > 0) {
-                $areaDetail->decrement('terisi');
-            }
+            if($areaDetail && $areaDetail->terisi>0) $areaDetail->decrement('terisi');
 
-            
-                Kendaraan::where('id', $transaksi->kendaraan_id)
-                    ->update(['area_parkir_id' => null]);
-            
+            Kendaraan::where('id',$s['kendaraan_id'])->update(['area_parkir_id'=>null]);
+
+            // simpan session struk
+            session()->put('struk_keluar', array_merge($s, [
+                'metode_id' => $metode->id,
+                'metode' => $metode->nama_metode,
+            ]));
         });
 
-        session()->forget('struk_keluar');
+        session()->forget('draft_keluar');
 
-        return redirect('/petugas/transaksi')
-            ->with('success', 'Pembayaran berhasil dikonfirmasi');
+        return back()->with('success','Pembayaran berhasil');
     }
 
-    public function TransaksiAktif(Request $request)
-    {
-        return Transaksi::whereNull('waktu_keluar')
-            ->whereHas('kendaraan', function ($q) use ($request) {
-                $q->where('plat_nomor', 'like', '%' . $request->q . '%');
-            })
-            ->with('kendaraan')
-            ->get()
-            ->map(function ($t) {
-                return [
-                    'plat_nomor' => $t->kendaraan->plat_nomor,
-                    'waktu_masuk' => $t->waktu_masuk,
-                ];
-            });
-    }
+
 
     public function formKeluar(Request $request)
     {
