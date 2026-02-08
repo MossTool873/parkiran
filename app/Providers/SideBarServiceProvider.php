@@ -22,7 +22,7 @@ class SidebarServiceProvider extends ServiceProvider
                 'admin' => [
                     [
                         'label' => 'Master Data',
-                        'icon'  => 'bi bi-stack', // ikon folder/stack
+                        'icon'  => 'bi bi-stack',
                         'children' => [
                             [
                                 'label' => 'User',
@@ -39,22 +39,8 @@ class SidebarServiceProvider extends ServiceProvider
                                 'route' => '/admin/areaParkir',
                                 'icon'  => 'bi bi-geo-alt'
                             ],
-                            [
-                                'label' => 'Tarif Dasar',
-                                'route' => '/admin/tarifTipeKendaraan',
-                                'icon'  => 'bi bi-currency-dollar'
-                            ],
-                            [
-                                'label' => 'Tarif Durasi',
-                                'route' => '/admin/tarif-durasi',
-                                'icon'  => 'bi bi-currency-dollar'
-                            ],
-                                                        [
-                                'label' => 'Tarif Durasi',
-                                'route' => '/admin/konfigurasi-tarif',
-                                'icon'  => 'bi bi-currency-dollar'
-                            ],
-                            
+
+
                             [
                                 'label' => 'Kendaraan',
                                 'route' => '/admin/kendaraan',
@@ -67,6 +53,33 @@ class SidebarServiceProvider extends ServiceProvider
                             ],
                         ],
                     ],
+                    [
+                        'label' => 'Tarif',
+                        'icon'  => 'bi bi-cash-stack',
+                        'children' => [
+                            [
+                                'label' => 'Tarif Dasar',
+                                'route' => '/admin/tarifTipeKendaraan',
+                                'icon'  => 'bi bi-currency-dollar'
+                            ],
+                            [
+                                'label' => 'Tarif Durasi',
+                                'route' => '/admin/tarif-durasi',
+                                'icon'  => 'bi bi-clock'
+                            ],
+                            [
+                                'label' => 'Konfigurasi Tarif',
+                                'route' => '/admin/konfigurasi-tarif',
+                                'icon'  => 'bi bi-gear'
+                            ],
+                            [
+                                'label' => 'Diskon Membership',
+                                'route' => '/admin/membership-tier',
+                                'icon'  => 'bi bi-award'
+                            ],
+                        ],
+                    ],
+
                     [
                         'label' => 'Membership',
                         'icon'  => 'bi bi-stars',
@@ -112,12 +125,12 @@ class SidebarServiceProvider extends ServiceProvider
                                 'route' => '/laporan/occupancy',
                                 'icon'  => 'bi bi-bar-chart'
                             ],
+                            [
+                                'label' => 'Tracking Kendaraan',
+                                'route' => '/tracking-kendaraan',
+                                'icon'  => 'bi bi-geo-alt'
+                            ],
                         ],
-                    ],
-                    [
-                        'label' => 'Tracking Kendaraan',
-                        'route' => '/tracking-kendaraan',
-                        'icon'  => 'bi bi-geo-alt'
                     ],
                     [
                         'label' => 'Backup-Restore Database',

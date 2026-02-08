@@ -30,7 +30,7 @@ class KonfigurasiTarif extends Model
         }
 
         if ($this->diskon_sampai === null) {
-            return true;
+            return false;
         }
 
         return now()->toDateString() <= $this->diskon_sampai->toDateString();
