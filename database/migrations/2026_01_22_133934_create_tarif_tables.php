@@ -22,11 +22,20 @@ return new class extends Migration
         Schema::create('tarif_durasi', function (Blueprint $table) {
             $table->id();
 
-            $table->integer('batas_jam'); 
-            $table->integer('persentase');  
+            $table->integer('batas_jam');
+            $table->integer('persentase');
 
             $table->timestamps();
             $table->softDeletes();
+        });
+        Schema::create('konfigurasi_tarif', function (Blueprint $table) {
+            $table->id();
+
+            $table->integer('persentase_tarif_perjam_lanjutan');
+            $table->integer('diskon_persen')->default(0);
+            $table->date('diskon_sampai')->nullable();
+            $table->boolean('diskon_aktif')->default(false);
+            $table->timestamps();
         });
     }
 
@@ -35,6 +44,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('konfigurasi_tarif');
         Schema::dropIfExists('tarif_tipe_kendaraan');
         Schema::dropIfExists('tarif_durasi');
     }

@@ -20,6 +20,7 @@ use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\KendaraanMemberController;
 use App\Http\Controllers\KendaraanMembershipController;
 use App\Http\Controllers\KendaraanTipeController;
+use App\Http\Controllers\KonfigurasiTarifController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LogAktivitasController;
 use App\Http\Controllers\MembershipController;
@@ -49,6 +50,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('tipeKendaraan', KendaraanTipeController::class);
     Route::resource('tarifTipeKendaraan', TarifTipeKendaraanController::class);
     Route::resource('tarif-durasi', TarifDurasiController::class);
+    Route::get('/konfigurasi-tarif', [KonfigurasiTarifController::class, 'index'])->name('konfigurasi-tarif.index');
+    Route::post('/konfigurasi-tarif', [KonfigurasiTarifController::class, 'update'])->name('konfigurasi-tarif.update');
     Route::resource('kendaraan', KendaraanController::class);
     Route::resource('metodePembayaran', MetodePembayaranController::class);
     Route::resource('membership-tier', MembershipTierController::class);
