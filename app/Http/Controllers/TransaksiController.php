@@ -8,9 +8,11 @@ use App\Models\KendaraanTipe;
 use App\Models\TarifTipeKendaraan;
 use App\Models\Transaksi;
 use App\Models\AreaParkirDetail;
+use App\Models\KonfigurasiTarif;
 use App\Models\Membership;
 use App\Models\MembershipKendaraan;
 use App\Models\MetodePembayaran;
+use App\Models\TarifDurasi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -138,68 +140,112 @@ class TransaksiController extends Controller
             ->with('success', 'Kendaraan berhasil masuk');
     }
 
- public function keluar(Request $request)
-    {
-        $request->validate([
-            'plat_nomor' => 'required',
+public function keluar(Request $request)
+{
+    $request->validate([
+        'plat_nomor' => 'required',
+    ]);
+
+    try {
+        $input = $request->plat_nomor;
+
+        $transaksi = Transaksi::whereNull('waktu_keluar')
+            ->where(function ($q) use ($input) {
+                $q->where('kode', $input)
+                    ->orWhereHas('kendaraan', fn($q2) => $q2->where('plat_nomor', $input));
+            })
+            ->first();
+
+        if (!$transaksi) throw new \Exception('Transaksi aktif tidak ditemukan');
+
+        $kendaraan = $transaksi->kendaraan;
+
+        $tarif = TarifTipeKendaraan::find($transaksi->tarif_tipe_kendaraan_id);
+        if (!$tarif) throw new \Exception('Tarif tidak ditemukan');
+
+        $waktuMasuk = Carbon::parse($transaksi->waktu_masuk);
+        $waktuKeluar = now();
+
+        $durasiMenit = $waktuMasuk->diffInMinutes($waktuKeluar);
+        $durasiJam = max(1, ceil($durasiMenit / 60));
+
+        // ================= TARIF =================
+$tarifDurasiList = TarifDurasi::orderBy('batas_jam')->get();
+$config = KonfigurasiTarif::first();
+
+$biayaAwal = 0;
+
+// cari tarif durasi tertinggi yang <= durasiJam
+$tarifDurasiTinggi = $tarifDurasiList->filter(fn($td) => $td->batas_jam <= $durasiJam)->last();
+
+if ($tarifDurasiTinggi) {
+    // gunakan tarif durasi untuk batas jam tertinggi
+    $biayaAwal += $tarif->tarif_perjam * ($tarifDurasiTinggi->persentase / 100) ;
+    $jamSisa = $durasiJam - $tarifDurasiTinggi->batas_jam;
+} else {
+    // kalau durasi lebih kecil dari batas tarif durasi pertama
+    $tarifPertama = $tarifDurasiList->first();
+    $biayaAwal += $tarif->tarif_perjam * ($tarifPertama->persentase / 100) * $durasiJam;
+    $jamSisa = 0;
+}
+
+// hitung durasi sisa dengan tarif lanjutan
+if ($jamSisa > 0) {
+    $persenLanjutan = $config->persentase_tarif_perjam_lanjutan;
+    $biayaAwal += $tarif->tarif_perjam * ($persenLanjutan / 100) * $jamSisa;
+}
+
+
+        // ================= DISKON =================
+        $member = $kendaraan->membershipKendaraan?->membership;
+
+        // Diskon non-member tetap berlaku untuk semua
+        $diskonNonMemberPersen = $config->isDiskonBerlaku() ? $config->diskon_persen : 0;
+        $diskonNonMemberNominal = ($biayaAwal * $diskonNonMemberPersen) / 100;
+
+        // Diskon member tambahan jika ada
+        $diskonMemberPersen = $member?->membershipTier?->diskon ?? 0;
+        $diskonMemberNominal = ($biayaAwal * $diskonMemberPersen) / 100;
+
+        // Total diskon
+        $totalDiskon = $diskonNonMemberNominal + $diskonMemberNominal;
+
+        // ================= TOTAL AKHIR =================
+        $totalAkhir = $biayaAwal - $totalDiskon;
+
+        // ================= SESSION =================
+        session()->put('draft_keluar', [
+            'transaksi_id' => $transaksi->id,
+            'area_parkir_id' => $transaksi->area_parkir_id,
+            'tipe_kendaraan_id' => $kendaraan->tipe_kendaraan_id,
+            'kendaraan_id' => $kendaraan->id,
+            'kode' => $transaksi->kode,
+            'plat' => $kendaraan->plat_nomor,
+            'jam_masuk' => $waktuMasuk->format('H:i'),
+            'jam_keluar' => $waktuKeluar->format('H:i'),
+            'durasi_menit' => $durasiMenit,
+            'durasi' => floor($durasiMenit / 60) . ' jam ' . ($durasiMenit % 60) . ' menit',
+            'tarif_perjam' => $tarif->tarif_perjam,
+            'biaya_awal' => $biayaAwal,                    // tarif awal (durasi + sisa lanjutan)
+            'diskon_non_member_persen' => $diskonNonMemberPersen,
+            'diskon_non_member' => $diskonNonMemberNominal,
+            'diskon_member_persen' => $diskonMemberPersen,
+            'diskon_member' => $diskonMemberNominal,
+            'diskon_total' => $totalDiskon,
+            'total' => $totalAkhir,                        // biaya akhir setelah semua diskon
+            'membership_id' => $member?->id,
+            'member' => $member?->nama ?? '-',
+            'tanggal' => $waktuKeluar->format('d-m-Y'),
+            'operator' => auth()->user()->name ?? '-',
         ]);
 
-        try {
-            $input = $request->plat_nomor;
-
-            $transaksi = Transaksi::whereNull('waktu_keluar')
-                ->where(function ($q) use ($input) {
-                    $q->where('kode', $input)
-                        ->orWhereHas('kendaraan', fn($q2) => $q2->where('plat_nomor', $input));
-                })
-                ->first();
-
-            if (!$transaksi) throw new \Exception('Transaksi aktif tidak ditemukan');
-
-            $kendaraan = $transaksi->kendaraan;
-
-            $tarif = TarifTipeKendaraan::find($transaksi->tarif_tipe_kendaraan_id);
-            if (!$tarif) throw new \Exception('Tarif tidak ditemukan');
-
-            $waktuMasuk = Carbon::parse($transaksi->waktu_masuk);
-            $waktuKeluar = now();
-
-            $durasiMenit = $waktuMasuk->diffInMinutes($waktuKeluar);
-            $durasiJam = max(1, ceil($durasiMenit / 60));
-            $biayaAwal = $durasiJam * $tarif->tarif_perjam;
-
-            $member = $kendaraan->membershipKendaraan?->membership;
-            $diskonPersen = $member?->membershipTier?->diskon ?? 0;
-            $diskonNominal = ($biayaAwal * $diskonPersen) / 100;
-
-            session()->put('draft_keluar', [
-                'transaksi_id' => $transaksi->id,
-                'area_parkir_id' => $transaksi->area_parkir_id,
-                'tipe_kendaraan_id' => $kendaraan->tipe_kendaraan_id,
-                'kendaraan_id' => $kendaraan->id,
-                'kode' => $transaksi->kode,
-                'plat' => $kendaraan->plat_nomor,
-                'jam_masuk' => $waktuMasuk->format('H:i'),
-                'jam_keluar' => $waktuKeluar->format('H:i'),
-                'durasi_menit' => $durasiMenit,
-                'durasi' => floor($durasiMenit / 60) . ' jam ' . ($durasiMenit % 60) . ' menit',
-                'tarif_perjam' => $tarif->tarif_perjam,
-                'biaya_awal' => $biayaAwal,
-                'diskon_persen' => $diskonPersen,
-                'diskon' => $diskonNominal,
-                'total' => $biayaAwal - $diskonNominal,
-                'membership_id' => $member?->id,
-                'member' => $member?->nama ?? '-',
-                'tanggal' => $waktuKeluar->format('d-m-Y'),
-                'operator' => auth()->user()->name ?? '-',
-            ]);
-
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()]);
-        }
-
-        return back();
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => $e->getMessage()]);
     }
+
+    return back();
+}
+
 
     /**
      * Autocomplete plat/kode
@@ -222,47 +268,56 @@ class TransaksiController extends Controller
     /**
      * Bayar → simpan transaksi keluar → simpan overlay struk
      */
-    public function bayar(Request $request)
-    {
-        $request->validate(['metode_pembayaran_id'=>'required']);
+public function bayar(Request $request)
+{
+    $request->validate(['metode_pembayaran_id' => 'required']);
 
-        $s = session('draft_keluar');
-        if (!$s) return back()->withErrors('Data pembayaran tidak ditemukan');
+    $s = session('draft_keluar');
+    if (!$s) return back()->withErrors('Data pembayaran tidak ditemukan');
 
-        DB::transaction(function() use ($request, $s) {
-            $transaksi = Transaksi::lockForUpdate()->findOrFail($s['transaksi_id']);
-            $metode = MetodePembayaran::findOrFail($request->metode_pembayaran_id);
+    DB::transaction(function() use ($request, $s) {
+        $transaksi = Transaksi::lockForUpdate()->findOrFail($s['transaksi_id']);
+        $metode = MetodePembayaran::findOrFail($request->metode_pembayaran_id);
 
-            $transaksi->update([
-                'waktu_keluar' => now(),
-                'durasi_menit' => $s['durasi_menit'],
-                'biaya' => $s['biaya_awal'],
-                'biaya_total' => $s['total'],
-                'membership_id' => $s['membership_id'],
-                'metode_pembayaran_id' => $metode->id,
-                'status' => 'keluar',
-            ]);
+        // ================= UPDATE TRANSAKSI YANG ADA =================
+        $transaksi->update([
+            'waktu_keluar' => now(),
+            'durasi_menit' => $s['durasi_menit'],
+            'biaya' => $s['biaya_awal'],
+            'biaya_total' => $s['total'],
+            'membership_id' => $s['membership_id'],
+            'metode_pembayaran_id' => $metode->id,
+            'status' => 'keluar',
+        ]);
 
-            $areaDetail = AreaParkirDetail::where('area_parkir_id',$s['area_parkir_id'])
-                ->where('tipe_kendaraan_id',$s['tipe_kendaraan_id'])
-                ->lockForUpdate()
-                ->first();
+        // ================= UPDATE AREA PARKIR =================
+        $areaDetail = AreaParkirDetail::where('area_parkir_id', $s['area_parkir_id'])
+            ->where('tipe_kendaraan_id', $s['tipe_kendaraan_id'])
+            ->lockForUpdate()
+            ->first();
 
-            if($areaDetail && $areaDetail->terisi>0) $areaDetail->decrement('terisi');
+        if ($areaDetail && $areaDetail->terisi > 0) {
+            $areaDetail->decrement('terisi');
+        }
 
-            Kendaraan::where('id',$s['kendaraan_id'])->update(['area_parkir_id'=>null]);
+        // Kosongkan area parkir kendaraan
+        Kendaraan::where('id', $s['kendaraan_id'])->update(['area_parkir_id' => null]);
 
-            // simpan session struk
-            session()->put('struk_keluar', array_merge($s, [
-                'metode_id' => $metode->id,
-                'metode' => $metode->nama_metode,
-            ]));
-        });
+        // ================= SIMPAN SESSION STRUK =================
+        session()->put('struk_keluar', array_merge($s, [
+            'metode_id' => $metode->id,
+            'metode' => $metode->nama_metode,
+        ]));
 
-        session()->forget('draft_keluar');
+        // ================= TAMBAH ROW BARU =================
 
-        return back()->with('success','Pembayaran berhasil');
-    }
+    });
+
+    session()->forget('draft_keluar');
+
+    return back()->with('success', 'Pembayaran berhasil');
+}
+
 
 
 

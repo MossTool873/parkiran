@@ -49,20 +49,50 @@
 
     {{-- Biaya & Diskon --}}
     <div class="mb-3 border-t border-gray-200 pt-2">
+        @php
+            $biayaAwal = $transaksi->biaya ?? 0;
+            $diskonMember = $transaksi->membership?->membershipTier?->diskon ?? 0;
+            $nominalDiskonMember = ($biayaAwal * $diskonMember / 100);
+
+            $config = \App\Models\KonfigurasiTarif::first();
+            $diskonNonMember = $config?->isDiskonBerlaku() ? ($config->diskon_persen/100) * $biayaAwal : 0;
+
+            $totalDiskon = $diskonNonMember + $nominalDiskonMember;
+            $biayaTotal = max(0, $biayaAwal - $totalDiskon);
+        @endphp
+
         <div class="grid grid-cols-2 gap-2 py-1">
             <div class="font-semibold">Tarif Awal</div>
-            <div class="text-right">Rp {{ number_format($transaksi->biaya ?? 0,0,',','.') }}</div>
+            <div class="text-right">Rp {{ number_format($biayaAwal,0,',','.') }}</div>
         </div>
+
         <div class="grid grid-cols-2 gap-2 py-1">
             <div class="font-semibold">Diskon</div>
             <div class="text-right">
-                {{ $transaksi->membership?->membershipTier?->diskon ?? 0 }}% 
-                (- Rp {{ number_format(($transaksi->membership?->membershipTier?->diskon ?? 0) * ($transaksi->biaya ?? 0) / 100,0,',','.') }})
+                {{ $config?->diskon_persen ?? 0 }}% 
+                (- Rp {{ number_format($diskonNonMember,0,',','.') }})
             </div>
         </div>
+
+        <div class="grid grid-cols-2 gap-2 py-1">
+            <div class="font-semibold">Diskon Member</div>
+            <div class="text-right">
+                {{ $diskonMember }}% 
+                (- Rp {{ number_format($nominalDiskonMember,0,',','.') }})
+            </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-2 py-1 border-t border-gray-200 pt-1 font-bold">
             <div>Total</div>
-            <div class="text-right">Rp {{ number_format($transaksi->biaya_total ?? 0,0,',','.') }}</div>
+            <div class="text-right">Rp {{ number_format($biayaTotal,0,',','.') }}</div>
+        </div>
+    </div>
+
+    {{-- Metode Pembayaran --}}
+    <div class="mb-3 border-t border-gray-200 pt-2">
+        <div class="grid grid-cols-2 gap-2 py-1">
+            <div class="font-semibold">Metode Bayar</div>
+            <div class="text-right">{{ $transaksi->metodePembayaran?->nama_metode ?? '-' }}</div>
         </div>
     </div>
 

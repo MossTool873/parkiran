@@ -33,7 +33,7 @@ public function create()
     {
         $request->validate([
             'batas_jam'  => 'required|integer|min:1|unique:tarif_durasi,batas_jam',
-            'persentase' => 'required|integer|min:1|max:1000',
+            'persentase' => 'required|integer|min:1',
         ]);
 
         TarifDurasi::create($request->all());
@@ -57,7 +57,7 @@ public function edit(TarifDurasi $tarif_durasi)
     {
         $request->validate([
             'batas_jam'  => 'required|integer|min:1|unique:tarif_durasi,batas_jam,' . $tarif_durasi->id,
-            'persentase' => 'required|integer|min:1|max:1000',
+            'persentase' => 'required|integer|min:1',
         ]);
 
         $tarif_durasi->update($request->all());

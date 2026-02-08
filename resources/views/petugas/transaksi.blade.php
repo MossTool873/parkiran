@@ -238,142 +238,157 @@ function printStrukKeluar() {
         </form>
     </div>
 
-    {{-- ===================== OVERLAY BAYAR ===================== --}}
-    @if(session('draft_keluar'))
-        @php $s = session('draft_keluar'); @endphp
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div class="bg-white rounded shadow p-6 w-96 relative font-mono text-sm">
+{{-- ===================== OVERLAY BAYAR ===================== --}}
+@if(session('draft_keluar'))
+    @php $s = session('draft_keluar'); @endphp
+    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div class="bg-white rounded shadow p-6 w-96 relative font-mono text-sm">
 
-                {{-- Tombol batal overlay --}}
-                <form method="POST" action="{{ route('keluar.batal') }}" class="absolute top-3 right-3">
-                    @csrf
-                    <button class="w-8 h-8 flex items-center justify-center
-                                   rounded-full
-                                   text-lg font-bold
-                                   text-gray-500
-                                   hover:text-white hover:bg-red-600 transition">
-                        &times;
-                    </button>
-                </form>
-
-                <h3 class="text-center font-bold mb-3">KONFIRMASI PEMBAYARAN</h3>
-
-                <div class="space-y-1">
-                    <div>Plat       : {{ $s['plat'] }}</div>
-                    <div>Jam Masuk  : {{ $s['jam_masuk'] }}</div>
-                    <div>Jam Keluar : {{ $s['jam_keluar'] }}</div>
-                    <div>Durasi     : {{ $s['durasi'] }}</div>
-                    <div>Member     : {{ $s['member'] }}</div>
-                </div>
-
-                <hr class="my-3">
-
-                <div class="space-y-1">
-                    <div>Tarif/Jam  : Rp {{ number_format($s['tarif_perjam'],0,',','.') }}</div>
-                    <div>Biaya Awal : Rp {{ number_format($s['biaya_awal'],0,',','.') }}</div>
-                    <div>Diskon ({{ $s['diskon_persen'] }}%) : - Rp {{ number_format($s['diskon'],0,',','.') }}</div>
-                    <div class="font-bold">TOTAL : Rp {{ number_format($s['total'],0,',','.') }}</div>
-                </div>
-
-                <hr class="my-3">
-
-                {{-- Pilih Metode Bayar --}}
-                <form method="POST" action="{{ route('keluar.bayar') }}">
-                    @csrf
-                    <label class="block text-sm font-medium mb-1">Metode Pembayaran</label>
-                    <select name="metode_pembayaran_id" class="w-full border px-3 py-2 mb-4" required>
-                        <option value="">-- Pilih --</option>
-                        @foreach($metodePembayarans as $metode)
-                            <option value="{{ $metode->id }}">{{ $metode->nama_metode }}</option>
-                        @endforeach
-                    </select>
-
-                    <button type="submit"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">
-                        Bayar
-                    </button>
-                </form>
-            </div>
-        </div>
-    @endif
-
-    {{-- ===================== OVERLAY STRUK ===================== --}}
-    @if(session('struk_keluar'))
-        @php $s = session('struk_keluar'); @endphp
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div class="bg-white rounded shadow p-6 w-96 relative font-mono text-sm print-area">
-
-                {{-- Tombol batal/tutup --}}
-                <form method="POST" action="{{ route('keluar.batal') }}" class="absolute top-3 right-3 no-print">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="w-10 h-10 flex items-center justify-center
+            {{-- Tombol batal overlay --}}
+            <form method="POST" action="{{ route('keluar.batal') }}" class="absolute top-3 right-3">
+                @csrf
+                <button class="w-8 h-8 flex items-center justify-center
                                rounded-full
-                               text-2xl font-bold
+                               text-lg font-bold
                                text-gray-500
-                               hover:text-white hover:bg-red-600
-                               transition">
-                        &times;
+                               hover:text-white hover:bg-red-600 transition">
+                    &times;
+                </button>
+            </form>
+
+            <h3 class="text-center font-bold mb-3">KONFIRMASI PEMBAYARAN</h3>
+
+            <div class="space-y-1">
+                <div>Plat       : {{ $s['plat'] }}</div>
+                <div>Jam Masuk  : {{ $s['jam_masuk'] }}</div>
+                <div>Jam Keluar : {{ $s['jam_keluar'] }}</div>
+                <div>Durasi     : {{ $s['durasi'] }}</div>
+                <div>Member     : {{ $s['member'] }}</div>
+            </div>
+
+            <hr class="my-3">
+
+            <div class="space-y-1">
+                <div>Biaya Awal         : Rp {{ number_format($s['biaya_awal'],0,',','.') }}</div>
+                <div>Diskon             : - Rp {{ number_format($s['diskon_non_member'],0,',','.') }}
+                    ({{ $s['diskon_non_member_persen'] }}%)
+                </div>
+                @if($s['diskon_member'] > 0)
+                    <div>Diskon Member      : - Rp {{ number_format($s['diskon_member'],0,',','.') }}
+                        ({{ $s['diskon_member_persen'] }}%)
+                    </div>
+                @endif
+                <div class="font-bold">TOTAL              : Rp {{ number_format($s['total'],0,',','.') }}</div>
+            </div>
+
+            <hr class="my-3">
+
+            {{-- Pilih Metode Bayar --}}
+            <form method="POST" action="{{ route('keluar.bayar') }}">
+                @csrf
+                <label class="block text-sm font-medium mb-1">Metode Pembayaran</label>
+                <select name="metode_pembayaran_id" class="w-full border px-3 py-2 mb-4" required>
+                    <option value="">-- Pilih --</option>
+                    @foreach($metodePembayarans as $metode)
+                        <option value="{{ $metode->id }}">{{ $metode->nama_metode }}</option>
+                    @endforeach
+                </select>
+
+                <button type="submit"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">
+                    Bayar
+                </button>
+            </form>
+        </div>
+    </div>
+@endif
+
+
+{{-- ===================== OVERLAY STRUK ===================== --}}
+@if(session('struk_keluar'))
+    @php $s = session('struk_keluar'); @endphp
+    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div class="bg-white rounded shadow p-6 w-96 relative font-mono text-sm print-area">
+
+            {{-- Tombol batal/tutup --}}
+            <form method="POST" action="{{ route('keluar.batal') }}" class="absolute top-3 right-3 no-print">
+                @csrf
+                <button
+                    type="submit"
+                    class="w-10 h-10 flex items-center justify-center
+                           rounded-full
+                           text-2xl font-bold
+                           text-gray-500
+                           hover:text-white hover:bg-red-600
+                           transition">
+                    &times;
+                </button>
+            </form>
+
+            {{-- HEADER --}}
+            <div class="text-center font-bold mb-3">
+                STRUK PARKIR KELUAR
+            </div>
+
+            {{-- INFO KENDARAAN --}}
+            <div class="space-y-1">
+                <div>Plat      : {{ $s['plat'] }}</div>
+                <div>Masuk     : {{ $s['jam_masuk'] }}</div>
+                <div>Keluar    : {{ $s['jam_keluar'] }}</div>
+                <div>Durasi    : {{ $s['durasi'] }}</div>
+                <div>Member    : {{ $s['member'] }}</div>
+            </div>
+
+            <hr class="my-3">
+
+            {{-- BIAYA --}}
+            <div class="space-y-1">
+                <div>Tarif/Jam          : Rp {{ number_format($s['tarif_perjam'], 0, ',', '.') }}</div>
+                <div>Biaya Awal         : Rp {{ number_format($s['biaya_awal'], 0, ',', '.') }}</div>
+                <div>Diskon  : - Rp {{ number_format($s['diskon_non_member'],0,',','.') }}
+                    ({{ $s['diskon_non_member_persen'] }}%)
+                </div>
+                @if($s['diskon_member'] > 0)
+                    <div>Diskon Member      : - Rp {{ number_format($s['diskon_member'],0,',','.') }}
+                        ({{ $s['diskon_member_persen'] }}%)
+                    </div>
+                @endif
+                <div class="font-bold">TOTAL              : Rp {{ number_format($s['total'],0,',','.') }}</div>
+                <div>Metode : {{ $s['metode'] }}</div>
+            </div>
+
+            <hr class="my-3">
+
+            {{-- META --}}
+            <div class="text-xs">
+                <div>Kode     : {{ $s['kode'] }}</div>
+                <div>Tanggal  : {{ $s['tanggal'] }}</div>
+                <div>Operator : {{ $s['operator'] }}</div>
+            </div>
+
+            <div class="text-center mt-2">
+                Terima Kasih
+            </div>
+
+            {{-- BUTTON --}}
+            <div class="mt-4 flex gap-2 no-print">
+                <button onclick="window.print()"
+                    class="flex-1 border px-3 py-1 rounded">
+                    Print
+                </button>
+
+                <form method="POST" action="{{ route('keluar.batal') }}" class="flex-1">
+                    @csrf
+                    <button class="w-full border px-3 py-1 rounded bg-gray-500 hover:bg-gray-600 text-white">
+                        Tutup
                     </button>
                 </form>
-
-                {{-- HEADER --}}
-                <div class="text-center font-bold mb-3">
-                    STRUK PARKIR KELUAR
-                </div>
-
-                {{-- INFO KENDARAAN --}}
-                <div class="space-y-1">
-                    <div>Plat      : {{ $s['plat'] }}</div>
-                    <div>Masuk     : {{ $s['jam_masuk'] }}</div>
-                    <div>Keluar    : {{ $s['jam_keluar'] }}</div>
-                    <div>Durasi    : {{ $s['durasi'] }}</div>
-                    <div>Member    : {{ $s['member'] }}</div>
-                </div>
-
-                <hr class="my-3">
-
-                {{-- BIAYA --}}
-                <div class="space-y-1">
-                    <div>Tarif/Jam  : Rp {{ number_format($s['tarif_perjam'], 0, ',', '.') }}</div>
-                    <div>Biaya Awal : Rp {{ number_format($s['biaya_awal'], 0, ',', '.') }}</div>
-                    <div>Diskon ({{ $s['diskon_persen'] }}%) : - Rp {{ number_format($s['diskon'], 0, ',', '.') }}</div>
-                    <div class="font-bold">TOTAL : Rp {{ number_format($s['total'], 0, ',', '.') }}</div>
-                    <div>Metode : {{ $s['metode'] }}</div>
-                </div>
-
-                <hr class="my-3">
-
-                {{-- META --}}
-                <div class="text-xs">
-                    <div>Kode     : {{ $s['kode'] }}</div>
-                    <div>Tanggal  : {{ $s['tanggal'] }}</div>
-                    <div>Operator : {{ $s['operator'] }}</div>
-                </div>
-
-                <div class="text-center mt-2">
-                    Terima Kasih
-                </div>
-
-                {{-- BUTTON --}}
-                <div class="mt-4 flex gap-2 no-print">
-                    <button onclick="window.print()"
-                        class="flex-1 border px-3 py-1 rounded">
-                        Print
-                    </button>
-
-                    <form method="POST" action="{{ route('keluar.batal') }}" class="flex-1">
-                        @csrf
-                        <button class="w-full border px-3 py-1 rounded bg-gray-500 hover:bg-gray-600 text-white">
-                            Tutup
-                        </button>
-                    </form>
-                </div>
-
             </div>
+
         </div>
-    @endif
+    </div>
+@endif
+
 
 
 {{-- ===================== SCRIPT AUTOCOMPLETE ===================== --}}

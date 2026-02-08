@@ -29,6 +29,7 @@ return new class extends Migration
             $table->integer('durasi_menit')->nullable();
             $table->integer('biaya')->nullable();
             $table->integer('biaya_total')->nullable();
+            $table->integer('diskon_nonmember')->nullable();
             $table->foreignId('metode_pembayaran_id')->nullable()->constrained('metode_pembayaran');
             $table->enum('status', ['masuk', 'keluar'])->default('masuk');
             $table->foreignId('area_parkir_id')->constrained('area_parkir');
