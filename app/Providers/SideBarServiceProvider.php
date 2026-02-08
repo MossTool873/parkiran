@@ -45,6 +45,11 @@ class SidebarServiceProvider extends ServiceProvider
                                 'icon'  => 'bi bi-currency-dollar'
                             ],
                             [
+                                'label' => 'Tarif Durasi',
+                                'route' => '/admin/tarif-durasi',
+                                'icon'  => 'bi bi-currency-dollar'
+                            ],
+                            [
                                 'label' => 'Kendaraan',
                                 'route' => '/admin/kendaraan',
                                 'icon'  => 'bi bi-car-front'

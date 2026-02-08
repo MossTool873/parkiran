@@ -71,41 +71,47 @@ class BackupDatabaseController extends Controller
     /**
      * RESTORE DATABASE
      */
-    public function restore(Request $request)
-    {
+public function restore(Request $request)
+{
+    $request->validate([
+        'backup_file' => 'required|file|mimes:sql,txt|max:102400', // max 100MB
+    ]);
 
+    $path = $request->file('backup_file')->getRealPath();
 
-        $request->validate([
-            'backup_file' => 'required|mimes:sql'
-        ]);
+    if (!is_readable($path)) {
+        return back()->with('error', 'File SQL tidak dapat dibaca');
+    }
 
-        $sql = file_get_contents($request->file('backup_file')->getRealPath());
+    $sql = file_get_contents($path);
 
-        // Hapus komentar
-        $sql = preg_replace('/--.*?\n/', '', $sql);
-        $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
+    if (trim($sql) === '') {
+        return back()->with('error', 'File SQL kosong');
+    }
 
-        $queries = array_filter(array_map('trim', explode(";\n", $sql)));
-
-        DB::beginTransaction();
+    try {
+        // Nonaktifkan FK
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
+        // Eksekusi mentah
+        DB::unprepared($sql);
+
+    } catch (\Throwable $e) {
+
+        return back()->with(
+            'error',
+            'Restore gagal (sebagian data mungkin sudah berubah): ' . $e->getMessage()
+        );
+
+    } finally {
+
+        // Pastikan FK selalu aktif lagi
         try {
-            $count = 0;
-            foreach ($queries as $query) {
-                DB::statement($query);
-                $count++;
-            }
-
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Restore gagal: ' . $e->getMessage());
-        }
-
-        return redirect()
-            ->back()
-            ->with('success', "Database berhasil direstore ({$count} query dijalankan)");
+        } catch (\Throwable $ex) {}
     }
+
+    return back()->with('success', 'Database berhasil direstore');
+}
+
 }

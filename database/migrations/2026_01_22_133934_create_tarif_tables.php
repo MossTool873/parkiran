@@ -18,6 +18,16 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        Schema::create('tarif_durasi', function (Blueprint $table) {
+            $table->id();
+
+            $table->integer('batas_jam'); 
+            $table->integer('persentase');  
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
     /**
@@ -26,5 +36,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('tarif_tipe_kendaraan');
+        Schema::dropIfExists('tarif_durasi');
     }
 };

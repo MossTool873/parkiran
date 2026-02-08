@@ -25,6 +25,7 @@ use App\Http\Controllers\LogAktivitasController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\MembershipTierController;
 use App\Http\Controllers\MetodePembayaranController;
+use App\Http\Controllers\TarifDurasiController;
 use App\Http\Controllers\TipeKendaraanController;
 use App\Http\Controllers\TarifTipeKendaraanController;
 use App\Http\Controllers\TransaksiController;
@@ -47,6 +48,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('areaParkir', AreaParkirController::class);
     Route::resource('tipeKendaraan', KendaraanTipeController::class);
     Route::resource('tarifTipeKendaraan', TarifTipeKendaraanController::class);
+    Route::resource('tarif-durasi', TarifDurasiController::class);
     Route::resource('kendaraan', KendaraanController::class);
     Route::resource('metodePembayaran', MetodePembayaranController::class);
     Route::resource('membership-tier', MembershipTierController::class);
