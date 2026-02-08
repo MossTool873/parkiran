@@ -3,93 +3,119 @@
 @section('title', 'Tambah Tarif Durasi')
 
 @section('content')
-<div class="bg-white p-6 rounded-lg shadow">
-    <h2 class="text-lg font-semibold mb-4">Tambah Tarif Durasi</h2>
+<div class="w-full px-6 py-6">
 
-    <form method="POST" action="{{ url('/admin/tarif-durasi') }}">
-        @csrf
+    {{-- ================= HEADER ================= --}}
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">Tambah Tarif Durasi</h1>
+        <p class="text-sm text-gray-500">
+            Tambahkan tarif tambahan berdasarkan durasi
+        </p>
+    </div>
 
-        {{-- Batas Jam --}}
-        <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">
-                Batas Jam
-            </label>
-            <input
-                type="number"
-                name="batas_jam"
-                min="1"
-                class="w-full border rounded px-3 py-2"
-                required
-            >
+    {{-- ================= ALERT ================= --}}
+    @if (session('success'))
+        <div class="mb-6 bg-green-100 text-green-700 px-4 py-3 rounded">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- ================= GRID KIRI KANAN ================= --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+        {{-- ================= CARD KIRI : FORM ================= --}}
+        <div class="bg-white rounded-xl shadow p-6">
+            <form method="POST" action="{{ url('/admin/tarif-durasi') }}" class="space-y-6">
+                @csrf
+
+                {{-- Batas Jam --}}
+                <div>
+                    <label class="block text-sm font-medium mb-2">
+                        Batas Jam
+                    </label>
+                    <input
+                        type="number"
+                        name="batas_jam"
+                        min="1"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring focus:ring-blue-200"
+                        required
+                    >
+                </div>
+
+                {{-- Persentase --}}
+                <div>
+                    <label class="block text-sm font-medium mb-2">
+                        Persentase (%)
+                    </label>
+                    <input
+                        type="number"
+                        id="persentase"
+                        name="persentase"
+                        min="1"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring focus:ring-blue-200"
+                        required
+                    >
+                </div>
+
+                {{-- SUBMIT --}}
+                <div class="flex justify-end gap-2">
+                    <button
+                        type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                        Simpan
+                    </button>
+
+                    <a href="{{ url('/admin/tarif-durasi') }}"
+                       class="px-6 py-2 bg-gray-300 rounded-lg">
+                        Kembali
+                    </a>
+                </div>
+            </form>
         </div>
 
-        {{-- Persentase --}}
-        <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">
-                Persentase (%)
-            </label>
-            <input
-                type="number"
-                id="persentase"
-                name="persentase"
-                min="1"
-                class="w-full border rounded px-3 py-2"
-                required
-            >
-        </div>
+        {{-- ================= CARD KANAN : ESTIMASI ================= --}}
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Preview Tarif</h2>
 
-        <hr class="my-6">
-
-        {{-- PREVIEW --}}
-        <h3 class="font-semibold mb-2">Preview Tarif</h3>
-
-        <div class="overflow-x-auto">
-            <table class="w-full border text-sm">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="border px-3 py-2 text-left">
-                            Tipe Kendaraan
-                        </th>
-                        <th class="border px-3 py-2 text-right">
-                            Tarif Dasar / Jam
-                        </th>
-                        <th class="border px-3 py-2 text-right">
-                            Hasil Tarif
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($tarifDasar as $item)
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border border-gray-200 rounded-lg">
+                    <thead class="bg-gray-100 text-left">
                         <tr>
-                            <td class="border px-3 py-2">
-                                {{ $item->tipeKendaraan->tipe_kendaraan }}
-                            </td>
-                            <td
-                                class="border px-3 py-2 text-right tarif-dasar"
-                                data-tarif="{{ $item->tarif_perjam }}"
-                            >
-                                Rp {{ number_format($item->tarif_perjam, 0, ',', '.') }}
-                            </td>
-                            <td class="border px-3 py-2 text-right hasil">
-                                -
-                            </td>
+                            <th class="px-4 py-2">Tipe Kendaraan</th>
+                            <th class="px-4 py-2 text-right">Tarif Dasar / Jam</th>
+                            <th class="px-4 py-2 text-right">Hasil Tarif</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($tarifDasar as $item)
+                            <tr class="border-t hover:bg-gray-50">
+                                <td class="px-4 py-2 font-medium">
+                                    {{ $item->tipeKendaraan->tipe_kendaraan }}
+                                </td>
+
+                                <td
+                                    class="px-4 py-2 text-right tarif-dasar"
+                                    data-tarif="{{ $item->tarif_perjam }}"
+                                >
+                                    Rp {{ number_format($item->tarif_perjam, 0, ',', '.') }}
+                                </td>
+
+                                <td class="px-4 py-2 text-right hasil">
+                                    -
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="mt-4 text-xs text-gray-500">
+                Preview otomatis menghitung tarif tambahan berdasarkan persentase yang diisi.
+            </p>
         </div>
 
-        <div class="mt-6 flex gap-2">
-            <button class="px-4 py-2 bg-blue-600 text-white rounded">
-                Simpan
-            </button>
-
-            <a href="{{ url('/admin/tarif-durasi') }}"
-               class="px-4 py-2 bg-gray-300 rounded">
-                Kembali
-            </a>
-        </div>
-    </form>
+    </div>
 </div>
 
 <script>

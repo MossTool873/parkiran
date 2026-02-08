@@ -125,13 +125,14 @@ class SidebarServiceProvider extends ServiceProvider
                                 'route' => '/laporan/occupancy',
                                 'icon'  => 'bi bi-bar-chart'
                             ],
-                            [
+                           
+                        ],
+                    ],
+                     [
                                 'label' => 'Tracking Kendaraan',
                                 'route' => '/tracking-kendaraan',
                                 'icon'  => 'bi bi-geo-alt'
                             ],
-                        ],
-                    ],
                     [
                         'label' => 'Backup-Restore Database',
                         'route' => '/admin/database/index',
