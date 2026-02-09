@@ -109,14 +109,25 @@
         <div class="bg-white rounded-xl shadow p-6">
             <h2 class="text-lg font-semibold mb-4">Estimasi Tarif</h2>
 
-            {{-- CATATAN --}}
-            <div class="mt-4 text-xs text-gray-600">
-                <strong>Catatan:</strong>
-                Diskon
-                <span class="font-semibold">{{ $config->diskon_persen }}%</span>
-                {{ $config->diskon_aktif ? 'sedang aktif' : 'tidak aktif' }},
-                diskon <u>tidak dihitung</u> dalam estimasi ini.
-            </div>
+           {{-- CATATAN --}}
+<div class="mt-4 text-xs text-gray-600 space-y-1">
+    <div>
+        <strong>Catatan:</strong>
+        Diskon
+        <span class="font-semibold">{{ $config->diskon_persen }}%</span>
+        {{ $config->diskon_aktif ? 'sedang aktif' : 'tidak aktif' }},
+        diskon <u>tidak dihitung</u> dalam estimasi ini.
+    </div>
+
+    <div>
+        Tarif per jam lanjutan dihitung dari durasi berlebih
+        setelah durasi tertinggi
+        <span class="font-semibold">
+            ({{ $durasiTertinggi ?? 0 }} jam)
+        </span>.
+    </div>
+</div>
+
             <br>
 
             {{-- TABEL ESTIMASI --}}
