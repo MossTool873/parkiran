@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('area_parkir', function (Blueprint $table) {
             $table->id();
             $table->string('nama_area');
+            $table->string('lokasi');
             $table->integer('total_kapasitas');
             $table->timestamps();
             $table->softDeletes();
@@ -28,7 +29,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-                Schema::create('kendaraan', function (Blueprint $table) {
+        Schema::create('kendaraan', function (Blueprint $table) {
             $table->id();
             $table->string('plat_nomor')->unique();
             $table->string('warna');

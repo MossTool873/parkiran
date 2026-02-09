@@ -3,12 +3,13 @@
 @section('title', 'Area Parkir')
 
 @section('content')
+
     {{-- HEADER --}}
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h1 class="text-2xl font-bold">Area Parkir</h1>
 
         <a href="{{ url('/admin/areaParkir/create') }}"
-           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center">
             + Tambah Area Parkir
         </a>
     </div>
@@ -24,12 +25,19 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         @forelse ($areaParkirs as $area)
-            <div class="bg-white rounded-lg shadow border">
+            <div class="bg-white rounded-xl shadow border">
 
                 {{-- HEADER CARD --}}
-                <div class="flex justify-between items-center px-6 py-4 border-b">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-6 py-4 border-b">
+
                     <div>
                         <h2 class="text-lg font-semibold">{{ $area->nama_area }}</h2>
+
+                        {{-- LOKASI BARU --}}
+                        <p class="text-sm text-gray-500">
+                            Lokasi: <span class="font-medium">{{ $area->lokasi }}</span>
+                        </p>
+
                         <p class="text-sm text-gray-600">
                             Total Kapasitas:
                             <span class="font-medium">{{ $area->total_kapasitas }}</span>
@@ -53,11 +61,13 @@
                             </button>
                         </form>
                     </div>
+
                 </div>
 
                 {{-- BODY CARD --}}
                 <div class="px-6 py-4">
-                    {{-- HEADER TABEL --}}
+
+                    {{-- HEADER TABLE --}}
                     <div class="grid grid-cols-4 font-semibold text-sm text-gray-600 border-b pb-2">
                         <div>Tipe</div>
                         <div>Kapasitas</div>
@@ -66,42 +76,46 @@
                     </div>
 
                     <div class="divide-y">
-@foreach ($area->detailKapasitas as $detail)
-    @php
-        $tipe = $detail->tipeKendaraan;
-    @endphp
 
-    @if ($detail->kapasitas > 0 && $tipe)
-        @php
-            $terisi = $detail->terisi ?? 0;
-            $kapasitas = $detail->kapasitas;
-            $persen = $kapasitas > 0
-                ? round(($terisi / $kapasitas) * 100)
-                : 0;
-        @endphp
+                        @foreach ($area->detailKapasitas as $detail)
+                            @php
+                                $tipe = $detail->tipeKendaraan;
+                            @endphp
 
-        <div class="grid grid-cols-4 py-2 text-sm items-center">
-            <div>{{ $tipe->tipe_kendaraan }}</div>
-            <div>{{ $kapasitas }}</div>
-            <div>{{ $terisi }}</div>
+                            @if ($detail->kapasitas > 0 && $tipe)
+                                @php
+                                    $terisi = $detail->terisi ?? 0;
+                                    $kapasitas = $detail->kapasitas;
+                                    $persen = $kapasitas > 0
+                                        ? round(($terisi / $kapasitas) * 100)
+                                        : 0;
+                                @endphp
 
-            {{-- PERSENTASE --}}
-            <div class="text-center">
-                <span class="inline-block px-2 py-1 rounded text-xs font-semibold
-                    {{ $persen >= 90 ? 'bg-red-100 text-red-700' :
-                       ($persen >= 70 ? 'bg-yellow-100 text-yellow-700' :
-                       'bg-green-100 text-green-700') }}">
-                    {{ $persen }}%
-                </span>
-            </div>
-        </div>
-    @endif
-@endforeach
+                                <div class="grid grid-cols-4 py-2 text-sm items-center">
+                                    <div>{{ $tipe->tipe_kendaraan }}</div>
+                                    <div>{{ $kapasitas }}</div>
+                                    <div>{{ $terisi }}</div>
+
+                                    {{-- PERSENTASE --}}
+                                    <div class="text-center">
+                                        <span class="inline-block px-2 py-1 rounded text-xs font-semibold
+                                            {{ $persen >= 90 ? 'bg-red-100 text-red-700' :
+                                               ($persen >= 70 ? 'bg-yellow-100 text-yellow-700' :
+                                               'bg-green-100 text-green-700') }}">
+                                            {{ $persen }}%
+                                        </span>
+                                    </div>
+                                </div>
+
+                            @endif
+                        @endforeach
 
                     </div>
+
                 </div>
 
             </div>
+
         @empty
             <div class="col-span-2 bg-white rounded-lg shadow p-6 text-center text-gray-500">
                 Data area parkir kosong
@@ -110,10 +124,9 @@
 
     </div>
 
-<div class="mt-8 text-center">
-    {{ $areaParkirs->onEachSide(2)->links() }}
-</div>
-
-
+    {{-- PAGINATION --}}
+    <div class="mt-8 text-center">
+        {{ $areaParkirs->onEachSide(2)->links() }}
+    </div>
 
 @endsection

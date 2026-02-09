@@ -12,8 +12,8 @@ class AreaParkir extends Model
     protected $table = 'area_parkir';
 
     protected $fillable = [
-        'kode',
         'nama_area',
+        'lokasi',
         'total_kapasitas',
     ];
 
