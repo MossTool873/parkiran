@@ -343,7 +343,6 @@ function printStrukKeluar() {
 
             {{-- BIAYA --}}
             <div class="space-y-1">
-                <div>Tarif/Jam          : Rp {{ number_format($s['tarif_perjam'], 0, ',', '.') }}</div>
                 <div>Biaya Awal         : Rp {{ number_format($s['biaya_awal'], 0, ',', '.') }}</div>
                 <div>Diskon  : - Rp {{ number_format($s['diskon_non_member'],0,',','.') }}
                     ({{ $s['diskon_non_member_persen'] }}%)
