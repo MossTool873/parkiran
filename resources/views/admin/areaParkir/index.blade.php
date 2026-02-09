@@ -22,7 +22,7 @@
     @endif
 
     {{-- GRID CARD --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         @forelse ($areaParkirs as $area)
             <div class="bg-white rounded-xl shadow border">
@@ -65,54 +65,43 @@
                 </div>
 
                 {{-- BODY CARD --}}
-                <div class="px-6 py-4">
+<div class="px-6 py-4">
 
-                    {{-- HEADER TABLE --}}
-                    <div class="grid grid-cols-4 font-semibold text-sm text-gray-600 border-b pb-2">
-                        <div>Tipe</div>
-                        <div>Kapasitas</div>
-                        <div>Terisi</div>
-                        <div class="text-center">%</div>
+    {{-- HEADER TABLE --}}
+    <div class="grid grid-cols-2 font-semibold text-sm text-gray-600 border-b pb-2">
+        <div>Tipe</div>
+        <div class="text-center">Kapasitas</div>
+    </div>
+
+    <div class="divide-y">
+
+        @foreach ($area->detailKapasitas as $detail)
+            @php
+                $tipe = $detail->tipeKendaraan;
+            @endphp
+
+            @if ($detail->kapasitas > 0 && $tipe)
+                @php
+                    $kapasitas = $detail->kapasitas;
+                @endphp
+
+                <div class="grid grid-cols-2 py-2 text-sm items-center">
+                    <div>
+                        {{ $tipe->tipe_kendaraan }}
                     </div>
 
-                    <div class="divide-y">
-
-                        @foreach ($area->detailKapasitas as $detail)
-                            @php
-                                $tipe = $detail->tipeKendaraan;
-                            @endphp
-
-                            @if ($detail->kapasitas > 0 && $tipe)
-                                @php
-                                    $terisi = $detail->terisi ?? 0;
-                                    $kapasitas = $detail->kapasitas;
-                                    $persen = $kapasitas > 0
-                                        ? round(($terisi / $kapasitas) * 100)
-                                        : 0;
-                                @endphp
-
-                                <div class="grid grid-cols-4 py-2 text-sm items-center">
-                                    <div>{{ $tipe->tipe_kendaraan }}</div>
-                                    <div>{{ $kapasitas }}</div>
-                                    <div>{{ $terisi }}</div>
-
-                                    {{-- PERSENTASE --}}
-                                    <div class="text-center">
-                                        <span class="inline-block px-2 py-1 rounded text-xs font-semibold
-                                            {{ $persen >= 90 ? 'bg-red-100 text-red-700' :
-                                               ($persen >= 70 ? 'bg-yellow-100 text-yellow-700' :
-                                               'bg-green-100 text-green-700') }}">
-                                            {{ $persen }}%
-                                        </span>
-                                    </div>
-                                </div>
-
-                            @endif
-                        @endforeach
-
+                    <div class="text-center font-medium">
+                        {{ $kapasitas }}
                     </div>
-
                 </div>
+
+            @endif
+        @endforeach
+
+    </div>
+
+</div>
+
 
             </div>
 
