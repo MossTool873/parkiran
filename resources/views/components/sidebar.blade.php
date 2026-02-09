@@ -12,6 +12,7 @@
     <nav class="flex-1 mt-4 overflow-y-auto">
         @foreach ($menus as $index => $menu)
 
+            {{-- Jika tidak ada children --}}
             @if (!isset($menu['children']))
                 <a href="{{ url($menu['route']) }}"
                    class="flex items-center gap-3 px-4 py-2 hover:bg-gray-800 transition rounded">
@@ -21,11 +22,17 @@
                     <span>{{ $menu['label'] }}</span>
                 </a>
 
+            {{-- Jika ada children --}}
             @else
                 @php
-                    $isActive = collect($menu['children'])
-                        ->pluck('route')
-                        ->contains(fn($r) => request()->is(ltrim($r,'/').'*'));
+                    $isActive = false;
+                    foreach($menu['children'] as $child) {
+                        // Cocokkan dengan path request saat ini
+                        if(request()->is(ltrim(parse_url($child['route'], PHP_URL_PATH), '/').'*')) {
+                            $isActive = true;
+                            break;
+                        }
+                    }
                 @endphp
 
                 <div x-data="{ openMenu: {{ $isActive ? $index : 'null' }} }" class="mt-1">
@@ -46,6 +53,7 @@
 
                     <div x-show="openMenu === {{ $index }}"
                          x-transition
+                         x-cloak
                          class="ml-6 mt-1 space-y-1">
                         @foreach ($menu['children'] as $child)
                             <a href="{{ url($child['route']) }}"
