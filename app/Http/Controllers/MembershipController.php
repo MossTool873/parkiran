@@ -13,11 +13,21 @@ use Illuminate\Validation\ValidationException;
 
 class MembershipController extends Controller
 {
-    public function index()
-    {
-        $memberships = Membership::with('membershipTier')->latest()->get();
-        return view('admin.membership.index', compact('memberships'));
-    }
+public function index(Request $request)
+{
+    $search = $request->query('search'); 
+
+    $memberships = Membership::with('membershipTier')
+        ->when($search, function($query, $search) {
+            $query->where('name', 'like', "%{$search}%");
+        })
+        ->latest()
+        ->paginate(10)
+        ->withQueryString(); 
+
+    return view('admin.membership.index', compact('memberships', 'search'));
+}
+
 
     public function create()
     {

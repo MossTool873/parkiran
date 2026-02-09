@@ -10,11 +10,21 @@ use Illuminate\Http\Request;
 
 class KendaraanController extends Controller
 {
-    public function index()
-    {
-        $kendaraans = Kendaraan::with('tipeKendaraan')->orderBy('id', 'desc')->paginate(10); 
-        return view('admin.kendaraan.index', compact('kendaraans'));
-    }
+    public function index(Request $request)
+{
+    $search = $request->query('search'); 
+
+    $kendaraans = Kendaraan::with('tipeKendaraan')
+        ->when($search, function ($query, $search) {
+            return $query->where('plat_nomor', 'like', "%{$search}%");
+        })
+        ->orderBy('id', 'desc')
+        ->paginate(10)
+        ->withQueryString(); 
+
+    return view('admin.kendaraan.index', compact('kendaraans', 'search'));
+}
+
 
     public function create()
     {

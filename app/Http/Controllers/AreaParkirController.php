@@ -10,14 +10,22 @@ use Illuminate\Support\Facades\DB;
 
 class AreaParkirController extends Controller
 {
-    public function index()
-    {
-        $areaParkirs = AreaParkir::with(['detailKapasitas.tipeKendaraan'])
-            ->orderBy('id', 'desc')
-            ->paginate(6);
+public function index(Request $request)
+{
+    $search = $request->query('search'); 
 
-        return view('admin.areaParkir.index', compact('areaParkirs'));
-    }
+    $areaParkirs = AreaParkir::with(['detailKapasitas.tipeKendaraan'])
+        ->when($search, function ($query, $search) {
+            return $query->where('lokasi', 'like', "%{$search}%")
+                         ->orWhere('nama_area', 'like', "%{$search}%");
+        })
+        ->orderBy('id', 'desc')
+        ->paginate(6)
+        ->withQueryString();
+
+    return view('admin.areaParkir.index', compact('areaParkirs', 'search'));
+}
+
 
     public function create()
     {

@@ -10,14 +10,20 @@ use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
-    public function index()
-    {
-        $users = User::with('role')
-            ->whereNull('deleted_at')
-            ->get();
+public function index(Request $request)
+{
+    $search = $request->query('search'); 
+    $users = User::with('role')
+        ->whereNull('deleted_at')
+        ->when($search, function($query, $search) {
+            $query->where('name', 'like', "%{$search}%");
+        })
+        ->orderBy('id', 'desc')
+        ->paginate(10)
+        ->withQueryString(); 
 
-        return view('admin.users.index', compact('users'));
-    }
+    return view('admin.users.index', compact('users', 'search'));
+}
 
     public function create()
     {

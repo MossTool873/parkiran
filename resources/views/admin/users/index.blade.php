@@ -3,13 +3,34 @@
 @section('title', 'Manajemen User')
 
 @section('content')
-    <div class="flex justify-between items-center mb-4">
+    {{-- HEADER: judul & tombol Tambah --}}
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
         <h1 class="text-2xl font-bold">Manajemen User</h1>
 
         <a href="{{ url('/admin/users/create') }}"
            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
             + Tambah User
         </a>
+    </div>
+
+    {{-- SEARCH BAR --}}
+    <div class="flex justify-end mb-4">
+        <form method="GET" action="{{ url('/admin/users') }}">
+            <div class="flex gap-2 w-full md:w-80">
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari nama user..."
+                    class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-blue-200">
+
+                <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                    Cari
+                </button>
+            </div>
+        </form>
     </div>
 
     @if (session('success'))
@@ -32,7 +53,7 @@
             <tbody>
                 @forelse ($users as $user)
                     <tr class="border-t">
-                        <td class="px-4 py-3">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-3">{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</td>
                         <td class="px-4 py-3">{{ $user->username }}</td>
                         <td class="px-4 py-3">{{ $user->name }}</td>
                         <td class="px-4 py-3">{{ $user->role->role ?? '-' }}</td>
@@ -61,5 +82,9 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    <div class="mt-4 text-center">
+        {{ $users->links() }}
     </div>
 @endsection

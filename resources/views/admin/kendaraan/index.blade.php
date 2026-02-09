@@ -12,6 +12,24 @@
         </a>
     </div>
 
+<div class="flex justify-end">
+        <div class="flex gap-2 w-full md:w-80">
+            <input
+                type="text"
+                name="search"
+                value="{{ request('search') }}"
+                placeholder="Cari plat atau nama member..."
+                class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-blue-200">
+
+            <button
+                type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                Cari
+            </button>
+        </div>
+    </div>
+
+
     @if (session('success'))
         <div class="mb-4 bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded">
             {{ session('success') }}
