@@ -25,7 +25,7 @@
 
         {{-- ================= CARD KIRI : FORM ================= --}}
         <div class="bg-white rounded-xl shadow p-6">
-            <form method="POST" action="{{ url('/admin/konfigurasi-tarif') }}" class="space-y-8">
+            <form method="POST" action="{{ url('/admin/konfigurasi-tarif') }}" class="space-y-8" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')>
                 @csrf
 
                 {{-- TARIF LANJUTAN --}}

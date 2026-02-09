@@ -98,7 +98,7 @@
                                 @foreach($tarifDasar as $tarif)
                                     <div class="flex justify-between border-b pb-1">
                                         <span>{{ $tarif->tipeKendaraan->tipe_kendaraan }}</span>
-                                        <span class="font-mono">
+                                        <span>
                                             Rp {{ number_format(($tarif->tarif_perjam * $item->persentase) / 100, 0, ',', '.') }}
                                         </span>
                                     </div>

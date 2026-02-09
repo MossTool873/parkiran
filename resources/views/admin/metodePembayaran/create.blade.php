@@ -15,7 +15,7 @@
     <h1 class="text-2xl font-bold mb-4">Tambah Metode Pembayaran</h1>
 
     <div class="bg-white rounded shadow p-6">
-        <form action="{{ url('/admin/metodePembayaran') }}" method="POST">
+        <form action="{{ url('/admin/metodePembayaran') }}" method="POST" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')>
             @csrf
 
             <div class="mb-4">

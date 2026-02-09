@@ -16,7 +16,7 @@
 <h1 class="text-2xl font-bold mb-6">Tambah Area Parkir</h1>
 
 <div class="bg-white rounded-lg shadow p-6 w-full">
-    <form action="{{ url('/admin/areaParkir') }}" method="POST" class="space-y-4">
+    <form action="{{ url('/admin/areaParkir') }}" method="POST" class="space-y-4" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')>
         @csrf
 
         <div>

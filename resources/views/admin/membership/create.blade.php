@@ -17,7 +17,8 @@
 
 <div class="bg-white rounded-lg shadow p-6">
 <form method="POST"
-      action="{{ isset($membership) ? route('membership.update',$membership->id) : route('membership.store') }}">
+      action="{{ isset($membership) ? route('membership.update',$membership->id) : route('membership.store') }}" 
+      onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')>
     @csrf
     @isset($membership)
         @method('PUT')

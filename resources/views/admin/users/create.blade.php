@@ -14,7 +14,7 @@
     @endif
 
     <div class="bg-white rounded-lg shadow p-6 w-full">
-        <form action="{{ url('/admin/users') }}" method="POST" class="space-y-4">
+        <form action="{{ url('/admin/users') }}" method="POST" class="space-y-4" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')>
             @csrf
 
             {{-- Username --}}
