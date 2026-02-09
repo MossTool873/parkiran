@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div x-data="tarifDurasiUI(@json($tarifDasar))">
+<div x-data="{ openRow: null }">
 
     {{-- ================= HEADER ================= --}}
     <div class="flex justify-between items-center mb-4">
@@ -17,7 +17,7 @@
     </div>
 
     {{-- ================= TABLE ================= --}}
-    <div class="bg-white rounded-lg shadow overflow-x-auto relative">
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-100 text-left">
                 <tr>
@@ -34,6 +34,7 @@
                     $prevBatas = $loop->first ? 0 : $tarifDurasi[$loop->index - 1]->batas_jam + 1;
                 @endphp
 
+                {{-- BARIS UTAMA --}}
                 <tr class="border-t hover:bg-gray-50">
                     <td class="px-4 py-3">
                         {{ $loop->iteration + ($tarifDurasi->firstItem() - 1) }}
@@ -43,16 +44,18 @@
                         {{ $prevBatas }} – {{ $item->batas_jam }} Jam
                     </td>
 
-                    {{-- TARIF BUTTON --}}
                     <td class="px-4 py-3">
-                        <button
-                            @click="open({{ $item->persentase }}, $event)"
-                            class="text-blue-600 font-semibold flex items-center gap-1 hover:underline">
+                        <button type="button"
+                                @click="openRow === {{ $item->id }} ? openRow = null : openRow = {{ $item->id }}"
+                                class="text-blue-600 font-semibold flex items-center gap-1 hover:underline">
 
                             {{ $item->persentase }}%
 
-                            <svg class="w-4 h-4"
-                                 fill="none" stroke="currentColor" stroke-width="2"
+                            <svg class="w-4 h-4 transition-transform duration-200"
+                                 :class="{ 'rotate-180': openRow === {{ $item->id }} }"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
                                  viewBox="0 0 24 24">
                                 <path d="M19 9l-7 7-7-7"/>
                             </svg>
@@ -70,69 +73,47 @@
                               onsubmit="return confirm('Yakin hapus?')">
                             @csrf
                             @method('DELETE')
-                            <button class="text-red-600 hover:underline">
+                            <button type="submit"
+                                    class="text-red-600 hover:underline">
                                 Hapus
                             </button>
                         </form>
                     </td>
                 </tr>
+
+                {{-- BARIS DETAIL --}}
+                <tr x-show="openRow === {{ $item->id }}"
+                    x-transition
+                    x-cloak
+                    class="bg-gray-50">
+
+                    <td colspan="4" class="px-6 py-4">
+
+                        <div class="bg-white border rounded-lg p-4 shadow-sm">
+                            <h3 class="font-semibold text-gray-700 mb-3">
+                                Estimasi Harga ({{ $item->persentase }}%)
+                            </h3>
+
+                            <div class="grid md:grid-cols-2 gap-4">
+                                @foreach($tarifDasar as $tarif)
+                                    <div class="flex justify-between border-b pb-1">
+                                        <span>{{ $tarif->tipeKendaraan->tipe_kendaraan }}</span>
+                                        <span class="font-mono">
+                                            Rp {{ number_format(($tarif->tarif_perjam * $item->persentase) / 100, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                    </td>
+                </tr>
+
             @endforeach
             </tbody>
         </table>
     </div>
 
-    {{-- ================= FLOATING PANEL ================= --}}
-    <div
-        x-show="show"
-        x-transition
-        @click.outside="close"
-        :style="{ top: y + 'px', left: x + 'px' }"
-        class="fixed z-50 bg-white border rounded-lg shadow-lg w-80 p-4">
-
-        <div class="flex justify-between items-center mb-2">
-            <h3 class="font-semibold text-gray-700">
-                Estimasi Harga (<span x-text="persen"></span>%)
-            </h3>
-            <button @click="close" class="text-gray-400 hover:text-gray-600">&times;</button>
-        </div>
-
-        <ul class="text-sm space-y-1">
-            <template x-for="tarif in tarifDasar" :key="tarif.id">
-                <li class="flex justify-between">
-                    <span x-text="tarif.tipe_kendaraan.tipe_kendaraan"></span>
-                    <span class="font-mono" 
-                          x-text="'Rp ' + Math.round(tarif.tarif_perjam * persen / 100).toLocaleString('id-ID')">
-                    </span>
-                </li>
-            </template>
-        </ul>
-    </div>
-
 </div>
-
-{{-- ================= SCRIPT ================= --}}
-<script>
-function tarifDurasiUI(tarifDasar) {
-    return {
-        show: false,
-        x: 0,
-        y: 0,
-        persen: 0,
-        tarifDasar: tarifDasar,
-
-        open(persen, event) {
-            const rect = event.target.getBoundingClientRect();
-            this.x = rect.left;
-            this.y = rect.bottom + 8;
-            this.persen = persen;
-            this.show = true;
-        },
-
-        close() {
-            this.show = false;
-        }
-    }
-}
-</script>
 
 @endsection

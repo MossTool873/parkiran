@@ -21,7 +21,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Alpine -->
-    <script src="//unpkg.com/alpinejs" defer></script>
+   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 
     <!-- QR -->
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
