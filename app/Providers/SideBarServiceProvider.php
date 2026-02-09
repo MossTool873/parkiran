@@ -120,14 +120,14 @@ class SidebarServiceProvider extends ServiceProvider
                                 'route' => '/laporan/occupancy',
                                 'icon'  => 'bi bi-bar-chart'
                             ],
-                           
+
                         ],
                     ],
-                     [
-                                'label' => 'Tracking Kendaraan',
-                                'route' => '/tracking-kendaraan',
-                                'icon'  => 'bi bi-geo-alt'
-                            ],
+                    [
+                        'label' => 'Tracking Kendaraan',
+                        'route' => '/tracking-kendaraan',
+                        'icon'  => 'bi bi-geo-alt'
+                    ],
                     [
                         'label' => 'Backup-Restore Database',
                         'route' => '/admin/database/index',
@@ -141,6 +141,53 @@ class SidebarServiceProvider extends ServiceProvider
                 ],
 
                 'petugas' => [
+                    [
+                        'label' => 'Master Data',
+                        'icon'  => 'bi bi-stack',
+                        'children' => [
+                            [
+                                'label' => 'Tipe Kendaraan',
+                                'route' => url('/show-data/tipekendaraan'),
+                                'icon'  => 'bi bi-truck'
+                            ],
+                            [
+                                'label' => 'Area Parkir',
+                                'route' => url('/show-data/area-parkir'),
+                                'icon'  => 'bi bi-geo-alt'
+                            ],
+                            [
+                                'label' => 'Kendaraan',
+                                'route' => url('/show-data/kendaraan'),
+                                'icon'  => 'bi bi-car-front'
+                            ],
+                            [
+                                'label' => 'Metode Pembayaran',
+                                'route' => url('/show-data/metode-pembayaran'),
+                                'icon'  => 'bi bi-credit-card'
+                            ],
+                        ],
+                    ],
+                    [
+                        'label' => 'Tarif',
+                        'icon'  => 'bi bi-cash-stack',
+                        'children' => [
+                            [
+                                'label' => 'Tarif Dasar',
+                                'route' => url('/show-data/tarif-tipe-kendaraan'),
+                                'icon'  => 'bi bi-currency-dollar'
+                            ],
+                            [
+                                'label' => 'Tarif Durasi',
+                                'route' => url('/show-data/tarif-durasi'),
+                                'icon'  => 'bi bi-clock'
+                            ],
+                            [
+                                'label' => 'Konfigurasi Tarif',
+                                'route' => url('/show-data/konfigurasi-tarif'),
+                                'icon'  => 'bi bi-gear'
+                            ],
+                        ],
+                    ],
                     [
                         'label' => 'Transaksi',
                         'route' => '/petugas/transaksi',

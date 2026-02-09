@@ -96,3 +96,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tracking-kendaraan', [KendaraanController::class, 'tracking'])->name('kendaraan.tracking');
     Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
 });
+
+use App\Http\Controllers\ViewOnlyController;
+
+Route::middleware(['auth'])->prefix('show-data')->group(function () {
+    Route::get('tipekendaraan', [ViewOnlyController::class, 'tipeKendaraan'])->name('show-data.tipeKendaraan');
+    Route::get('area-parkir', [ViewOnlyController::class, 'areaParkir'])->name('show-data.areaParkir');
+    Route::get('kendaraan', [ViewOnlyController::class, 'kendaraan'])->name('show-data.kendaraan');
+    Route::get('metode-pembayaran', [ViewOnlyController::class, 'metodePembayaran'])->name('show-data.metodePembayaran');
+    Route::get('tarif-tipe-kendaraan', [ViewOnlyController::class, 'tarifTipeKendaraan'])->name('show-data.tarifTipeKendaraan');
+    Route::get('tarif-durasi', [ViewOnlyController::class, 'tarifDurasi'])->name('show-data.tarifDurasi');
+    Route::get('konfigurasi-tarif', [ViewOnlyController::class, 'konfigurasiTarif'])->name('show-data.konfigurasiTarif');
+
+});
