@@ -29,18 +29,19 @@ public function create()
     return view('admin.tarif_durasi.create', compact('tarifDasar'));
 }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'batas_jam'  => 'required|integer|min:1|unique:tarif_durasi,batas_jam',
-            'persentase' => 'required|integer|min:1',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'batas_jam' => 'required|integer|min:1|unique:tarif_durasi,batas_jam,NULL,id,deleted_at,NULL',
+        'persentase' => 'required|integer|min:1',
+    ]);
 
-        TarifDurasi::create($request->all());
+    TarifDurasi::create($request->all());
 
-        return redirect(url('/admin/tarif-durasi'))
-            ->with('success', 'Tarif durasi berhasil ditambahkan');
-    }
+    return redirect(url('/admin/tarif-durasi'))
+        ->with('success', 'Tarif durasi berhasil ditambahkan');
+}
+
 
 
 public function edit(TarifDurasi $tarif_durasi)

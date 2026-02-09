@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AreaParkir;
 use App\Models\Kendaraan;
 use App\Models\KendaraanTipe;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 
 class KendaraanController extends Controller
@@ -94,23 +95,35 @@ public function tracking(Request $request)
 {
     $search = $request->search;
 
-    $areaParkirs = AreaParkir::with([
-        'kendaraan' => function ($q) {
-            $q->with([
-                'tipeKendaraan',
-                'memberships'
-            ])
-            ->orderBy('created_at', 'desc');
-        }
+    $transaksis = Transaksi::with([
+        'kendaraan.tipeKendaraan',
+        'kendaraan.membershipAktif.membership',
+        'areaParkir'
     ])
-    ->when($search, function ($q) use ($search) {
-        $q->where('nama_area', 'like', '%' . $search . '%');
-    })
-    ->orderBy('nama_area')
-    ->get();
+    ->whereNull('waktu_keluar') // ⬅️ MASIH PARKIR
+    ->when($search, function ($query) use ($search) {
 
-    return view('laporan.trackingKendaraan', compact('areaParkirs', 'search'));
+        $query->where(function ($q) use ($search) {
+
+            // Cari berdasarkan plat nomor
+            $q->whereHas('kendaraan', function ($q2) use ($search) {
+                $q2->where('plat_nomor', 'like', '%' . $search . '%');
+            })
+
+            // ATAU berdasarkan nama member
+            ->orWhereHas('membership', function ($q3) use ($search) {
+                $q3->where('nama', 'like', '%' . $search . '%');
+            });
+
+        });
+
+    })
+    ->orderBy('waktu_masuk', 'desc')
+    ->paginate(10);
+
+    return view('laporan.trackingKendaraan', compact('transaksis', 'search'));
 }
+
 
 
 }
