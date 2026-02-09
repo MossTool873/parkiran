@@ -77,6 +77,13 @@ Route::prefix('petugas')->middleware(['auth','role:petugas'])->group(function ()
         session()->forget('struk_keluar');
         return back();
     })->name('keluar.batal');
+    Route::get('membership', [MembershipController::class, 'indexPetugas'])->name('petugas.membership.index');
+    Route::get('membership/create', [MembershipController::class, 'createPetugas'])->name('petugas.membership.create');
+    Route::post('membership', [MembershipController::class, 'storePetugas'])->name('petugas.membership.store');
+    Route::get('membership/{membership}/edit', [MembershipController::class, 'editPetugas'])->name('petugas.membership.edit');
+    Route::put('membership/{membership}', [MembershipController::class, 'updatePetugas'])->name('petugas.membership.update');
+    Route::get('/membership-kendaraan', [KendaraanMemberController::class, 'petugasIndex'])->name('membership_kendaraan.index');
+    Route::get('/membership-tier', [MembershipTierController::class, 'petugasIndex'])->name('membership_tier.index');
 });
 
 Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {

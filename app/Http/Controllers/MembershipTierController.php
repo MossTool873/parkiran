@@ -67,4 +67,12 @@ class MembershipTierController extends Controller
 
         return redirect()->route('membership-tier.index')->with('success', 'Membership tier berhasil dihapus');
     }
+
+    public function petugasIndex()
+{
+    $tiers = MembershipTier::latest()->get();
+
+    return view('petugas.membership_tier.index', compact('tiers'));
+}
+
 }

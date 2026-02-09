@@ -189,6 +189,28 @@ class SidebarServiceProvider extends ServiceProvider
                         ],
                     ],
                     [
+                        'label' => 'Membership',
+                        'icon'  => 'bi bi-stars',
+                        'children' => [
+                            [
+                                'label' => 'Membership Tier',
+                                'route' => '/petugas/membership-tier',
+                                'icon'  => 'bi bi-award'
+                            ],
+                            [
+                                'label' => 'Daftar Membership',
+                                'route' => '/petugas/membership',
+                                'icon'  => 'bi bi-list'
+                            ],
+                            [
+                                'label' => 'Kendaraan Membership',
+                                'route' => '/petugas/membership-kendaraan',
+                                'icon'  => 'bi bi-car-front'
+                            ],
+                        ],
+                    ],
+
+                    [
                         'label' => 'Transaksi',
                         'route' => '/petugas/transaksi',
                         'icon'  => 'bi bi-receipt'
