@@ -72,11 +72,6 @@ class SidebarServiceProvider extends ServiceProvider
                                 'route' => '/admin/konfigurasi-tarif',
                                 'icon'  => 'bi bi-gear'
                             ],
-                            [
-                                'label' => 'Diskon Membership',
-                                'route' => '/admin/membership-tier',
-                                'icon'  => 'bi bi-award'
-                            ],
                         ],
                     ],
 
