@@ -14,8 +14,7 @@
 
             @if (!isset($menu['children']))
                 <a href="{{ url($menu['route']) }}"
-                   class="flex items-center gap-3 px-4 py-2 hover:bg-gray-800 transition rounded
-                   {{ request()->is(ltrim($menu['route'], '/').'*') ? 'bg-gray-800' : '' }}">
+                   class="flex items-center gap-3 px-4 py-2 hover:bg-gray-800 transition rounded">
                     @if(isset($menu['icon']))
                         <i class="{{ $menu['icon'] }}"></i>
                     @endif
@@ -50,8 +49,7 @@
                          class="ml-6 mt-1 space-y-1">
                         @foreach ($menu['children'] as $child)
                             <a href="{{ url($child['route']) }}"
-                               class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-800 rounded
-                               {{ request()->is(ltrim($child['route'], '/').'*') ? 'bg-gray-800' : '' }}">
+                               class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-800 rounded">
                                 @if(isset($child['icon']))
                                     <i class="{{ $child['icon'] }}"></i>
                                 @endif
