@@ -3,6 +3,8 @@
 @section('title', 'Occupancy Area Parkir')
 
 @section('content')
+<meta http-equiv="refresh" content="12">
+
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Occupancy Area Parkir</h1>
 
@@ -107,3 +109,4 @@
     </div>
 
 @endsection
+

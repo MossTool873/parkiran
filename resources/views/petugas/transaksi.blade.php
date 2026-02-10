@@ -116,98 +116,191 @@ function printStrukKeluar() {
 
 
     {{-- ===================== FORM MASUK & KELUAR ===================== --}}
-    <div class="max-w-6xl mx-auto mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="max-w-6xl mx-auto mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {{-- ===================== MASUK ===================== --}}
+    {{-- ===================== MASUK ===================== --}}
 <div class="bg-white p-6 rounded-lg shadow">
     <h4 class="text-xl font-semibold mb-6">Transaksi Kendaraan Masuk</h4>
 
-    <form method="POST" action="{{ url('/petugas/transaksi/masuk') }}" class="space-y-4" onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')">
+    <form method="POST"
+          action="{{ url('/petugas/transaksi/masuk') }}"
+          class="space-y-4"
+          onsubmit="return validatePlat()">
         @csrf
 
+        {{-- Plat Nomor --}}
         <div class="relative">
             <label class="block text-sm font-medium mb-1">Plat Nomor</label>
-            <input type="text" name="plat_nomor" id="plat_nomor" value="{{ old('plat_nomor') }}"
-                class="w-full border rounded px-3 py-2" autocomplete="off" required>
+
+            <input type="text"
+                   name="plat_nomor"
+                   id="plat_nomor"
+                   placeholder="AA 1234 BBB"
+                   maxlength="11"
+                   autocomplete="off"
+                   class="w-full border rounded px-3 py-2 uppercase tracking-widest"
+                   required>
+
             <ul id="suggestions"
                 class="absolute left-0 right-0 mt-1 bg-white border rounded shadow max-h-48 overflow-y-auto hidden z-50">
             </ul>
+
+            <p class="text-xs text-gray-500 mt-1">
+                Format wajib: A 1234 BU
+            </p>
         </div>
 
+        {{-- Warna --}}
         <div>
             <label class="block text-sm font-medium mb-1">Warna</label>
-            <input type="text" name="warna" id="warna" value="{{ old('warna') }}"
-                class="w-full border rounded px-3 py-2" required>
+            <input type="text"
+                   name="warna"
+                   id="warna"
+                   class="w-full border rounded px-3 py-2"
+                   required>
         </div>
 
+        {{-- Tipe Kendaraan --}}
         <div>
             <label class="block text-sm font-medium mb-1">Tipe Kendaraan</label>
-            <select name="tipe_kendaraan_id" id="tipe_kendaraan_id" class="w-full border rounded px-3 py-2"
-                required>
+            <select name="tipe_kendaraan_id"
+                    id="tipe_kendaraan_id"
+                    class="w-full border rounded px-3 py-2"
+                    required>
                 <option value="">-- Pilih --</option>
                 @foreach ($tipeKendaraans as $tipe)
-                    <option value="{{ $tipe->id }}"
-                        {{ old('tipe_kendaraan_id') == $tipe->id ? 'selected' : '' }}>
+                    <option value="{{ $tipe->id }}">
                         {{ $tipe->tipe_kendaraan }}
                     </option>
                 @endforeach
             </select>
         </div>
 
+        {{-- Area Parkir --}}
         <div>
             <label class="block text-sm font-medium mb-1">Area Parkir</label>
-            <select name="area_parkir_id" id="area_parkir_id" class="w-full border rounded px-3 py-2" required>
+            <select name="area_parkir_id"
+                    class="w-full border rounded px-3 py-2"
+                    required>
                 <option value="">-- Pilih --</option>
                 @foreach ($areaParkirs as $area)
-                    <option value="{{ $area->id }}"
-                        {{ old('area_parkir_id') == $area->id ? 'selected' : '' }}>
+                    <option value="{{ $area->id }}">
                         {{ $area->nama_area }}
                     </option>
                 @endforeach
             </select>
         </div>
 
-        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">
+        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold">
             Simpan Masuk
         </button>
     </form>
 </div>
+
+{{-- ===================== SCRIPT GABUNG ===================== --}}
 <script>
-    // =================== AUTOCOMPLETE KENDARAAN MASUK ===================
-    const platInput = document.getElementById('plat_nomor');
-    const suggestions = document.getElementById('suggestions');
-    const warnaInput = document.getElementById('warna');
-    const tipeSelect = document.getElementById('tipe_kendaraan_id');
+const platInput   = document.getElementById('plat_nomor');
+const suggestions = document.getElementById('suggestions');
+const warnaInput  = document.getElementById('warna');
+const tipeSelect  = document.getElementById('tipe_kendaraan_id');
 
-    platInput.addEventListener('keyup', function() {
-        const q = this.value.trim();
-        if (!q) return suggestions.classList.add('hidden');
 
-        fetch(`{{ route('kendaraan.search') }}?q=${q}`)
-            .then(res => res.json())
-            .then(data => {
-                suggestions.innerHTML = '';
-                if (!data.length) return suggestions.classList.add('hidden');
+// ================= FORMAT PLAT =================
+platInput.addEventListener('input', function (e) {
 
-                data.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = item.plat_nomor;
-                    li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
-                    li.onclick = () => {
-                        platInput.value = item.plat_nomor;
-                        warnaInput.value = item.warna;
-                        tipeSelect.value = item.tipe_kendaraan_id;
-                        suggestions.classList.add('hidden');
-                    };
-                    suggestions.appendChild(li);
-                });
+    let raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    let hasil = '';
 
-                suggestions.classList.remove('hidden');
+    let depan = raw.match(/^[A-Z]{1,2}/);
+    if (!depan) {
+        e.target.value = '';
+        return;
+    }
+
+    depan = depan[0];
+    hasil += depan + ' ';
+    raw = raw.slice(depan.length);
+
+    let angka = raw.match(/^[0-9]{0,4}/)[0];
+    hasil += angka;
+    raw = raw.slice(angka.length);
+
+    if (angka.length === 4) {
+        let belakang = raw.replace(/[^A-Z]/g, '').slice(0, 3);
+        if (belakang.length > 0) {
+            hasil += ' ' + belakang;
+        }
+    }
+
+    e.target.value = hasil.trim();
+});
+
+
+// ================= AUTOCOMPLETE =================
+platInput.addEventListener('keyup', function() {
+
+    const q = this.value.trim();
+    if (!q) {
+        suggestions.classList.add('hidden');
+        return;
+    }
+
+    fetch(`{{ route('kendaraan.search') }}?q=${q}`)
+        .then(res => res.json())
+        .then(data => {
+
+            suggestions.innerHTML = '';
+
+            if (!data.length) {
+                suggestions.classList.add('hidden');
+                return;
+            }
+
+            data.forEach(item => {
+
+                const li = document.createElement('li');
+                li.textContent = item.plat_nomor;
+                li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
+
+                li.onclick = () => {
+                    platInput.value = item.plat_nomor;
+                    warnaInput.value = item.warna;
+                    tipeSelect.value = item.tipe_kendaraan_id;
+                    suggestions.classList.add('hidden');
+                };
+
+                suggestions.appendChild(li);
             });
-    });
+
+            suggestions.classList.remove('hidden');
+        });
+});
 
 
+// ================= VALIDASI SUBMIT =================
+function validatePlat() {
+
+    const value = platInput.value.trim();
+    const regex = /^[A-Z]{1,2} [0-9]{4} [A-Z]{1,3}$/;
+
+    if (!regex.test(value)) {
+        alert('Plat nomor harus 4 angka dan minimal 1 huruf belakang.\nContoh: A 1234 BU');
+        platInput.focus();
+        return false;
+    }
+
+    return confirm('Yakin data yang dimasukkan sudah benar?');
+}
+
+
+// ================= HIDE SUGGESTION KETIKA KLIK LUAR =================
+document.addEventListener('click', function(e){
+    if (!platInput.contains(e.target) && !suggestions.contains(e.target)) {
+        suggestions.classList.add('hidden');
+    }
+});
 </script>
+
 
     {{-- ===================== TRANSAKSI KELUAR ===================== --}}
     <div class="bg-white p-6 rounded-lg shadow">

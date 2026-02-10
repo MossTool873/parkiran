@@ -81,41 +81,65 @@ public function index(Request $request)
         return view('admin.areaParkir.edit', compact('areaParkir', 'tipeKendaraans'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'nama_area' => 'required|string|max:255',
-            'lokasi' => 'required|string|max:255',
-            'kapasitas' => 'required|array',
-            'kapasitas.*' => 'nullable|integer|min:0'
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'nama_area'   => 'required|string|max:255',
+        'lokasi'      => 'required|string|max:255',
+        'kapasitas'   => 'required|array',
+        'kapasitas.*' => 'nullable|integer|min:0'
+    ]);
+
+    // ================= VALIDASI KAPASITAS VS TERISI =================
+    foreach ($request->kapasitas as $tipeId => $jumlah) {
+
+    $detail = AreaParkirDetail::with('tipeKendaraan')
+        ->where('area_parkir_id', $id)
+        ->where('tipe_kendaraan_id', $tipeId)
+        ->first();
+
+    if ($detail && $jumlah < $detail->terisi) {
+
+        $namaTipe = $detail->tipeKendaraan->tipe_kendaraan ?? 'Tipe kendaraan';
+
+        return back()
+            ->withErrors([
+                "kapasitas.$tipeId" =>
+                    "Kapasitas {$namaTipe} tidak boleh kurang dari jumlah terpakai ({$detail->terisi})"
+            ])
+            ->withInput();
+    }
+}
+
+
+    // ================= TRANSAKSI UPDATE =================
+    DB::transaction(function () use ($request, $id) {
+
+        $total_kapasitas = array_sum($request->kapasitas);
+
+        AreaParkir::where('id', $id)->update([
+            'nama_area'       => $request->nama_area,
+            'lokasi'          => $request->lokasi,
+            'total_kapasitas' => $total_kapasitas
         ]);
 
-        DB::transaction(function () use ($request, $id) {
+        foreach ($request->kapasitas as $tipeId => $jumlah) {
+            AreaParkirDetail::updateOrCreate(
+                [
+                    'area_parkir_id'    => $id,
+                    'tipe_kendaraan_id' => $tipeId
+                ],
+                [
+                    'kapasitas' => $jumlah
+                ]
+            );
+        }
+    });
 
-            $total_kapasitas = array_sum($request->kapasitas);
+    return redirect('/admin/areaParkir')
+        ->with('success', 'Area parkir berhasil diperbarui');
+}
 
-            AreaParkir::where('id', $id)->update([
-                'nama_area'       => $request->nama_area,
-                'lokasi'          => $request->lokasi,
-                'total_kapasitas' => $total_kapasitas
-            ]);
-
-            foreach ($request->kapasitas as $tipeId => $jumlah) {
-                AreaParkirDetail::updateOrCreate(
-                    [
-                        'area_parkir_id'     => $id,
-                        'tipe_kendaraan_id'  => $tipeId
-                    ],
-                    [
-                        'kapasitas' => $jumlah
-                    ]
-                );
-            }
-        });
-
-        return redirect('/admin/areaParkir')
-            ->with('success', 'Area parkir berhasil diperbarui');
-    }
 
     public function destroy($id)
     {

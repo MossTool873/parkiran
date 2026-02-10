@@ -7,6 +7,16 @@
 <h1 class="text-2xl font-bold mb-6">Edit Area Parkir</h1>
 
 <div class="bg-white rounded-lg shadow p-6 w-full">
+    @if ($errors->any())
+    <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <ul class="list-disc list-inside">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 
     <form action="{{ url('/admin/areaParkir/'.$areaParkir->id) }}"
           method="POST"
