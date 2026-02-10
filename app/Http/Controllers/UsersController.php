@@ -31,33 +31,51 @@ public function index(Request $request)
         return view('admin.users.create', compact('roles'));
     }
 
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'username'              => 'required|unique:users,username',
-            'nama'                  => 'required',
-            'role_id'               => 'required|exists:roles,id',
-            'password'              => 'required|min:6|confirmed',
-            'password_confirmation' => 'required',
-        ]);
+public function store(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'username'              => 'required',
+        'nama'                  => 'required',
+        'role_id'               => 'required|exists:roles,id',
+        'password'              => 'required|min:6|confirmed',
+        'password_confirmation' => 'required',
+    ]);
 
-        if ($validator->fails()) {
-            return redirect('/admin/users/create')
-                ->withErrors($validator)
-                ->withInput()
-                ->with('error', 'Data tidak valid');
+    if ($validator->fails()) {
+        return redirect('/admin/users/create')
+            ->withErrors($validator)
+            ->withInput()
+            ->with('error', 'Data tidak valid');
+    }
+
+    // Cek user soft deleted
+    $user = User::withTrashed()->where('username', $request->username)->first();
+
+    if ($user) {
+        if ($user->trashed()) {
+            $user->restore();
         }
 
+        // update data user
+        $user->update([
+            'name' => $request->nama,
+            'role_id' => $request->role_id,
+            'password' => Hash::make($request->password),
+        ]);
+    } else {
+        // buat user baru
         User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'name'     => $request->nama,
             'role_id'  => $request->role_id,
         ]);
-
-        return redirect('/admin/users')
-            ->with('success', 'User berhasil ditambahkan');
     }
+
+    return redirect('/admin/users')
+        ->with('success', 'User berhasil ditambahkan');
+}
+
 
     public function edit($id)
     {

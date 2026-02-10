@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,40 +31,52 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'username' => 'required',
-            'password' => 'required',
-        ]);
+   public function login(Request $request)
+{
+    $request->validate([
+        'username' => 'required',
+        'password' => 'required',
+    ]);
 
-        $credentials = $request->only('username', 'password');
-        $remember = $request->boolean('remember');
+    $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
+    $user = User::where('username', $request->username)
+        ->whereNull('deleted_at') 
+        ->first();
 
-            $role = auth()->user()->role->role;
-            logAktivitas('Login');
-
-            switch ($role) {
-                case 'admin':
-                    return redirect('/admin');
-                case 'petugas':
-                    return redirect('/petugas');
-                case 'owner':
-                    return redirect('/owner');
-                default:
-                    Auth::logout();
-                    return redirect('/login')
-                        ->withErrors('Role tidak dikenali');
-            }
-        }
-
+    if (!$user) {
         return back()->withErrors([
             'username' => 'Username atau password salah'
         ]);
     }
+
+    $credentials = ['username' => $request->username, 'password' => $request->password];
+
+    if (Auth::attempt($credentials, $remember)) {
+        $request->session()->regenerate();
+
+        $role = auth()->user()->role->role;
+        logAktivitas('Login');
+
+        switch ($role) {
+            case 'admin':
+                return redirect('/admin');
+            case 'petugas':
+                return redirect('/petugas');
+            case 'owner':
+                return redirect('/owner');
+            default:
+                Auth::logout();
+                return redirect('/login')
+                    ->withErrors('Role tidak dikenali');
+        }
+    }
+
+    return back()->withErrors([
+        'username' => 'Username atau password salah'
+    ]);
+}
+
 
     public function logout(Request $request)
     {

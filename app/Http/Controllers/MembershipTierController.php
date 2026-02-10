@@ -63,6 +63,9 @@ class MembershipTierController extends Controller
     public function destroy($id)
     {
         $tier = MembershipTier::findOrFail($id);
+            if ($tier->memberships()->exists()) {
+        return back()->with('error', 'membership tier masih digunakan!!');
+    }
         $tier->delete();
 
         return redirect()->route('membership-tier.index')->with('success', 'Membership tier berhasil dihapus');

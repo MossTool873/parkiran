@@ -12,5 +12,9 @@ class MembershipTier extends Model
 
     protected $table = 'membership_tier';
     protected $fillable = ['membership_tier','diskon'];
-
+    
+        public function memberships()
+    {
+        return $this->hasMany(Membership::class, 'membership_tier_id');
+    }
 }
