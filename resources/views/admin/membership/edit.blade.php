@@ -39,25 +39,17 @@
                         @foreach ($tiers as $tier)
                             <option value="{{ $tier->id }}"
                                 {{ old('membership_tier_id', $membership->membership_tier_id) == $tier->id ? 'selected' : '' }}>
-                                {{ $tier->nama_tier }}
+                                {{ $tier->membership_tier }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
                 <div>
-                    <label class="block mb-1">Pembaruan Terakhir</label>
-                    <input type="date"
-                           name="pembaruan_terakhir"
-                           value="{{ old('pembaruan_terakhir', $membership->pembaruan_terakhir) }}"
-                           class="w-full border rounded px-3 py-2">
-                </div>
-
-                <div>
                     <label class="block mb-1">Kadaluarsa</label>
                     <input type="date"
                            name="kadaluarsa"
-                           value="{{ old('kadaluarsa', $membership->kadaluarsa) }}"
+                           value="{{ old('kadaluarsa', \Carbon\Carbon::parse($membership->kadaluarsa)->format('Y-m-d')) }}"
                            class="w-full border rounded px-3 py-2">
                 </div>
             </div>
@@ -77,11 +69,11 @@
                 <tbody id="kendaraan-body">
 
                 @foreach ($membership->kendaraans as $index => $kendaraan)
-                    <tr>
+                    <tr data-index="{{ $index }}">
                         <td class="relative px-2 py-2">
                             <input type="text"
                                    name="kendaraan[{{ $index }}][plat_nomor]"
-                                   value="{{ $kendaraan->plat_nomor }}"
+                                   value="{{ old("kendaraan.$index.plat_nomor", $kendaraan->plat_nomor) }}"
                                    class="plat-input w-full border rounded px-2 py-1">
                             <ul class="suggestions hidden absolute bg-white border rounded shadow w-full z-10"></ul>
                         </td>
@@ -89,7 +81,7 @@
                         <td class="px-2 py-2">
                             <input type="text"
                                    name="kendaraan[{{ $index }}][warna]"
-                                   value="{{ $kendaraan->warna }}"
+                                   value="{{ old("kendaraan.$index.warna", $kendaraan->warna) }}"
                                    class="warna-input w-full border rounded px-2 py-1">
                         </td>
 
@@ -98,7 +90,7 @@
                                     class="tipe-input w-full border rounded px-2 py-1">
                                 @foreach ($tipeKendaraans as $tipe)
                                     <option value="{{ $tipe->id }}"
-                                        {{ $kendaraan->tipe_kendaraan_id == $tipe->id ? 'selected' : '' }}>
+                                        {{ old("kendaraan.$index.tipe_kendaraan_id", $kendaraan->tipe_kendaraan_id) == $tipe->id ? 'selected' : '' }}>
                                         {{ $tipe->tipe_kendaraan }}
                                     </option>
                                 @endforeach
@@ -143,11 +135,15 @@ let index = {{ $membership->kendaraans->count() }};
 /* ===================== TAMBAH ROW ===================== */
 document.getElementById('tambah-row').onclick = () => {
     const body = document.getElementById('kendaraan-body');
-    const row  = body.rows[0].cloneNode(true);
+    const template = body.rows[0];
+    const row = template.cloneNode(true);
+
+    row.setAttribute('data-index', index);
 
     row.querySelectorAll('input, select').forEach(el => {
         el.value = '';
         el.readOnly = false;
+        el.disabled = false;
         el.style.pointerEvents = 'auto';
         el.classList.remove('bg-gray-100');
         el.name = el.name.replace(/\[\d+\]/, `[${index}]`);
@@ -167,6 +163,8 @@ document.addEventListener('click', e => {
         const body = document.getElementById('kendaraan-body');
         if (body.rows.length > 1) {
             e.target.closest('tr').remove();
+        } else {
+            alert('Minimal harus ada 1 kendaraan.');
         }
     }
 });
@@ -186,15 +184,12 @@ document.addEventListener('input', e => {
         return;
     }
 
-    fetch(`{{ route('kendaraan.search') }}?q=${q}`)
+    fetch(`{{ route('kendaraan.search') }}?q=${encodeURIComponent(q)}`)
         .then(r => r.json())
         .then(data => {
             list.innerHTML = '';
 
             if (!data.length) {
-                warna.readOnly = false;
-                tipe.style.pointerEvents = 'auto';
-                tipe.classList.remove('bg-gray-100');
                 list.classList.add('hidden');
                 return;
             }
@@ -205,14 +200,23 @@ document.addEventListener('input', e => {
                 li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
 
                 li.onclick = () => {
+                    // set plat
                     e.target.value = k.plat_nomor;
+
+                    // set warna
                     warna.value = k.warna;
-                    tipe.value  = k.tipe_kendaraan_id;
 
-                    warna.readOnly = true;
-                    tipe.style.pointerEvents = 'none';
-                    tipe.classList.add('bg-gray-100');
+                    // set tipe kendaraan
+                    let option = Array.from(tipe.options).find(o => o.value == k.tipe_kendaraan_id);
+                    if(option){
+                        tipe.value = option.value;
+                    } else {
+                        const newOption = new Option(k.tipe_kendaraan, k.tipe_kendaraan_id);
+                        tipe.add(newOption);
+                        tipe.value = k.tipe_kendaraan_id;
+                    }
 
+                    // sembunyikan suggestion
                     list.classList.add('hidden');
                 };
 

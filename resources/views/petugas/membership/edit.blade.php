@@ -5,6 +5,7 @@
 @section('content')
 <div class="max-w-6xl mx-auto mt-8">
 
+    {{-- ERROR --}}
     @if ($errors->any())
         <div class="mb-4 bg-red-100 text-red-700 p-4 rounded">
             <ul class="list-disc list-inside">
@@ -54,6 +55,7 @@
                 </div>
             </div>
 
+            {{-- Kendaraan --}}
             <h3 class="font-semibold mb-2">Kendaraan</h3>
 
             <table class="w-full text-sm border">
@@ -68,11 +70,11 @@
                 <tbody id="kendaraan-body">
 
                 @foreach ($membership->kendaraans as $index => $kendaraan)
-                    <tr>
+                    <tr data-index="{{ $index }}">
                         <td class="relative px-2 py-2">
                             <input type="text"
                                    name="kendaraan[{{ $index }}][plat_nomor]"
-                                   value="{{ $kendaraan->plat_nomor }}"
+                                   value="{{ old("kendaraan.$index.plat_nomor", $kendaraan->plat_nomor) }}"
                                    class="plat-input w-full border rounded px-2 py-1">
                             <ul class="suggestions hidden absolute bg-white border rounded shadow w-full z-10"></ul>
                         </td>
@@ -80,7 +82,7 @@
                         <td class="px-2 py-2">
                             <input type="text"
                                    name="kendaraan[{{ $index }}][warna]"
-                                   value="{{ $kendaraan->warna }}"
+                                   value="{{ old("kendaraan.$index.warna", $kendaraan->warna) }}"
                                    class="warna-input w-full border rounded px-2 py-1">
                         </td>
 
@@ -89,7 +91,7 @@
                                     class="tipe-input w-full border rounded px-2 py-1">
                                 @foreach ($tipeKendaraans as $tipe)
                                     <option value="{{ $tipe->id }}"
-                                        {{ $kendaraan->tipe_kendaraan_id == $tipe->id ? 'selected' : '' }}>
+                                        {{ old("kendaraan.$index.tipe_kendaraan_id", $kendaraan->tipe_kendaraan_id) == $tipe->id ? 'selected' : '' }}>
                                         {{ $tipe->tipe_kendaraan }}
                                     </option>
                                 @endforeach
@@ -132,11 +134,15 @@ let index = {{ $membership->kendaraans->count() }};
 /* TAMBAH ROW */
 document.getElementById('tambah-row').onclick = () => {
     const body = document.getElementById('kendaraan-body');
-    const row  = body.rows[0].cloneNode(true);
+    const template = body.rows[0];
+    const row = template.cloneNode(true);
+
+    row.setAttribute('data-index', index);
 
     row.querySelectorAll('input, select').forEach(el => {
         el.value = '';
         el.readOnly = false;
+        el.disabled = false;
         el.style.pointerEvents = 'auto';
         el.classList.remove('bg-gray-100');
         el.name = el.name.replace(/\[\d+\]/, `[${index}]`);
@@ -167,17 +173,11 @@ document.addEventListener('input', e => {
     const q     = e.target.value.trim();
     if (!q) { list.classList.add('hidden'); return; }
 
-    fetch(`{{ route('kendaraan.search') }}?q=${q}`)
+    fetch(`{{ route('kendaraan.search') }}?q=${encodeURIComponent(q)}`)
         .then(r => r.json())
         .then(data => {
             list.innerHTML = '';
-            if (!data.length) {
-                warna.readOnly = false;
-                tipe.style.pointerEvents = 'auto';
-                tipe.classList.remove('bg-gray-100');
-                list.classList.add('hidden');
-                return;
-            }
+            if (!data.length) { list.classList.add('hidden'); return; }
 
             data.forEach(k => {
                 const li = document.createElement('li');
@@ -187,9 +187,6 @@ document.addEventListener('input', e => {
                     e.target.value = k.plat_nomor;
                     warna.value = k.warna;
                     tipe.value  = k.tipe_kendaraan_id;
-                    warna.readOnly = true;
-                    tipe.style.pointerEvents = 'none';
-                    tipe.classList.add('bg-gray-100');
                     list.classList.add('hidden');
                 };
                 list.appendChild(li);

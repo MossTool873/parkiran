@@ -114,54 +114,71 @@ class MembershipController extends Controller
         return view('admin.membership.edit', compact('membership', 'tiers', 'kendaraanList', 'tipeKendaraans'));
     }
 
-    public function update(Request $request, Membership $membership)
-    {
-        $request->validate([
-            'nama' => 'required|unique:membership,nama',
-            'membership_tier_id' => 'required|exists:membership_tier,id',
-            'pembaruan_terakhir' => 'required|date',
-            'kadaluarsa' => 'required|date|after_or_equal:pembaruan_terakhir',
+   public function update(Request $request, Membership $membership)
+{
+    $request->validate([
+        'nama' => 'required|unique:membership,nama,' . $membership->id,
+        'membership_tier_id' => 'required|exists:membership_tier,id',
+        'kadaluarsa' => 'required|date|after_or_equal:pembaruan_terakhir',
+        'kendaraan.*.plat_nomor' => 'required',
+        'kendaraan.*.warna' => 'required',
+        'kendaraan.*.tipe_kendaraan_id' => 'required|exists:kendaraan_tipe,id',
+    ], [
+        'nama.unique' => 'Nama membership sudah digunakan.',
+    ]);
 
-            // kendaraan (sama seperti create)
-            'kendaraan.*.plat_nomor' => 'required',
-            'kendaraan.*.warna' => 'required',
-            'kendaraan.*.tipe_kendaraan_id' => 'required|exists:kendaraan_tipe,id',
-        ], [
-            'nama.unique' => 'Nama membership sudah digunakan.',
+    DB::transaction(function () use ($request, $membership) {
+
+        // ===================== VALIDASI KENDARAAN SUDAH PUNYA MEMBERSHIP LAIN =====================
+        foreach ($request->kendaraan as $i => $item) {
+            $sudahAda = DB::table('membership_kendaraan')
+                ->join('membership', 'membership.id', '=', 'membership_kendaraan.membership_id')
+                ->join('kendaraan', 'kendaraan.id', '=', 'membership_kendaraan.kendaraan_id')
+                ->whereNull('membership.deleted_at')
+                ->whereNull('membership_kendaraan.deleted_at')
+                ->where('kendaraan.plat_nomor', $item['plat_nomor'])
+                ->whereDate('membership.kadaluarsa', '>=', now())
+                ->where('membership.id', '<>', $membership->id) // kecuali membership yang sedang diedit
+                ->exists();
+
+            if ($sudahAda) {
+                throw ValidationException::withMessages([
+                    "kendaraan.$i.plat_nomor" =>
+                    "Kendaraan {$item['plat_nomor']} sudah terdaftar di membership lain"
+                ]);
+            }
+        }
+
+        // ===================== UPDATE MEMBERSHIP =====================
+        $membership->update([
+            'nama' => $request->nama,
+            'membership_tier_id' => $request->membership_tier_id,
+            'pembaruan_terakhir' => now(),
+            'kadaluarsa' => $request->kadaluarsa,
         ]);
 
-        DB::transaction(function () use ($request, $membership) {
+        // ===================== SIMPAN / UPDATE KENDARAAN =====================
+        $kendaraanIds = [];
+        foreach ($request->kendaraan as $item) {
+            $kendaraan = Kendaraan::firstOrCreate(
+                ['plat_nomor' => $item['plat_nomor']],
+                [
+                    'warna' => $item['warna'],
+                    'tipe_kendaraan_id' => $item['tipe_kendaraan_id'],
+                ]
+            );
+            $kendaraanIds[] = $kendaraan->id;
+        }
 
-            // update membership
-            $membership->update([
-                'nama' => $request->nama,
-                'membership_tier_id' => $request->membership_tier_id,
-                'pembaruan_terakhir' => $request->pembaruan_terakhir,
-                'kadaluarsa' => $request->kadaluarsa,
-            ]);
+        // sync supaya kendaraan yang tidak ada di request dihapus
+        $membership->kendaraans()->sync($kendaraanIds);
+    });
 
-            // hapus relasi kendaraan lama
-            $membership->kendaraans()->detach();
+    return redirect()
+        ->route('membership.index')
+        ->with('success', 'Membership berhasil diperbarui');
+}
 
-            // simpan kendaraan baru
-            foreach ($request->kendaraan as $item) {
-
-                $kendaraan = Kendaraan::firstOrCreate(
-                    ['plat_nomor' => $item['plat_nomor']],
-                    [
-                        'warna' => $item['warna'],
-                        'tipe_kendaraan_id' => $item['tipe_kendaraan_id'],
-                    ]
-                );
-
-                $membership->kendaraans()->attach($kendaraan->id);
-            }
-        });
-
-        return redirect()
-            ->route('membership.index')
-            ->with('success', 'Membership berhasil diperbarui');
-    }
 
     public function destroy(Membership $membership)
     {
@@ -254,54 +271,65 @@ class MembershipController extends Controller
             ->with('success', 'Membership berhasil ditambahkan');
     }
 
-    public function editPetugas(Membership $membership)
-    {
-        $tiers = MembershipTier::all();
-        $tipeKendaraans = KendaraanTipe::all();
-        $kendaraanList = Kendaraan::all();
+ public function editPetugas(Membership $membership)
+{
+    $tiers = MembershipTier::all();
+    $tipeKendaraans = KendaraanTipe::all();
+    $kendaraanList = Kendaraan::all();
 
-        return view('petugas.membership.edit', compact('membership', 'tiers', 'kendaraanList', 'tipeKendaraans'));
-    }
+    return view('petugas.membership.edit', compact(
+        'membership',
+        'tiers',
+        'kendaraanList',
+        'tipeKendaraans'
+    ));
+}
 
-    public function updatePetugas(Request $request, Membership $membership)
-    {
-        $request->validate([
-            'nama' => 'required|unique:membership,nama,' . $membership->id,
-            'membership_tier_id' => 'required|exists:membership_tier,id',
-            'pembaruan_terakhir' => 'required|date',
-            'kadaluarsa' => 'required|date|after_or_equal:pembaruan_terakhir',
-            'kendaraan.*.plat_nomor' => 'required',
-            'kendaraan.*.warna' => 'required',
-            'kendaraan.*.tipe_kendaraan_id' => 'required|exists:kendaraan_tipe,id',
-        ], [
-            'nama.unique' => 'Nama membership sudah digunakan.',
+public function updatePetugas(Request $request, Membership $membership)
+{
+    $request->validate([
+        'nama' => 'required|unique:membership,nama,' . $membership->id,
+        'membership_tier_id' => 'required|exists:membership_tier,id',
+        'kadaluarsa' => 'required|date|after_or_equal:pembaruan_terakhir',
+        'kendaraan.*.plat_nomor' => 'required',
+        'kendaraan.*.warna' => 'required',
+        'kendaraan.*.tipe_kendaraan_id' => 'required|exists:kendaraan_tipe,id',
+    ], [
+        'nama.unique' => 'Nama membership sudah digunakan.',
+    ]);
+
+    DB::transaction(function () use ($request, $membership) {
+
+        // ================= UPDATE MEMBERSHIP =================
+        $membership->update([
+            'nama' => $request->nama,
+            'membership_tier_id' => $request->membership_tier_id,
+                'pembaruan_terakhir' => now(),
+            'kadaluarsa' => $request->kadaluarsa,
         ]);
 
-        DB::transaction(function () use ($request, $membership) {
-            $membership->update([
-                'nama' => $request->nama,
-                'membership_tier_id' => $request->membership_tier_id,
-                'pembaruan_terakhir' => $request->pembaruan_terakhir,
-                'kadaluarsa' => $request->kadaluarsa,
-            ]);
+        // ================= HAPUS RELASI KENDARAAN LAMA =================
+        $membership->kendaraans()->detach();
 
-            $membership->kendaraans()->detach();
+        // ================= SIMPAN / UPDATE KENDARAAN =================
+        foreach ($request->kendaraan as $item) {
+            // Cek apakah kendaraan sudah ada
+            $kendaraan = Kendaraan::updateOrCreate(
+                ['plat_nomor' => $item['plat_nomor']], // kondisi unik
+                [
+                    'warna' => $item['warna'],
+                    'tipe_kendaraan_id' => $item['tipe_kendaraan_id'],
+                ]
+            );
 
-            foreach ($request->kendaraan as $item) {
-                $kendaraan = Kendaraan::firstOrCreate(
-                    ['plat_nomor' => $item['plat_nomor']],
-                    [
-                        'warna' => $item['warna'],
-                        'tipe_kendaraan_id' => $item['tipe_kendaraan_id'],
-                    ]
-                );
+            // Buat relasi dengan membership
+            $membership->kendaraans()->attach($kendaraan->id);
+        }
+    });
 
-                $membership->kendaraans()->attach($kendaraan->id);
-            }
-        });
+    return redirect()
+        ->route('petugas.membership.index')
+        ->with('success', 'Membership berhasil diperbarui');
+}
 
-        return redirect()
-            ->route('petugas.membership.index')
-            ->with('success', 'Membership berhasil diperbarui');
-    }
 }
