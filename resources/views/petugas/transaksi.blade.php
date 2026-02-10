@@ -284,7 +284,7 @@ function validatePlat() {
     const regex = /^[A-Z]{1,2} [0-9]{4} [A-Z]{1,3}$/;
 
     if (!regex.test(value)) {
-        alert('Plat nomor harus 4 angka dan minimal 1 huruf belakang.\nContoh: A 1234 BU');
+        alert('Format Plat nomor salah\nContoh: A 1234 BU');
         platInput.focus();
         return false;
     }

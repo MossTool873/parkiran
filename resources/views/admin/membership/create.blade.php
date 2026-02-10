@@ -127,14 +127,42 @@
 </form>
 </div>
 
-{{-- ================= SCRIPT ================= --}}
 <script>
 let index = 1;
+
+/* ===================== FORMAT PLAT ===================== */
+function formatPlat(input) {
+    let raw = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    let hasil = '';
+
+    let depan = raw.match(/^[A-Z]{1,2}/);
+    if (!depan) {
+        input.value = '';
+        return;
+    }
+
+    depan = depan[0];
+    hasil += depan + ' ';
+    raw = raw.slice(depan.length);
+
+    let angka = raw.match(/^[0-9]{0,4}/)[0];
+    hasil += angka;
+    raw = raw.slice(angka.length);
+
+    if (angka.length === 4) {
+        let belakang = raw.replace(/[^A-Z]/g, '').slice(0, 3);
+        if (belakang.length > 0) {
+            hasil += ' ' + belakang;
+        }
+    }
+
+    input.value = hasil.trim();
+}
 
 /* ===================== TAMBAH ROW ===================== */
 document.getElementById('tambah-row').onclick = () => {
     const body = document.getElementById('kendaraan-body');
-    const row = body.rows[0].cloneNode(true);
+    const row  = body.rows[0].cloneNode(true);
 
     row.querySelectorAll('input, select').forEach(el => {
         el.value = '';
@@ -153,7 +181,7 @@ document.getElementById('tambah-row').onclick = () => {
     index++;
 };
 
-/* ===================== HAPUS ROW (MINIMAL 1) ===================== */
+/* ===================== HAPUS ROW ===================== */
 document.addEventListener('click', e => {
     if (e.target.classList.contains('hapus-row')) {
         const body = document.getElementById('kendaraan-body');
@@ -163,9 +191,12 @@ document.addEventListener('click', e => {
     }
 });
 
-/* ===================== AUTOCOMPLETE PLAT ===================== */
+/* ===================== INPUT & AUTOCOMPLETE ===================== */
 document.addEventListener('input', e => {
     if (!e.target.classList.contains('plat-input')) return;
+
+    /* FORMAT PLAT */
+    formatPlat(e.target);
 
     const row   = e.target.closest('tr');
     const warna = row.querySelector('.warna-input');
@@ -183,7 +214,7 @@ document.addEventListener('input', e => {
         .then(data => {
             list.innerHTML = '';
 
-            /* ===== JIKA TIDAK ADA DATA (INPUT MANUAL) ===== */
+            /* ===== INPUT MANUAL ===== */
             if (!data.length) {
                 warna.readOnly = false;
                 tipe.style.pointerEvents = 'auto';
@@ -192,7 +223,7 @@ document.addEventListener('input', e => {
                 return;
             }
 
-            /* ===== ADA DATA (AUTOFILL) ===== */
+            /* ===== AUTOFILL ===== */
             data.forEach(k => {
                 const li = document.createElement('li');
                 li.textContent = k.plat_nomor;
@@ -201,9 +232,8 @@ document.addEventListener('input', e => {
                 li.onclick = () => {
                     e.target.value = k.plat_nomor;
                     warna.value = k.warna;
-                    tipe.value = k.tipe_kendaraan_id;
+                    tipe.value  = k.tipe_kendaraan_id;
 
-                    /* KUNCI INPUT (TAPI TETAP TERKIRIM) */
                     warna.readOnly = true;
                     tipe.style.pointerEvents = 'none';
                     tipe.classList.add('bg-gray-100');
@@ -217,6 +247,22 @@ document.addEventListener('input', e => {
             list.classList.remove('hidden');
         });
 });
+
+/* ===================== VALIDASI SAAT SUBMIT ===================== */
+document.querySelector('form').addEventListener('submit', e => {
+    const plats = document.querySelectorAll('.plat-input');
+    const regex = /^[A-Z]{1,2} [0-9]{4} [A-Z]{1,3}$/;
+
+    for (let input of plats) {
+        if (!regex.test(input.value.trim())) {
+            alert('Format plat salah!\nContoh: A 1234 BU');
+            input.focus();
+            e.preventDefault();
+            return;
+        }
+    }
+});
 </script>
+
 
 @endsection

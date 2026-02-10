@@ -128,24 +128,49 @@
     </form>
 </div>
 
-{{-- ===================== SCRIPT ===================== --}}
 <script>
-let index = {{ $membership->kendaraans->count() }};
+let index = 1;
+
+/* ===================== FORMAT PLAT ===================== */
+function formatPlat(input) {
+    let raw = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    let hasil = '';
+
+    let depan = raw.match(/^[A-Z]{1,2}/);
+    if (!depan) {
+        input.value = '';
+        return;
+    }
+
+    depan = depan[0];
+    hasil += depan + ' ';
+    raw = raw.slice(depan.length);
+
+    let angka = raw.match(/^[0-9]{0,4}/)[0];
+    hasil += angka;
+    raw = raw.slice(angka.length);
+
+    if (angka.length === 4) {
+        let belakang = raw.replace(/[^A-Z]/g, '').slice(0, 3);
+        if (belakang.length > 0) {
+            hasil += ' ' + belakang;
+        }
+    }
+
+    input.value = hasil.trim();
+}
 
 /* ===================== TAMBAH ROW ===================== */
 document.getElementById('tambah-row').onclick = () => {
     const body = document.getElementById('kendaraan-body');
-    const template = body.rows[0];
-    const row = template.cloneNode(true);
-
-    row.setAttribute('data-index', index);
+    const row  = body.rows[0].cloneNode(true);
 
     row.querySelectorAll('input, select').forEach(el => {
         el.value = '';
         el.readOnly = false;
-        el.disabled = false;
         el.style.pointerEvents = 'auto';
         el.classList.remove('bg-gray-100');
+
         el.name = el.name.replace(/\[\d+\]/, `[${index}]`);
     });
 
@@ -163,15 +188,16 @@ document.addEventListener('click', e => {
         const body = document.getElementById('kendaraan-body');
         if (body.rows.length > 1) {
             e.target.closest('tr').remove();
-        } else {
-            alert('Minimal harus ada 1 kendaraan.');
         }
     }
 });
 
-/* ===================== AUTOCOMPLETE PLAT ===================== */
+/* ===================== INPUT & AUTOCOMPLETE ===================== */
 document.addEventListener('input', e => {
     if (!e.target.classList.contains('plat-input')) return;
+
+    /* FORMAT PLAT */
+    formatPlat(e.target);
 
     const row   = e.target.closest('tr');
     const warna = row.querySelector('.warna-input');
@@ -184,39 +210,35 @@ document.addEventListener('input', e => {
         return;
     }
 
-    fetch(`{{ route('kendaraan.search') }}?q=${encodeURIComponent(q)}`)
+    fetch(`{{ route('kendaraan.search') }}?q=${q}`)
         .then(r => r.json())
         .then(data => {
             list.innerHTML = '';
 
+            /* ===== INPUT MANUAL ===== */
             if (!data.length) {
+                warna.readOnly = false;
+                tipe.style.pointerEvents = 'auto';
+                tipe.classList.remove('bg-gray-100');
                 list.classList.add('hidden');
                 return;
             }
 
+            /* ===== AUTOFILL ===== */
             data.forEach(k => {
                 const li = document.createElement('li');
                 li.textContent = k.plat_nomor;
                 li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
 
                 li.onclick = () => {
-                    // set plat
                     e.target.value = k.plat_nomor;
-
-                    // set warna
                     warna.value = k.warna;
+                    tipe.value  = k.tipe_kendaraan_id;
 
-                    // set tipe kendaraan
-                    let option = Array.from(tipe.options).find(o => o.value == k.tipe_kendaraan_id);
-                    if(option){
-                        tipe.value = option.value;
-                    } else {
-                        const newOption = new Option(k.tipe_kendaraan, k.tipe_kendaraan_id);
-                        tipe.add(newOption);
-                        tipe.value = k.tipe_kendaraan_id;
-                    }
+                    warna.readOnly = true;
+                    tipe.style.pointerEvents = 'none';
+                    tipe.classList.add('bg-gray-100');
 
-                    // sembunyikan suggestion
                     list.classList.add('hidden');
                 };
 
@@ -226,5 +248,21 @@ document.addEventListener('input', e => {
             list.classList.remove('hidden');
         });
 });
+
+/* ===================== VALIDASI SAAT SUBMIT ===================== */
+document.querySelector('form').addEventListener('submit', e => {
+    const plats = document.querySelectorAll('.plat-input');
+    const regex = /^[A-Z]{1,2} [0-9]{4} [A-Z]{1,3}$/;
+
+    for (let input of plats) {
+        if (!regex.test(input.value.trim())) {
+            alert('Format plat salah!\nContoh: A 1234 BU');
+            input.focus();
+            e.preventDefault();
+            return;
+        }
+    }
+});
 </script>
+
 @endsection
