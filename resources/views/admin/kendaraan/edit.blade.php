@@ -103,7 +103,7 @@ platInput.addEventListener('input', function (e) {
     hasil += angka;
     raw = raw.slice(angka.length);
 
-    if (angka.length === 4) {
+    if (angka.length > 0) {
         let belakang = raw.replace(/[^A-Z]/g, '').slice(0, 3);
         if (belakang.length > 0) {
             hasil += ' ' + belakang;
@@ -116,15 +116,17 @@ platInput.addEventListener('input', function (e) {
 /* ================= VALIDASI SUBMIT ================= */
 function validatePlat() {
     const value = platInput.value.trim();
-    const regex = /^[A-Z]{1,2} [0-9]{4} [A-Z]{1,3}$/;
+    // Format: 1-2 huruf + spasi + 1-4 angka + optional spasi + 0-3 huruf
+    const regex = /^[A-Z]{1,2} [0-9]{1,4}( [A-Z]{1,3})?$/;
 
     if (!regex.test(value)) {
-        alert('Format plat nomor salah\nContoh: A 1234 BU');
+        alert('Format Plat nomor salah\nContoh: A 1 atau A 1234 BU');
         platInput.focus();
         return false;
     }
 
     return confirm('Yakin data yang dimasukkan sudah benar?');
 }
+
 </script>
 @endsection

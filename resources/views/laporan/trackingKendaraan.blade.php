@@ -51,7 +51,7 @@
 
                     {{-- MEMBER --}}
                     <td class="px-6 py-3">
-                        {{ $trx->membership->nama ?? '-' }}
+                        {{ $trx->kendaraan->membershipAktif->membership->nama  ?? '-' }}
                     </td>
 
                     {{-- TIPE --}}

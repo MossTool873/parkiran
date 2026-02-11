@@ -9,12 +9,15 @@ class LogAktivitas extends Model
 {
     use HasFactory;
 
+
     protected $table = 'log_aktivitas';
 
     protected $fillable = [
         'user_id',
         'aksi',
-        'created_at'
+        'detail',
+        'ip_address',
+        'user_agent'
     ];
 
     public function user()

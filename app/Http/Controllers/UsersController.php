@@ -10,20 +10,20 @@ use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
-public function index(Request $request)
-{
-    $search = $request->query('search'); 
-    $users = User::with('role')
-        ->whereNull('deleted_at')
-        ->when($search, function($query, $search) {
-            $query->where('name', 'like', "%{$search}%");
-        })
-        ->orderBy('id', 'desc')
-        ->paginate(10)
-        ->withQueryString(); 
+    public function index(Request $request)
+    {
+        $search = $request->query('search');
+        $users = User::with('role')
+            ->whereNull('deleted_at')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
-    return view('admin.users.index', compact('users', 'search'));
-}
+        return view('admin.users.index', compact('users', 'search'));
+    }
 
     public function create()
     {
@@ -31,50 +31,68 @@ public function index(Request $request)
         return view('admin.users.create', compact('roles'));
     }
 
-public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'username'              => 'required',
-        'nama'                  => 'required',
-        'role_id'               => 'required|exists:roles,id',
-        'password'              => 'required|min:6|confirmed',
-        'password_confirmation' => 'required',
-    ]);
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'username'              => 'required',
+            'nama'                  => 'required',
+            'role_id'               => 'required|exists:roles,id',
+            'password'              => 'required|min:6|confirmed',
+            'password_confirmation' => 'required',
+        ]);
 
-    if ($validator->fails()) {
-        return redirect('/admin/users/create')
-            ->withErrors($validator)
-            ->withInput()
-            ->with('error', 'Data tidak valid');
-    }
-
-    // Cek user soft deleted
-    $user = User::withTrashed()->where('username', $request->username)->first();
-
-    if ($user) {
-        if ($user->trashed()) {
-            $user->restore();
+        if ($validator->fails()) {
+            return redirect('/admin/users/create')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Data tidak valid');
         }
 
-        // update data user
-        $user->update([
-            'name' => $request->nama,
-            'role_id' => $request->role_id,
-            'password' => Hash::make($request->password),
-        ]);
-    } else {
-        // buat user baru
-        User::create([
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'name'     => $request->nama,
-            'role_id'  => $request->role_id,
-        ]);
-    }
+        // Cek user soft deleted
+        $user = User::withTrashed()->where('username', $request->username)->first();
 
-    return redirect('/admin/users')
-        ->with('success', 'User berhasil ditambahkan');
-}
+        if ($user) {
+            if ($user->trashed()) {
+                $user->restore();
+            }
+
+            // update data user
+            $user->update([
+                'name' => $request->nama,
+                'role_id' => $request->role_id,
+                'password' => Hash::make($request->password),
+            ]);
+            logAktivitas(
+                'Create User (restore): ' . $user->username,
+                [
+                    'username' => $user->username,
+                    'nama'     => $user->name,
+                    'role_id'  => $user->role_id,
+                    'aksi'     => 'restore'
+                ]
+            );
+        } else {
+            // buat user baru
+            $user = User::create([
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+                'name'     => $request->nama,
+                'role_id'  => $request->role_id,
+            ]);
+            logAktivitas(
+                'Create User: ' . $user->username,
+                [
+                    'username' => $user->username,
+                    'nama'     => $user->name,
+                    'role_id'  => $user->role_id,
+                    'aksi'     => 'create'
+                ]
+            );
+        }
+
+        return redirect('/admin/users')
+            ->with('success', 'User berhasil ditambahkan');
+    }
 
 
     public function edit($id)
@@ -107,21 +125,48 @@ public function store(Request $request)
             'username' => $request->username,
             'name'     => $request->nama,
             'role_id'  => $request->role_id,
-            'no_telp'  => $request->no_telp,
         ];
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
+        $oldData = [
+            'username' => $user->username,
+            'nama'     => $user->name,
+            'role_id'  => $user->role_id,
+        ];
+
         $user->update($data);
+
+        logAktivitas(
+            'Update User: ' . $user->username,
+            [
+                'old' => $oldData,
+                'new' => $data
+            ]
+        );
 
         return redirect('/admin/users')->with('success', 'User berhasil diperbarui');
     }
 
+
     public function destroy($id)
     {
         $user = User::findOrFail($id);
+
+        logAktivitas(
+            'Delete User: ' . $user->username,
+            [
+                'old' => [
+                    'username' => $user->username,
+                    'nama'     => $user->name,
+                    'role_id'  => $user->role_id,
+                ],
+                'aksi' => 'delete'
+            ]
+        );
+
         $user->delete();
 
         return redirect('/admin/users')->with('success', 'User berhasil dihapus');

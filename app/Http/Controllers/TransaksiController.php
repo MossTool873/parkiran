@@ -130,7 +130,14 @@ class TransaksiController extends Controller
                     'tipe'   => $kendaraan->tipeKendaraan->tipe_kendaraan ?? '-',
                 ]);
 
-                logAktivitas('Transaksi masuk '.$transaksi->kode);
+        logAktivitas('Transaksi Masuk', [
+            'kode_transaksi' => $transaksi->kode,
+            'kendaraan_id'   => $kendaraan->id,
+            'plat_nomor'     => $kendaraan->plat_nomor,
+            'area_parkir_id' => $areaDetail->area_parkir_id,
+            'waktu_masuk'    => $transaksi->waktu_masuk->toDateTimeString(),
+        ]);
+
             });
         } catch (\Exception $e) {
             return back()
@@ -298,7 +305,17 @@ class TransaksiController extends Controller
                 'metode' => $metode->nama_metode,
             ]));
 
-                logAktivitas('Transaksi keluar '.$transaksi->kode);
+logAktivitas('Transaksi Keluar', [
+    'kode_transaksi' => $transaksi->kode,
+    'kendaraan_id'   => $transaksi->kendaraan_id,
+    'plat_nomor'     => $transaksi->kendaraan->plat_nomor ?? null,
+    'area_parkir_id' => $transaksi->area_parkir_id,
+    'durasi_menit'   => $transaksi->durasi_menit,
+    'biaya_total'    => $transaksi->biaya_total,
+    'metode_pembayaran_id' => $transaksi->metode_pembayaran_id,
+    'waktu_keluar'   => $transaksi->waktu_keluar->toDateTimeString(),
+]);
+
         });
 
         session()->forget('draft_keluar');

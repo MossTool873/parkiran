@@ -1,40 +1,29 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{
+    BackupDatabaseController,
+    AuthController,
+    AreaParkirController,
+    KendaraanController,
+    KendaraanMemberController,
+    KendaraanMembershipController,
+    KendaraanTipeController,
+    KonfigurasiTarifController,
+    LaporanController,
+    LogAktivitasController,
+    MembershipController,
+    MembershipTierController,
+    MetodePembayaranController,
+    TarifDurasiController,
+    TipeKendaraanController,
+    TarifTipeKendaraanController,
+    TransaksiController,
+    UsersController,
+    ViewOnlyController
+};
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
-use App\Http\Controllers\BackupDatabaseController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AreaParkirController;
-use App\Http\Controllers\KendaraanController;
-use App\Http\Controllers\KendaraanMemberController;
-use App\Http\Controllers\KendaraanMembershipController;
-use App\Http\Controllers\KendaraanTipeController;
-use App\Http\Controllers\KonfigurasiTarifController;
-use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\LogAktivitasController;
-use App\Http\Controllers\MembershipController;
-use App\Http\Controllers\MembershipTierController;
-use App\Http\Controllers\MetodePembayaranController;
-use App\Http\Controllers\TarifDurasiController;
-use App\Http\Controllers\TipeKendaraanController;
-use App\Http\Controllers\TarifTipeKendaraanController;
-use App\Http\Controllers\TransaksiController;
-use App\Http\Controllers\UsersController;
-use App\Models\Kendaraan;
-use App\Models\MetodePembayaran;
-
-Route::get('/', function () {return redirect('login');});
+Route::get('/', fn()=>redirect('login'));
 
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -42,77 +31,135 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::get('/ganti-password', [AuthController::class, 'gantiPaswordForm']);
 Route::post('/ganti-password', [AuthController::class, 'updatePassword']);
 
+// ================= ADMIN =================
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 
-    Route::get('/', function () {return redirect('/admin/users');});
-    Route::resource('users', UsersController::class);
-    Route::resource('areaParkir', AreaParkirController::class);
-    Route::resource('tipeKendaraan', KendaraanTipeController::class);
-    Route::resource('tarifTipeKendaraan', TarifTipeKendaraanController::class);
-    Route::resource('tarif-durasi', TarifDurasiController::class);
-    Route::get('/konfigurasi-tarif', [KonfigurasiTarifController::class, 'index'])->name('konfigurasi-tarif.index');
-    Route::post('/konfigurasi-tarif', [KonfigurasiTarifController::class, 'update'])->name('konfigurasi-tarif.update');
-    Route::resource('kendaraan', KendaraanController::class);
-    Route::resource('metodePembayaran', MetodePembayaranController::class);
-    Route::resource('membership-tier', MembershipTierController::class);
-    Route::resource('membership', MembershipController::class);
-    Route::get('/database/index',[BackupDatabaseController::class,'index']);
+    Route::get('/', fn()=>redirect('/admin/users'));
+
+    Route::resource('users', UsersController::class)
+        ->middleware('log.menu:Users');
+    Route::resource('areaParkir', AreaParkirController::class)
+        ->middleware('log.menu:Area Parkir');
+    Route::resource('tipeKendaraan', KendaraanTipeController::class)
+        ->middleware('log.menu:Tipe Kendaraan');
+    Route::resource('tarifTipeKendaraan', TarifTipeKendaraanController::class)
+        ->middleware('log.menu:Tarif Tipe Kendaraan');
+    Route::resource('tarif-durasi', TarifDurasiController::class)
+        ->middleware('log.menu:Tarif Durasi');
+    Route::get('/konfigurasi-tarif', [KonfigurasiTarifController::class, 'index'])
+        ->name('konfigurasi-tarif.index')
+        ->middleware('log.menu:Konfigurasi Tarif');
+    Route::post('/konfigurasi-tarif', [KonfigurasiTarifController::class, 'update'])
+        ->name('konfigurasi-tarif.update');
+    Route::resource('kendaraan', KendaraanController::class)
+        ->middleware('log.menu:Kendaraan');
+    Route::resource('metodePembayaran', MetodePembayaranController::class)
+        ->middleware('log.menu:Metode Pembayaran');
+    Route::resource('membership-tier', MembershipTierController::class)
+        ->middleware('log.menu:Membership Tier');
+    Route::resource('membership', MembershipController::class)
+        ->middleware('log.menu:Membership');
+    Route::get('/database/index',[BackupDatabaseController::class,'index'])
+        ->middleware('log.menu:Backup Database');
     Route::post('/database/backup', [BackupDatabaseController::class, 'download'])->name('database.backup');
     Route::post('/database/restore', [BackupDatabaseController::class, 'restore'])->name('database.restore');
-    Route::get('/membership-kendaraan', [KendaraanMemberController::class, 'index']);
-    Route::get('/log-aktivitas', [LogAktivitasController::class, 'index']);
+    Route::get('/membership-kendaraan', [KendaraanMemberController::class, 'index'])
+        ->middleware('log.menu:Membership Kendaraan');
+    Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])
+        ->middleware('log.menu:Log Aktivitas');
 });
 
-
+// ================= PETUGAS =================
 Route::prefix('petugas')->middleware(['auth','role:petugas'])->group(function () {
 
     Route::get('/', fn()=>redirect('/petugas/transaksi'));
-    Route::get('/transaksi', [TransaksiController::class,'index'])->name('transaksi');
+    Route::get('/transaksi', [TransaksiController::class,'index'])
+        ->name('transaksi')
+        ->middleware('log.menu:Transaksi');
     Route::post('/transaksi/masuk', [TransaksiController::class,'masuk'])->name('transaksi.masuk');
     Route::post('/transaksi/keluar', [TransaksiController::class,'keluar'])->name('keluar.hitung');
     Route::post('/transaksi/keluar/bayar', [TransaksiController::class,'bayar'])->name('keluar.bayar');
-    Route::get('/transaksi-aktif',[TransaksiController::class,'transaksiAktif'])->name('transaksi.transaksiAktif');
+    Route::get('/transaksi-aktif',[TransaksiController::class,'transaksiAktif'])
+        ->name('transaksi.transaksiAktif')
+        ->middleware('log.menu:Transaksi Aktif');
     Route::post('/transaksi/keluar/batal', function(){
         session()->forget('draft_keluar');
         session()->forget('struk_keluar');
         return back();
     })->name('keluar.batal');
-    Route::get('membership', [MembershipController::class, 'indexPetugas'])->name('petugas.membership.index');
-    Route::get('membership/create', [MembershipController::class, 'createPetugas'])->name('petugas.membership.create');
-    Route::post('membership', [MembershipController::class, 'storePetugas'])->name('petugas.membership.store');
-    Route::get('membership/{membership}/edit', [MembershipController::class, 'editPetugas'])->name('petugas.membership.edit');
-    Route::put('membership/{membership}', [MembershipController::class, 'updatePetugas'])->name('petugas.membership.update');
-    Route::get('/membership-kendaraan', [KendaraanMemberController::class, 'petugasIndex'])->name('membership_kendaraan.index');
-    Route::get('/membership-tier', [MembershipTierController::class, 'petugasIndex'])->name('membership_tier.index');
+    Route::get('membership', [MembershipController::class, 'indexPetugas'])
+        ->name('petugas.membership.index')
+        ->middleware('log.menu:Membership');
+    Route::get('membership/create', [MembershipController::class, 'createPetugas'])
+        ->name('petugas.membership.create')
+        ->middleware('log.menu:Tambah Membership');
+    Route::post('membership', [MembershipController::class, 'storePetugas'])
+        ->name('petugas.membership.store');
+    Route::get('membership/{membership}/edit', [MembershipController::class, 'editPetugas'])
+        ->name('petugas.membership.edit')
+        ->middleware('log.menu:Edit Membership');
+    Route::put('membership/{membership}', [MembershipController::class, 'updatePetugas'])
+        ->name('petugas.membership.update');
+    Route::get('/membership-kendaraan', [KendaraanMemberController::class, 'petugasIndex'])
+        ->name('membership_kendaraan.index')
+        ->middleware('log.menu:Membership Kendaraan');
+    Route::get('/membership-tier', [MembershipTierController::class, 'petugasIndex'])
+        ->name('membership_tier.index')
+        ->middleware('log.menu:Membership Tier');
 });
 
+// ================= OWNER =================
 Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
-    Route::get('/', function () {return redirect('/laporan/harian');});
+    Route::get('/', fn()=>redirect('/laporan/harian'));
 });
 
+// ================= LAPORAN =================
 Route::prefix('laporan')->middleware(['auth', 'role:admin,owner'])->group(function () {
-    Route::get('/harian', [LaporanController::class, 'laporanHariIni']);
-    Route::get('/periode', [LaporanController::class, 'laporanPeriode']);
+    Route::get('/harian', [LaporanController::class, 'laporanHariIni'])
+        ->middleware('log.menu:Laporan Harian');
+    Route::get('/periode', [LaporanController::class, 'laporanPeriode'])
+        ->middleware('log.menu:Laporan Periode');
     Route::post('/periode', [LaporanController::class, 'laporanPeriode']);
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('laporan/occupancy', [LaporanController::class, 'occupancy']);
-    Route::get('laporan/riwayatTransaksi', [LaporanController::class, 'riwayatTransaksi']);
-    Route::get('/transaksi/{id}', [TransaksiController::class, 'showTransaksi'])->name('transaksi.show');
-    Route::get('/tracking-kendaraan', [KendaraanController::class, 'tracking'])->name('kendaraan.tracking');
-    Route::get('/kendaraan/search', [KendaraanController::class, 'search'])->name('kendaraan.search');
+    Route::get('laporan/occupancy', [LaporanController::class, 'occupancy'])
+        ->middleware('log.menu:Laporan Occupancy');
+    Route::get('laporan/riwayatTransaksi', [LaporanController::class, 'riwayatTransaksi'])
+        ->middleware('log.menu:Riwayat Transaksi');
+    Route::get('/transaksi/{id}', [TransaksiController::class, 'showTransaksi'])
+        ->name('transaksi.show')
+        ->middleware('log.menu:Detail Transaksi');
+    Route::get('/tracking-kendaraan', [KendaraanController::class, 'tracking'])
+        ->name('kendaraan.tracking')
+        ->middleware('log.menu:Tracking Kendaraan');
+    Route::get('/kendaraan/search', [KendaraanController::class, 'search'])
+        ->name('kendaraan.search')
+        ->middleware('log.menu:Cari Kendaraan');
 });
 
-use App\Http\Controllers\ViewOnlyController;
-
+// ================= VIEW ONLY =================
 Route::middleware(['auth'])->prefix('show-data')->group(function () {
-    Route::get('tipekendaraan', [ViewOnlyController::class, 'tipeKendaraan'])->name('show-data.tipeKendaraan');
-    Route::get('area-parkir', [ViewOnlyController::class, 'areaParkir'])->name('show-data.areaParkir');
-    Route::get('kendaraan', [ViewOnlyController::class, 'kendaraan'])->name('show-data.kendaraan');
-    Route::get('metode-pembayaran', [ViewOnlyController::class, 'metodePembayaran'])->name('show-data.metodePembayaran');
-    Route::get('tarif-tipe-kendaraan', [ViewOnlyController::class, 'tarifTipeKendaraan'])->name('show-data.tarifTipeKendaraan');
-    Route::get('tarif-durasi', [ViewOnlyController::class, 'tarifDurasi'])->name('show-data.tarifDurasi');
-    Route::get('konfigurasi-tarif', [ViewOnlyController::class, 'konfigurasiTarif'])->name('show-data.konfigurasiTarif');
-
+    Route::get('tipekendaraan', [ViewOnlyController::class, 'tipeKendaraan'])
+        ->name('show-data.tipeKendaraan')
+        ->middleware('log.menu:Tipe Kendaraan (view-only)');
+    Route::get('area-parkir', [ViewOnlyController::class, 'areaParkir'])
+        ->name('show-data.areaParkir')
+        ->middleware('log.menu:Area Parkir (view-only)');
+    Route::get('kendaraan', [ViewOnlyController::class, 'kendaraan'])
+        ->name('show-data.kendaraan')
+        ->middleware('log.menu:Kendaraan (view-only)');
+    Route::get('metode-pembayaran', [ViewOnlyController::class, 'metodePembayaran'])
+        ->name('show-data.metodePembayaran')
+        ->middleware('log.menu:Metode Pembayaran (view-only)');
+    Route::get('tarif-tipe-kendaraan', [ViewOnlyController::class, 'tarifTipeKendaraan'])
+        ->name('show-data.tarifTipeKendaraan')
+        ->middleware('log.menu:Tarif Tipe Kendaraan (view-only)');
+    Route::get('tarif-durasi', [ViewOnlyController::class, 'tarifDurasi'])
+        ->name('show-data.tarifDurasi')
+        ->middleware('log.menu:Tarif Durasi (view-only)');
+    Route::get('konfigurasi-tarif', [ViewOnlyController::class, 'konfigurasiTarif'])
+        ->name('show-data.konfigurasiTarif')
+        ->middleware('log.menu:Konfigurasi Tarif (view-only)');
 });
+

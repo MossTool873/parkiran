@@ -59,7 +59,27 @@
                         <td class="px-4 py-3">{{ $membership->nama }}</td>
                         <td class="px-4 py-3">{{ $membership->membershipTier->membership_tier ?? '-' }}</td>
                         <td class="px-4 py-3">{{ \Carbon\Carbon::parse($membership->pembaruan_terakhir)->format('d-m-Y') }}</td>
-                        <td class="px-4 py-3">{{ \Carbon\Carbon::parse($membership->kadaluarsa)->format('d-m-Y') }}</td>
+<td class="px-4 py-3">
+    @php
+        $today = \Carbon\Carbon::today();
+        $exp = \Carbon\Carbon::parse($membership->kadaluarsa);
+        $diffDays = $today->diffInDays($exp, false); 
+        if ($diffDays < 0) {
+            $badgeClass = 'bg-red-100 text-red-700';
+            $text = 'Kadaluarsa';
+        } elseif ($diffDays <= 7) {
+            $badgeClass = 'bg-yellow-100 text-yellow-800';
+            $text = $exp->format('d-m-Y');
+        } else {
+            $badgeClass = 'bg-green-100 text-green-700';
+            $text = $exp->format('d-m-Y');
+        }
+    @endphp
+    <span class="px-2 py-1 rounded-full text-sm font-medium {{ $badgeClass }}">
+        {{ $text }}
+    </span>
+</td>
+
                         <td class="px-4 py-3 flex gap-2">
                             <a href="{{ route('membership.edit', $membership->id) }}" class="text-blue-600 hover:underline">
                                 Edit

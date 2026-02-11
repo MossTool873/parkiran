@@ -22,7 +22,7 @@
                 method="POST"
                 action="{{ url('/admin/tarif-durasi/' . $tarif_durasi->id) }}"
                 class="space-y-6"
-                onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')
+                onsubmit="return confirm('Yakin data yang dimasukkan sudah benar?')"
             >
                 @csrf
                 @method('PUT')
