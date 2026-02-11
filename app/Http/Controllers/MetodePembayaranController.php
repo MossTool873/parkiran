@@ -11,11 +11,7 @@ class MetodePembayaranController extends Controller
     public function index()
     {
         $metodePembayarans = MetodePembayaran::all();
-
-        return view(
-            'admin.metodePembayaran.index',
-            compact('metodePembayarans')
-        );
+        return view('admin.metodePembayaran.index', compact('metodePembayarans'));
     }
 
     public function create()
@@ -34,14 +30,23 @@ class MetodePembayaranController extends Controller
                 ]
             ],
             [
-                'nama_metode.unique' =>
-                    'Metode pembayaran ini sudah ada.'
+                'nama_metode.unique' => 'Metode pembayaran ini sudah ada.'
             ]
         );
 
-        MetodePembayaran::create([
+        $metode = MetodePembayaran::create([
             'nama_metode' => $request->nama_metode
         ]);
+
+        logAktivitas(
+            'Create Metode Pembayaran: ' . $request->nama_metode,
+            [
+                'new' => [
+                    'nama_metode' => $request->nama_metode,
+                ],
+                'aksi' => 'create'
+            ]
+        );
 
         return redirect('/admin/metodePembayaran')
             ->with('success', 'Metode pembayaran berhasil ditambahkan');
@@ -50,11 +55,7 @@ class MetodePembayaranController extends Controller
     public function edit($id)
     {
         $metode = MetodePembayaran::findOrFail($id);
-
-        return view(
-            'admin.metodePembayaran.edit',
-            compact('metode')
-        );
+        return view('admin.metodePembayaran.edit', compact('metode'));
     }
 
     public function update(Request $request, $id)
@@ -72,18 +73,48 @@ class MetodePembayaranController extends Controller
 
         $metode = MetodePembayaran::findOrFail($id);
 
+        $oldData = [
+            'nama_metode' => $metode->nama_metode
+        ];
+
         $metode->update([
             'nama_metode' => $request->nama_metode
         ]);
 
-        return redirect('/admin/metodePembayaran')->with('success', 'Metode pembayaran berhasil diperbarui');
+        logAktivitas(
+            'Update Metode Pembayaran: ' . $request->nama_metode,
+            [
+                'old' => $oldData,
+                'new' => [
+                    'nama_metode' => $request->nama_metode
+                ],
+                'aksi' => 'update'
+            ]
+        );
+
+        return redirect('/admin/metodePembayaran')
+            ->with('success', 'Metode pembayaran berhasil diperbarui');
     }
 
     public function destroy($id)
     {
         $metode = MetodePembayaran::findOrFail($id);
+
+        $oldData = [
+            'nama_metode' => $metode->nama_metode
+        ];
+
         $metode->delete();
 
-        return redirect('/admin/metodePembayaran')->with('success', 'Metode pembayaran berhasil dihapus');
+        logAktivitas(
+            'Delete Metode Pembayaran: ' . $oldData['nama_metode'],
+            [
+                'old' => $oldData,
+                'aksi' => 'delete'
+            ]
+        );
+
+        return redirect('/admin/metodePembayaran')
+            ->with('success', 'Metode pembayaran berhasil dihapus');
     }
 }

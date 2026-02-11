@@ -8,51 +8,49 @@ use Illuminate\Http\Request;
 
 class TarifDurasiController extends Controller
 {
+    public function index()
+    {
+        $tarifDurasi = TarifDurasi::orderBy('batas_jam')->paginate(10);
+        $tarifDasar = TarifTipeKendaraan::with('tipeKendaraan')->get();
 
-public function index()
-{
-    $tarifDurasi = TarifDurasi::orderBy('batas_jam')->paginate(10);
+        return view('admin.tarif_durasi.index', compact('tarifDurasi', 'tarifDasar'));
+    }
 
-    $tarifDasar = TarifTipeKendaraan::with('tipeKendaraan')->get();
+    public function create()
+    {
+        $tarifDasar = TarifTipeKendaraan::with('tipeKendaraan')->get();
+        return view('admin.tarif_durasi.create', compact('tarifDasar'));
+    }
 
-    return view(
-        'admin.tarif_durasi.index',
-        compact('tarifDurasi', 'tarifDasar')
-    );
-}
+    public function store(Request $request)
+    {
+        $request->validate([
+            'batas_jam' => 'required|integer|min:1|unique:tarif_durasi,batas_jam,NULL,id,deleted_at,NULL',
+            'persentase' => 'required|integer|min:1',
+        ]);
 
+        $tarif = TarifDurasi::create($request->all());
 
-public function create()
-{
-    $tarifDasar = TarifTipeKendaraan::with('tipeKendaraan')->get();
+        logAktivitas(
+            'Create Tarif Durasi: ' . $tarif->batas_jam . ' jam',
+            [
+                'new' => [
+                    'batas_jam' => $tarif->batas_jam,
+                    'persentase' => $tarif->persentase,
+                ],
+                'aksi' => 'create'
+            ]
+        );
 
-    return view('admin.tarif_durasi.create', compact('tarifDasar'));
-}
+        return redirect(url('/admin/tarif-durasi'))
+            ->with('success', 'Tarif durasi berhasil ditambahkan');
+    }
 
-public function store(Request $request)
-{
-    $request->validate([
-        'batas_jam' => 'required|integer|min:1|unique:tarif_durasi,batas_jam,NULL,id,deleted_at,NULL',
-        'persentase' => 'required|integer|min:1',
-    ]);
-
-    TarifDurasi::create($request->all());
-
-    return redirect(url('/admin/tarif-durasi'))
-        ->with('success', 'Tarif durasi berhasil ditambahkan');
-}
-
-
-
-public function edit(TarifDurasi $tarif_durasi)
-{
-    $tarifDasar = TarifTipeKendaraan::with('tipeKendaraan')->get();
-
-    return view(
-        'admin.tarif_durasi.edit',
-        compact('tarif_durasi', 'tarifDasar')
-    );
-}
+    public function edit(TarifDurasi $tarif_durasi)
+    {
+        $tarifDasar = TarifTipeKendaraan::with('tipeKendaraan')->get();
+        return view('admin.tarif_durasi.edit', compact('tarif_durasi', 'tarifDasar'));
+    }
 
     public function update(Request $request, TarifDurasi $tarif_durasi)
     {
@@ -61,7 +59,24 @@ public function edit(TarifDurasi $tarif_durasi)
             'persentase' => 'required|integer|min:1',
         ]);
 
+        $oldData = [
+            'batas_jam' => $tarif_durasi->batas_jam,
+            'persentase' => $tarif_durasi->persentase,
+        ];
+
         $tarif_durasi->update($request->all());
+
+        logAktivitas(
+            'Update Tarif Durasi: ' . $tarif_durasi->batas_jam . ' jam',
+            [
+                'old' => $oldData,
+                'new' => [
+                    'batas_jam' => $tarif_durasi->batas_jam,
+                    'persentase' => $tarif_durasi->persentase,
+                ],
+                'aksi' => 'update'
+            ]
+        );
 
         return redirect(url('/admin/tarif-durasi'))
             ->with('success', 'Tarif durasi berhasil diperbarui');
@@ -69,7 +84,20 @@ public function edit(TarifDurasi $tarif_durasi)
 
     public function destroy(TarifDurasi $tarif_durasi)
     {
+        $oldData = [
+            'batas_jam' => $tarif_durasi->batas_jam,
+            'persentase' => $tarif_durasi->persentase,
+        ];
+
         $tarif_durasi->delete();
+
+        logAktivitas(
+            'Delete Tarif Durasi: ' . $oldData['batas_jam'] . ' jam',
+            [
+                'old' => $oldData,
+                'aksi' => 'delete'
+            ]
+        );
 
         return redirect(url('/admin/tarif-durasi'))
             ->with('success', 'Tarif durasi berhasil dihapus');

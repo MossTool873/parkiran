@@ -11,20 +11,19 @@ use Illuminate\Http\Request;
 class KendaraanController extends Controller
 {
     public function index(Request $request)
-{
-    $search = $request->query('search'); 
+    {
+        $search = $request->query('search'); 
 
-    $kendaraans = Kendaraan::with('tipeKendaraan')
-        ->when($search, function ($query, $search) {
-            return $query->where('plat_nomor', 'like', "%{$search}%");
-        })
-        ->orderBy('id', 'desc')
-        ->paginate(10)
-        ->withQueryString(); 
+        $kendaraans = Kendaraan::with('tipeKendaraan')
+            ->when($search, function ($query, $search) {
+                return $query->where('plat_nomor', 'like', "%{$search}%");
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString(); 
 
-    return view('admin.kendaraan.index', compact('kendaraans', 'search'));
-}
-
+        return view('admin.kendaraan.index', compact('kendaraans', 'search'));
+    }
 
     public function create()
     {
@@ -40,11 +39,23 @@ class KendaraanController extends Controller
             'tipe_kendaraan_id' => 'required',
         ]);
 
-        Kendaraan::create([
+        $kendaraan = Kendaraan::create([
             'plat_nomor' => $request->plat_nomor,
             'warna' => $request->warna,
             'tipe_kendaraan_id' => $request->tipe_kendaraan_id,
         ]);
+
+        logAktivitas(
+            'Create Kendaraan: ' . $kendaraan->plat_nomor,
+            [
+                'new' => [
+                    'plat_nomor' => $kendaraan->plat_nomor,
+                    'warna' => $kendaraan->warna,
+                    'tipe_kendaraan_id' => $kendaraan->tipe_kendaraan_id,
+                ],
+                'aksi' => 'create'
+            ]
+        );
 
         return redirect('/admin/kendaraan')->with('success', 'Kendaraan berhasil ditambahkan');
     }
@@ -64,11 +75,32 @@ class KendaraanController extends Controller
             'tipe_kendaraan_id' => 'required',
         ]);
 
-        Kendaraan::where('id', $id)->update([
+        $kendaraan = Kendaraan::findOrFail($id);
+
+        $oldData = [
+            'plat_nomor' => $kendaraan->plat_nomor,
+            'warna' => $kendaraan->warna,
+            'tipe_kendaraan_id' => $kendaraan->tipe_kendaraan_id,
+        ];
+
+        $kendaraan->update([
             'plat_nomor' => $request->plat_nomor,
             'warna' => $request->warna,
             'tipe_kendaraan_id' => $request->tipe_kendaraan_id,
         ]);
+
+        logAktivitas(
+            'Update Kendaraan: ' . $kendaraan->plat_nomor,
+            [
+                'old' => $oldData,
+                'new' => [
+                    'plat_nomor' => $request->plat_nomor,
+                    'warna' => $request->warna,
+                    'tipe_kendaraan_id' => $request->tipe_kendaraan_id,
+                ],
+                'aksi' => 'update'
+            ]
+        );
 
         return redirect('/admin/kendaraan')->with('success', 'Kendaraan berhasil diperbarui');
     }
@@ -76,7 +108,22 @@ class KendaraanController extends Controller
     public function destroy($id)
     {
         $kendaraan = Kendaraan::findOrFail($id);
+
+        $oldData = [
+            'plat_nomor' => $kendaraan->plat_nomor,
+            'warna' => $kendaraan->warna,
+            'tipe_kendaraan_id' => $kendaraan->tipe_kendaraan_id,
+        ];
+
         $kendaraan->delete();
+
+        logAktivitas(
+            'Delete Kendaraan: ' . $oldData['plat_nomor'],
+            [
+                'old' => $oldData,
+                'aksi' => 'delete'
+            ]
+        );
 
         return redirect('/admin/kendaraan')->with('success', 'Kendaraan berhasil dihapus');
     }
@@ -101,29 +148,24 @@ class KendaraanController extends Controller
         return response()->json($data);
     }
 
-public function tracking(Request $request)
+    public function tracking(Request $request)
     {
         $search = $request->search;
 
         $transaksis = Transaksi::with([
             'kendaraan.tipeKendaraan',
-            'kendaraan.membershipAktif.membership', // pakai relasi yang ada
+            'kendaraan.membershipAktif.membership',
             'areaParkir'
         ])
-        ->whereNull('waktu_keluar') // kendaraan yang masih parkir
+        ->whereNull('waktu_keluar')
         ->when($search, function ($query) use ($search) {
             $query->where(function ($q) use ($search) {
-
-                // Search berdasarkan plat nomor kendaraan
                 $q->whereHas('kendaraan', function ($q2) use ($search) {
                     $q2->where('plat_nomor', 'like', '%' . $search . '%');
                 })
-
-                // Search berdasarkan nama member aktif
                 ->orWhereHas('kendaraan.membershipAktif.membership', function ($q3) use ($search) {
                     $q3->where('nama', 'like', '%' . $search . '%');
                 });
-
             });
         })
         ->orderBy('waktu_masuk', 'desc')
@@ -132,7 +174,4 @@ public function tracking(Request $request)
 
         return view('laporan.trackingKendaraan', compact('transaksis', 'search'));
     }
-
-
-
 }

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class MembershipTierController extends Controller
 {
-
     public function index()
     {
         $tiers = MembershipTier::latest()->get();
@@ -26,10 +25,21 @@ class MembershipTierController extends Controller
             'diskon' => 'required|numeric|min:0|max:100',
         ]);
 
-        MembershipTier::create([
+        $tier = MembershipTier::create([
             'membership_tier' => $request->membership_tier,
             'diskon' => $request->diskon,
         ]);
+
+        logAktivitas(
+            'Create Membership Tier: ' . $request->membership_tier,
+            [
+                'new' => [
+                    'membership_tier' => $request->membership_tier,
+                    'diskon' => $request->diskon,
+                ],
+                'aksi' => 'create'
+            ]
+        );
 
         return redirect()
             ->route('membership-tier.index')
@@ -50,10 +60,28 @@ class MembershipTierController extends Controller
         ]);
 
         $tier = MembershipTier::findOrFail($id);
+
+        $oldData = [
+            'membership_tier' => $tier->membership_tier,
+            'diskon' => $tier->diskon,
+        ];
+
         $tier->update([
             'membership_tier' => $request->membership_tier,
             'diskon' => $request->diskon,
         ]);
+
+        logAktivitas(
+            'Update Membership Tier: ' . $request->membership_tier,
+            [
+                'old' => $oldData,
+                'new' => [
+                    'membership_tier' => $request->membership_tier,
+                    'diskon' => $request->diskon,
+                ],
+                'aksi' => 'update'
+            ]
+        );
 
         return redirect()
             ->route('membership-tier.index')
@@ -63,19 +91,32 @@ class MembershipTierController extends Controller
     public function destroy($id)
     {
         $tier = MembershipTier::findOrFail($id);
-            if ($tier->memberships()->exists()) {
-        return back()->with('error', 'membership tier masih digunakan!!');
-    }
+
+        if ($tier->memberships()->exists()) {
+            return back()->with('error', 'membership tier masih digunakan!!');
+        }
+
+        $oldData = [
+            'membership_tier' => $tier->membership_tier,
+            'diskon' => $tier->diskon,
+        ];
+
         $tier->delete();
+
+        logAktivitas(
+            'Delete Membership Tier: ' . $oldData['membership_tier'],
+            [
+                'old' => $oldData,
+                'aksi' => 'delete'
+            ]
+        );
 
         return redirect()->route('membership-tier.index')->with('success', 'Membership tier berhasil dihapus');
     }
 
     public function petugasIndex()
-{
-    $tiers = MembershipTier::latest()->get();
-
-    return view('petugas.membership_tier.index', compact('tiers'));
-}
-
+    {
+        $tiers = MembershipTier::latest()->get();
+        return view('petugas.membership_tier.index', compact('tiers'));
+    }
 }

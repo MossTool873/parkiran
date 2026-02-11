@@ -12,23 +12,15 @@ class TarifTipeKendaraanController extends Controller
     public function index()
     {
         $tarifTipeKendaraans = TarifTipeKendaraan::with('tipeKendaraan')->get();
-
-        return view(
-            'admin.tarifTipeKendaraan.index',
-            compact('tarifTipeKendaraans')
-        );
+        return view('admin.tarifTipeKendaraan.index', compact('tarifTipeKendaraans'));
     }
 
     public function create()
     {
         $tipeKendaraans = KendaraanTipe::all();
-
         $tipeTerpakai = TarifTipeKendaraan::pluck('tipe_kendaraan_id')->toArray();
 
-        return view(
-            'admin.tarifTipeKendaraan.create',
-            compact('tipeKendaraans', 'tipeTerpakai')
-        );
+        return view('admin.tarifTipeKendaraan.create', compact('tipeKendaraans', 'tipeTerpakai'));
     }
 
     public function store(Request $request)
@@ -44,15 +36,25 @@ class TarifTipeKendaraanController extends Controller
                 'tarif_perjam' => 'required|numeric|min:0'
             ],
             [
-                'tipe_kendaraan_id.unique' =>
-                    'Tipe kendaraan ini sudah memiliki tarif.'
+                'tipe_kendaraan_id.unique' => 'Tipe kendaraan ini sudah memiliki tarif.'
             ]
         );
 
-        TarifTipeKendaraan::create([
+        $tarif = TarifTipeKendaraan::create([
             'tipe_kendaraan_id' => $request->tipe_kendaraan_id,
             'tarif_perjam'      => $request->tarif_perjam
         ]);
+
+        logAktivitas(
+            'Create Tarif Tipe Kendaraan: ' . $tarif->tipe_kendaraan_id,
+            [
+                'new' => [
+                    'tipe_kendaraan_id' => $tarif->tipe_kendaraan_id,
+                    'tarif_perjam' => $tarif->tarif_perjam
+                ],
+                'aksi' => 'create'
+            ]
+        );
 
         return redirect('/admin/tarifTipeKendaraan')
             ->with('success', 'Tarif berhasil ditambahkan');
@@ -63,11 +65,7 @@ class TarifTipeKendaraanController extends Controller
         $tarif = TarifTipeKendaraan::findOrFail($id);
         $tipeKendaraans = KendaraanTipe::all();
 
-        return view(
-            'admin.tarifTipeKendaraan.edit',
-            compact('tarif', 'tipeKendaraans') 
-            
-        );
+        return view('admin.tarifTipeKendaraan.edit', compact('tarif', 'tipeKendaraans'));
     }
 
     public function update(Request $request, $id)
@@ -78,18 +76,51 @@ class TarifTipeKendaraanController extends Controller
 
         $tarif = TarifTipeKendaraan::findOrFail($id);
 
+        $oldData = [
+            'tipe_kendaraan_id' => $tarif->tipe_kendaraan_id,
+            'tarif_perjam' => $tarif->tarif_perjam
+        ];
+
         $tarif->update([
             'tarif_perjam' => $request->tarif_perjam
         ]);
 
-        return redirect('/admin/tarifTipeKendaraan')->with('success', 'Tarif berhasil diperbarui');
+        logAktivitas(
+            'Update Tarif Tipe Kendaraan: ' . $tarif->tipe_kendaraan_id,
+            [
+                'old' => $oldData,
+                'new' => [
+                    'tipe_kendaraan_id' => $tarif->tipe_kendaraan_id,
+                    'tarif_perjam' => $tarif->tarif_perjam
+                ],
+                'aksi' => 'update'
+            ]
+        );
+
+        return redirect('/admin/tarifTipeKendaraan')
+            ->with('success', 'Tarif berhasil diperbarui');
     }
 
     public function destroy($id)
     {
         $tarif = TarifTipeKendaraan::findOrFail($id);
+
+        $oldData = [
+            'tipe_kendaraan_id' => $tarif->tipe_kendaraan_id,
+            'tarif_perjam' => $tarif->tarif_perjam
+        ];
+
         $tarif->delete();
 
-        return redirect('/admin/tarifTipeKendaraan')->with('success', 'Tarif berhasil dihapus');
+        logAktivitas(
+            'Delete Tarif Tipe Kendaraan: ' . $oldData['tipe_kendaraan_id'],
+            [
+                'old' => $oldData,
+                'aksi' => 'delete'
+            ]
+        );
+
+        return redirect('/admin/tarifTipeKendaraan')
+            ->with('success', 'Tarif berhasil dihapus');
     }
 }

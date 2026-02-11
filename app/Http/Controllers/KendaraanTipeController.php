@@ -20,8 +20,24 @@ class KendaraanTipeController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['tipe_kendaraan' => 'required',]);
-        KendaraanTipe::create(['tipe_kendaraan' => $request->tipe_kendaraan]);
+        $request->validate([
+            'tipe_kendaraan' => 'required',
+        ]);
+
+        $tipe = KendaraanTipe::create([
+            'tipe_kendaraan' => $request->tipe_kendaraan
+        ]);
+
+        logAktivitas(
+            'Create Kendaraan Tipe: ' . $tipe->tipe_kendaraan,
+            [
+                'new' => [
+                    'tipe_kendaraan' => $tipe->tipe_kendaraan
+                ],
+                'aksi' => 'create'
+            ]
+        );
+
         return redirect('/admin/tipeKendaraan');
     }
 
@@ -33,22 +49,56 @@ class KendaraanTipeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate(['tipe_kendaraan' => 'required',]);
-        KendaraanTipe::where('id', $id)->update(['tipe_kendaraan' => $request->tipe_kendaraan]);
+        $request->validate([
+            'tipe_kendaraan' => 'required',
+        ]);
+
+        $tipe = KendaraanTipe::findOrFail($id);
+
+        $oldData = [
+            'tipe_kendaraan' => $tipe->tipe_kendaraan
+        ];
+
+        $tipe->update([
+            'tipe_kendaraan' => $request->tipe_kendaraan
+        ]);
+
+        logAktivitas(
+            'Update Kendaraan Tipe: ' . $tipe->tipe_kendaraan,
+            [
+                'old' => $oldData,
+                'new' => [
+                    'tipe_kendaraan' => $request->tipe_kendaraan
+                ],
+                'aksi' => 'update'
+            ]
+        );
+
         return redirect('/admin/tipeKendaraan');
     }
 
-public function destroy($id)
-{
-    $tipe = KendaraanTipe::findOrFail($id);
+    public function destroy($id)
+    {
+        $tipe = KendaraanTipe::findOrFail($id);
 
-    if ($tipe->tarifTipeKendaraans()->exists()) {
-        return back()->with('error', 'Tipe kendaraan masih digunakan!!');
+        if ($tipe->tarifTipeKendaraans()->exists()) {
+            return back()->with('error', 'Tipe kendaraan masih digunakan!!');
+        }
+
+        $oldData = [
+            'tipe_kendaraan' => $tipe->tipe_kendaraan
+        ];
+
+        $tipe->delete();
+
+        logAktivitas(
+            'Delete Kendaraan Tipe: ' . $oldData['tipe_kendaraan'],
+            [
+                'old' => $oldData,
+                'aksi' => 'delete'
+            ]
+        );
+
+        return back()->with('success', 'Tipe kendaraan berhasil dihapus');
     }
-
-    $tipe->delete();
-
-    return back()->with('success', 'Tipe kendaraan berhasil dihapus');
-}
-
 }
